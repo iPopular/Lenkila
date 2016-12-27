@@ -12,4 +12,9 @@ class Tmp_Customer_Stadium extends Model
     {
         return $this->belongsTo('App\Stadium');
     }
+
+    public function customer()
+    {
+        return $this->belongsTo('App\Customer');
+    }
 }

@@ -23,7 +23,7 @@ Route::get('/{stadium}/customer_info', [
     'roles' => ['owner', 'administrator', 'staff']
 ]);
 
-Route::get('/{stadium}/add-customer', [
+Route::post('/{stadium}/add-customer', [
     'middleware' => ['auth', 'roles'],
     'uses' => 'CustomerInfoController@addCustomer',
     'roles' => ['owner', 'administrator', 'staff']

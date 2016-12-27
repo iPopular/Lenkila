@@ -32,9 +32,7 @@ class AccountController extends Controller
                 
         $roles = Role::all();
 
-        return view('pages.account_management', compact('roles', 'stadium', 'stadium_users'));
-
-        
+        return view('pages.account_management', compact('roles', 'stadium', 'stadium_users'));        
     }
 
     public function addAccount(Request $request, $stadium)

@@ -15,6 +15,13 @@
                     });
                 </script>
             @endif
+            @foreach($errors->all() as $error)
+                <script>
+                    $( document ).ready(function() {
+                        toastr["error"]("{{ $error }}");
+                    });
+                </script>
+            @endforeach
             <h5>ข้อมูลลูกค้า </h5>
                     
                 <div class="text-xs-right">
@@ -38,39 +45,38 @@
                         <!--Table body-->
                         <tbody>                            
                             <!--First row-->
-                            @foreach($stadium_customer->tmp_customer_stadium as $customer)                           
+                            <script>console.log({!! $stadium_customer->tmp_customer_stadium  !!});</script>
+                            <script>console.log({!! $stadium_customer->tmp_customer_stadium[0]->customer  !!});</script>
+                            @foreach($stadium_customer->tmp_customer_stadium as $tmp)                           
                             <tr>
-                                <form id="form-{{$customer->id}}" class="form-horizontal" role="form" method="POST" action="/{{ $stadium }}/update-account/{{ $customer->username }}">
+                                <form id="form-{{$tmp->member_id}}" class="form-horizontal" role="form" method="POST">
                                     {{ csrf_field() }}
                                     <td>
-                                        <div class="div-row div-row-{{$customer->id}}" style="display:block;">
-                                            {{ $customer->nickname }}
+                                        <div class="div-row div-row-{{$tmp->member_id}}" style="display:block;">
+                                            {{ $tmp->customer->nickname }}
                                         </div>
                                     </td>
                                     <td>
-                                        <div class="div-row div-row-{{$customer->id}}" style="display:block;">
-                                            {{ $customer->mobile_number }}
+                                        <div class="div-row div-row-{{$tmp->member_id}}" style="display:block;">
+                                            {{ $tmp->customer->mobile_number }}
                                         </div>
                                     </td>
                                     <td>
-                                        <div class="div-row div-row-{{$customer->id}}" style="display:block;">
+                                        <div class="div-row div-row-{{$tmp->member_id}}" style="display:block;">
                                             
                                         </div>
                                     </td>
                                     <td>
-                                        <div class="div-row div-row-{{$customer->id}}" style="display:block;">
+                                        <div class="div-row div-row-{{$tmp->member_id}}" style="display:block;">
                                             
                                         </div>
                                     </td>
-                                    <td>
-                                        @if($user_role->update_customer == 1)
-                                            <button form="form-{{$customer->id}}" id="btn-edit-{{$customer->id}}" class="btn btn-xs btn-warning waves-effect waves-light btn-table btn-edit" type="button" data-original-title="Remove item" data-toggle="tooltip" data-placement="top"><i id="icon-edit-{{$customer->id}}" class="fa fa-pencil" aria-hidden="true"></i>
-                                            </button>
-                                        @endif
-                                        @if($user_role->delete_customer == 1)
-                                            <button id="btn-delete-{{$customer->id}}" class="btn btn-xs btn-danger waves-effect waves-light btn-table btn-delete" type="button" data-original-title="Remove item" data-toggle="tooltip" data-placement="top"><i id="icon-delete-{{$customer->id}}" class="fa fa-trash-o" aria-hidden="true"></i>
-                                            </button>
-                                        @endif
+                                    <td>                                       
+                                        <button form="form-{{$tmp->member_id}}" id="btn-edit-{{$tmp->member_id}}" class="btn btn-xs btn-warning waves-effect waves-light btn-table btn-edit" type="button" data-original-title="Remove item" data-toggle="tooltip" data-placement="top"><i id="icon-edit-{{$tmp->member_id}}" class="fa fa-pencil" aria-hidden="true"></i>
+                                        </button>                                   
+                                    
+                                        <button id="btn-delete-{{$tmp->member_id}}" class="btn btn-xs btn-danger waves-effect waves-light btn-table btn-delete" type="button" data-original-title="Remove item" data-toggle="tooltip" data-placement="top"><i id="icon-delete-{{$tmp->member_id}}" class="fa fa-trash-o" aria-hidden="true"></i>
+                                        </button>                                       
                                     </td>
                                 </form>
                             </tr>
@@ -115,7 +121,8 @@
 
                 <div tabindex="-1" class="modal fade modal-ext" id="modal-add" role="dialog" aria-hidden="true" aria-labelledby="myModalLabel" style="display: none;">
                     <div class="modal-dialog" role="document">
-                        <form class="form-horizontal" role="form" method="POST" action="/{{ $stadium }}/add-customer }}">
+                        <form class="form-horizontal" role="form" method="POST" action="/{{ $stadium }}/add-customer">
+                        {{ csrf_field() }}
                             <!--Content-->
                             <div class="modal-content">
                                 <!--Header-->
@@ -147,12 +154,12 @@
                                         </div>
                                         <div class="form-group md-form">
                                             <fieldset class="form-group">
-                                                <input name="group1" id="male" name="male" type="radio" checked="checked">
+                                                <input name="sex" id="male" type="radio" checked="checked">
                                                 <label for="male">ชาย</label>
                                             </fieldset>
 
                                             <fieldset class="form-group">
-                                                <input name="group1" id="female" name="female" type="radio">
+                                                <input name="sex" id="female" type="radio">
                                                 <label for="female">หญิง</label>
                                             </fieldset>
                                         </div>
@@ -166,8 +173,8 @@
                                         </div>
                                         <div class="form-group md-form">
                                             <i class="fa fa-mobile prefix"></i>
-                                            <input class="form-control" id="moblie-number" name="mobile-number" type="text" required>
-                                            <label for="mobile-number">เบอร์โทร</label>
+                                            <input class="form-control" id="mobile_number" name="mobile_number" type="text" required>
+                                            <label for="mobile_number">เบอร์โทร</label>
                                         </div>
                                     </div>
 

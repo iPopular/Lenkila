@@ -15,6 +15,6 @@ class Stadium extends Model
 
     public function tmp_customer_stadium()
     {
-        return $this->hasMany('App\Tmp_Customer_Stadium', 'stadium_id');
+        return $this->hasMany('App\Tmp_Customer_Stadium','stadium_id');
     }
 }
