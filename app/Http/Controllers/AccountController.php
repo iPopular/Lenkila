@@ -28,9 +28,7 @@ class AccountController extends Controller
 
     public function show(Request $request, $stadium)
     {
-        $stadium_users = Stadium::find(Auth::user()->stadium_id)->first();
-        //if($stadium != $stadium_users->name)
-            //return Redirect::to('/');
+        $stadium_users = Stadium::find(Auth::user()->stadium_id)->first();        
                 
         $roles = Role::all();
 
