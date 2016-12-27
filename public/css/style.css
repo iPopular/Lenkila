@@ -1,0 +1,38 @@
+@import url(https://fonts.googleapis.com/css?family=Prompt:300);
+
+body {
+    font-family: 'Roboto', 'Prompt', sans-serif;
+}
+
+select {
+    font-family: 'Roboto', 'Prompt', sans-serif;
+}
+
+/* YOUR CUSTOM STYLES */
+.select-border {
+    margin-top: 1.05em;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+}
+
+.btn-password {
+    margin: 0px;
+}
+
+.btn-table {    
+    /*padding-left: 15px;
+    padding-right: 15px;*/
+    /*margin-top: 0px;*/
+    margin-right: 0px;
+    /*margin-bottom: 0px;*/
+    margin-left: 0px;
+
+}
+
+/* webkit solution */
+.form-table::-webkit-input-placeholder { text-align:center; }
+/* mozilla solution */
+.form-table:-moz-placeholder { text-align:center; }
+
+.form-table { text-align:center; }
