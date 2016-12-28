@@ -25,7 +25,7 @@
             <h5>ข้อมูลลูกค้า </h5>
                     
                 <div class="text-xs-right">
-                    <button id="btn-add" class="btn btn-md btn-info waves-effect waves-light btn-table btn-edit" type="button" data-toggle="modal" data-target="#modal-add-customer"><i class="fa fa-plus" aria-hidden="true"></i>   สร้าง</button>
+                    <button id="btn-add" class="btn btn-md btn-info waves-effect waves-light" type="button" data-toggle="modal" data-target="#modal-add-customer"><i class="fa fa-plus" aria-hidden="true"></i>   สร้าง</button>
                 </div>
                 <!--Account table-->
                 <div class="table-responsive">
@@ -45,8 +45,7 @@
                         <!--Table body-->
                         <tbody>                            
                             <!--First row-->
-                            <script>console.log({!! $stadium_customer->tmp_customer_stadium  !!});</script>
-                            <script>console.log({!! $stadium_customer->tmp_customer_stadium[0]->customer  !!});</script>
+                            <script>console.log({!! $stadium_customer !!});</script>
                             @foreach($stadium_customer->tmp_customer_stadium as $tmp)                           
                             <tr>
                                 <form id="form-{{$tmp->member_id}}" class="form-horizontal" role="form" method="POST">
@@ -57,6 +56,8 @@
                                     <input id="lastname-{{$tmp->member_id}}" type="hidden" value="{{ $tmp->customer->lastname }}">
                                     <input id="birthday-{{$tmp->member_id}}" type="hidden" value="{{ $tmp->customer->birthday }}">
                                     <input id="workplace-{{$tmp->member_id}}" type="hidden" value="{{ $tmp->customer->workplace }}">
+                                    <input id="sex-{{$tmp->member_id}}" type="hidden" value="{{ $tmp->customer->sex }}">
+                                    <input id="note-{{$tmp->member_id}}" type="hidden" value="{{ $tmp->note }}">
                                     <td>                                        
                                         {{ $tmp->customer->nickname }}                                        
                                     </td>
@@ -74,7 +75,7 @@
                                             <i class="fa fa-pencil" aria-hidden="true"></i>
                                         </button>                                   
                                     
-                                        <button id="btn-delete-{{$tmp->member_id}}" class="btn btn-xs btn-danger waves-effect waves-light btn-table" type="button" data-original-title="Remove item" data-toggle="tooltip">
+                                        <button id="btn-delete-{{$tmp->member_id}}" class="btn btn-xs btn-danger waves-effect waves-light btn-table btn-delete-customer" type="button" data-original-title="Remove item" data-toggle="tooltip">
                                             <i class="fa fa-trash-o" aria-hidden="true"></i>
                                         </button>                                       
                                     </td>
@@ -89,24 +90,25 @@
                 </div>
                 <!--/Account table-->
 
-                <div tabindex="-1" class="modal fade" id="modal-ConfirmDelete" role="dialog" aria-hidden="true" aria-labelledby="myModalLabel" style="display: none;">
+                <div tabindex="-1" class="modal fade" id="modal-delete-customer" role="dialog" aria-hidden="true" aria-labelledby="myModalLabel" style="display: none;">
                     <div class="modal-dialog" role="document">
                         <!--Content-->
                         <div class="modal-content">
-                            <form id="form-del-account" class="form-horizontal" role="form" method="POST" action="/{{ $stadium }}/delete-account">
+                            <form id="form-del-account" class="form-horizontal" role="form" method="POST" action="/{{ $stadium }}/delete-customer">
                                 {{ csrf_field() }}
                                 <!--Header-->
                                 <div class="modal-header">
                                     <button class="close" aria-label="Close" type="button" data-dismiss="modal">
                                             <span aria-hidden="true">×</span>
                                         </button>
-                                    <h4 class="modal-title" id="myModalLabel">คำเตือน!</h4>
+                                    <h4 class="modal-title modal-title-important" id="myModalLabel">คำเตือน!</h4>
                                 </div>
                                 <!--Body-->
                                 <div class="modal-body">
-                                    <p>หากทำการลบบัญชีผู้ใช้แล้ว ท่านจะไม่สามารถกู้คืนได้!</p>
-                                    <strong>ท่านต้องการลบบัญชี <strong id="str-ask-del"></strong> ใช่หรือไม่?</strong>
-                                    <input id="del-user" name="del-user" type="hidden">
+                                    <p class="text-important">การลบข้อมูลลูกค้า จะทำให้ข้อมูลการมาใช้บริการหายไปด้วย</p>
+                                    <p class="text-important">และท่านจะไม่สามารถกู้คืนได้!</p>
+                                    <strong>ท่านต้องการลบข้อมูลของ คุณ <strong id="str-ask-del"></strong> ใช่หรือไม่?</strong>
+                                    <input id="del-customer" name="del-customer" type="hidden">
                                 </div>
                                 <!--Footer-->
                                 <div class="modal-footer">
@@ -161,17 +163,17 @@
                                     <div class="form-inline">
                                         <div class="form-group md-form">
                                             <i class="fa fa-calendar prefix"></i>
-                                            <input class="form-control datepicker" id="birthday" name="birthday" type="text">
+                                            <input class="form-control datepicker" id="birthday" name="birthday" type="text" >
                                             <label for="birthday">วันเกิด</label>
                                         </div>                                        
                                         <div class="form-group">
                                             <fieldset class="form-group">
-                                                <input name="sex" type="radio" id="male" checked="checked">
+                                                <input name="sex" type="radio" id="male" value="male" checked="checked">
                                                 <label for="male">ชาย</label>
                                             </fieldset>
 
                                             <fieldset class="form-group">
-                                                <input name="sex" type="radio" id="female">
+                                                <input name="sex" type="radio" id="female" value="female">
                                                 <label for="female">หญิง</label>
                                             </fieldset>
                                         </div>
@@ -184,24 +186,18 @@
                                         </div>
                                     </div>
                                     <div class="form-inline">
-                                        <div class="form-group md-form">
-                                            <i class="fa fa-car prefix"></i>
-                                            <input class="form-control" id="visited" name="visited" type="text"></input>
-                                            <label for="visited">จำนวนครั้งที่เคยมา</label>
-                                        </div>
-
-                                        <div class="form-group md-form">
-                                            <i class="fa fa-clock-o prefix"></i>
-                                            <input class="form-control" id="time-often" name="time-often" type="text"></input>
-                                            <label for="time-often">เวลาที่มาบ่อย</label>
-                                        </div>
+                                        <div class="md-form">
+                                            <i class="fa fa-file-text-o prefix"></i>
+                                            <textarea class="md-textarea" id="note" name="note" type="text"></textarea>
+                                            <label for="note">โน๊ต</label>
+                                        </div>                                        
                                     </div>
                                 </div>
                                 <!--Footer-->
                                 <div class="modal-footer">
                                     <div class="form-inline" style="color:red;">
-                                        <i class="fa fa-asterisk" aria-hidden="true"></i>  <p class="form-group">กรุณากรอกชื่อเล่น และเบอร์โทรศัพท์ของลูกค้า</p>
-                                        <button class="btn btn-default waves-effect waves-light form-group" type="submit">สร้าง</button>
+                                        <i class="fa fa-asterisk" aria-hidden="true"></i>  <p class="form-group text-important">กรุณากรอกชื่อเล่น และเบอร์โทรศัพท์ของลูกค้า</p>
+                                        <button class="btn btn-default waves-effect waves-light form-group" type="submit"><i class="fa fa-plus" aria-hidden="true"></i> สร้าง</button>
                                     </div>
                                 </div>                            
                             </div>
@@ -221,7 +217,7 @@
                                     <button class="close" aria-label="Close" type="button" data-dismiss="modal">
                                             <span aria-hidden="true">×</span>
                                         </button>
-                                    <h4 class="modal-title" id="myModalLabel">สร้างข้อมูลลูกค้า</h4>
+                                    <h4 class="modal-title" id="myModalLabel">แก้ไขข้อมูลลูกค้า</h4>
                                 </div>
                                 <!--Body-->
                                 <div class="modal-body text-xs-left edit">
@@ -257,12 +253,12 @@
                                         </div>                                        
                                         <div class="form-group">
                                             <fieldset class="form-group">
-                                                <input name="sex-edit" id="male-edit" type="radio" checked="checked">
+                                                <input name="sex" id="male-edit" type="radio" value="male" checked="checked">
                                                 <label for="male-edit">ชาย</label>
                                             </fieldset>
 
                                             <fieldset class="form-group">
-                                                <input name="sex-edit" id="female-edit" type="radio">
+                                                <input name="sex" id="female-edit" value="female" type="radio">
                                                 <label for="female-edit">หญิง</label>
                                             </fieldset>
                                         </div>
@@ -287,12 +283,19 @@
                                             <label for="time-often">เวลาที่มาบ่อย</label>
                                         </div>
                                     </div>
+                                    <div class="form-inline">
+                                        <div class="md-form">
+                                            <i class="fa fa-file-text-o prefix"></i>
+                                            <textarea class="md-textarea" id="note-edit" name="note" type="text"></textarea>
+                                            <label for="note">โน๊ต</label>
+                                        </div>                                        
+                                    </div>
                                 </div>
                                 <!--Footer-->
                                 <div class="modal-footer">
                                     <div class="form-inline" style="color:red;">
-                                        <i class="fa fa-asterisk" aria-hidden="true"></i>  <p class="form-group">กรุณากรอกชื่อเล่น และเบอร์โทรศัพท์ของลูกค้า</p>
-                                        <button class="btn btn-default waves-effect waves-light form-group" type="submit">แก้ไข</button>
+                                        <i class="fa fa-asterisk" aria-hidden="true"></i>  <p class="form-group  text-important">กรุณากรอกชื่อเล่น และเบอร์โทรศัพท์ของลูกค้า</p>
+                                        <button class="btn btn-default waves-effect waves-light form-group" type="submit"><i class="fa fa-pencil" aria-hidden="true"></i> แก้ไข</button>
                                     </div>
                                 </div>                            
                             </div>

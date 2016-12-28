@@ -141,34 +141,51 @@ function toggleOneRow(id) {
                 el.style.display = 'block';
         });
 
-        if(!document.getElementById('btn-password-'+id).disabled)
-            document.getElementById('btn-password-'+id).disabled = true;
+        if($('#btn-password-' + id).is(':disabled'))
+            $('#btn-password-' + id).prop('disabled', false);
         else
-            document.getElementById('btn-password-'+id).disabled = false;
+            $('#btn-password-' + id).prop('disabled', true);
     }
     return checkEmpty;    
 }
 
 $('.datepicker').datepicker({
-    format: 'yyyy-mm-dd',
+    format: 'yyyy/mm/dd',
     startView: 3,
-    autoclose: true
+    autoclose: true,
+    maxViewMode: 2,
+    maxDate: '0'
 });
 
 $('.btn-edit-customer').click(function (){
     var Id = this.id.split('-');
-    $('#nickname-edit').val($('#nickname-' + Id[3]).val());
-    
     $('.edit label').addClass('active');
+    $('#nickname-edit').val($('#nickname-' + Id[3]).val());    
     $('#mobile_number-edit').val($('#mobile_number-' + Id[3]).val());
     $('#firstname-edit').val($('#firstname-' + Id[3]).val());
     $('#lastname-edit').val($('#lastname-' + Id[3]).val());
     $('#workplace-edit').val($('#workplace-' + Id[3]).val());
+    $('#note-edit').val($('#note-' + Id[3]).val());
+
+    var sex = $('#sex-' + Id[3]).val();
+    if( sex === 'male')
+        $('#male-edit').prop('checked', true);
+    else
+        $('#female-edit').prop('checked', true);
+
 
     var queryDate = $('#birthday-' + Id[3]).val();
-    console.log(queryDate);
     var dateParts = queryDate.split('-');
-    var parsedDate = new Date(dateParts[0], dateParts[1], dateParts[2]); 
+    var parsedDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]); 
     
     $('#birthday-edit').datepicker('setDate', parsedDate);
+});
+
+$('.btn-delete-customer').click(function (){
+    var Id = this.id.split('-');
+    $('#del-customer').val($('#mobile_number-' + Id[2]).val());
+
+    $('#str-ask-del').empty();
+    $('#str-ask-del').append($('#nickname-' + Id[2]).val());
+    $('#modal-delete-customer').modal('toggle');
 });

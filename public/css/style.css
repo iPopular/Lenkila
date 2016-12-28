@@ -8,6 +8,12 @@ select {
     font-family: 'Roboto', 'Prompt', sans-serif;
 }
 
+.text-important {
+    color: red;
+    font-size: 1.1rem;
+    font-weight: bolder;
+}
+
 /* YOUR CUSTOM STYLES */
 .select-border {
     margin-top: 1.05em;

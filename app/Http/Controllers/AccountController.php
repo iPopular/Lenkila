@@ -28,7 +28,7 @@ class AccountController extends Controller
 
     public function show(Request $request, $stadium)
     {
-        $stadium_users = Stadium::find(Auth::user()->stadium_id)->first();        
+        $stadium_users = Stadium::where('id', Auth::user()->stadium_id)->first();        
                 
         $roles = Role::all();
 
@@ -119,7 +119,7 @@ class AccountController extends Controller
             if($username != Auth::user()->username)
             {
                 $user = Users::where('username', $username) -> first();
-                $stadium_users = Stadium::find(Auth::user()->stadium_id)->first();
+                $stadium_users = Stadium::where('id', Auth::user()->stadium_id)->first();
 
                 if($stadium == $stadium_users->name)
                 {

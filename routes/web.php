@@ -38,6 +38,12 @@ Route::post('/{stadium}/edit-customer', [
     'roles' => ['owner', 'administrator', 'staff']
 ]);
 
+Route::post('/{stadium}/delete-customer', [
+    'middleware' => ['auth', 'roles'],
+    'uses' => 'CustomerInfoController@deleteCustomer',
+    'roles' => ['owner', 'administrator', 'staff']
+]);
+
 Route::get('/{stadium}/account_management', [
     'middleware' => ['auth', 'roles'], 
     'uses' => 'AccountController@show',

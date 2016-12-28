@@ -165,11 +165,11 @@
                                     <button class="close" aria-label="Close" type="button" data-dismiss="modal">
                                             <span aria-hidden="true">×</span>
                                         </button>
-                                    <h4 class="modal-title" id="myModalLabel">คำเตือน!</h4>
+                                    <h4 class="modal-title  modal-title-important" id="myModalLabel">คำเตือน!</h4>
                                 </div>
                                 <!--Body-->
                                 <div class="modal-body">
-                                    <p>หากทำการลบบัญชีผู้ใช้แล้ว ท่านจะไม่สามารถกู้คืนได้!</p>
+                                    <p class="text-important">หากทำการลบบัญชีผู้ใช้แล้ว ท่านจะไม่สามารถกู้คืนได้!</p>
                                     <strong>ท่านต้องการลบบัญชี <strong id="str-ask-del"></strong> ใช่หรือไม่?</strong>
                                     <input id="del-user" name="del-user" type="hidden">
                                 </div>
