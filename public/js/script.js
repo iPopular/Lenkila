@@ -149,5 +149,26 @@ function toggleOneRow(id) {
     return checkEmpty;    
 }
 
-$('#datepicker-birthday').datepicker({
+$('.datepicker').datepicker({
+    format: 'yyyy-mm-dd',
+    startView: 3,
+    autoclose: true
+});
+
+$('.btn-edit-customer').click(function (){
+    var Id = this.id.split('-');
+    $('#nickname-edit').val($('#nickname-' + Id[3]).val());
+    
+    $('.edit label').addClass('active');
+    $('#mobile_number-edit').val($('#mobile_number-' + Id[3]).val());
+    $('#firstname-edit').val($('#firstname-' + Id[3]).val());
+    $('#lastname-edit').val($('#lastname-' + Id[3]).val());
+    $('#workplace-edit').val($('#workplace-' + Id[3]).val());
+
+    var queryDate = $('#birthday-' + Id[3]).val();
+    console.log(queryDate);
+    var dateParts = queryDate.split('-');
+    var parsedDate = new Date(dateParts[0], dateParts[1], dateParts[2]); 
+    
+    $('#birthday-edit').datepicker('setDate', parsedDate);
 });

@@ -12,7 +12,10 @@
 */
 
 Route::get('/', function () {
-    return Redirect::to('/'. Auth::user()->stadium->name .'/report_problems');
+    if(count(Auth::user()) > 0)
+        return Redirect::to('/'. Auth::user()->stadium->name .'/report_problems');
+    else
+        return Redirect::to('/login');
 });
 
 Auth::routes();
@@ -26,6 +29,12 @@ Route::get('/{stadium}/customer_info', [
 Route::post('/{stadium}/add-customer', [
     'middleware' => ['auth', 'roles'],
     'uses' => 'CustomerInfoController@addCustomer',
+    'roles' => ['owner', 'administrator', 'staff']
+]);
+
+Route::post('/{stadium}/edit-customer', [
+    'middleware' => ['auth', 'roles'],
+    'uses' => 'CustomerInfoController@editCustomer',
     'roles' => ['owner', 'administrator', 'staff']
 ]);
 
