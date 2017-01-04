@@ -20,6 +20,12 @@ Route::get('/', function () {
 
 Auth::routes();
 
+Route::get('/{stadium}/reservation', [
+    'middleware' => ['auth', 'roles'],
+    'uses' => 'ReservationController@show',
+    'roles' => ['owner', 'administrator', 'staff']
+]);
+
 Route::get('/{stadium}/customer_info', [
     'middleware' => ['auth', 'roles'],
     'uses' => 'CustomerInfoController@show',

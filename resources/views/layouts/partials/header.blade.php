@@ -5,7 +5,7 @@
 <title>Material Design Bootstrap</title>
 
 <!-- Font Awesome -->
-<script src="https://use.fontawesome.com/612b830948.js"></script>
+<link href="{{ URL::asset('css/font-awesome.min.css') }}" rel="stylesheet">
 
 <!-- Bootstrap core CSS -->
 <link href="{{ URL::asset('css/bootstrap.min.css') }}" rel="stylesheet">
@@ -19,6 +19,6 @@
 <link href="{{ URL::asset('css/bootstrap-datepicker.min.css') }}" rel="stylesheet">
 
 <!-- JQuery -->
-<script type="text/javascript" src="{{ URL::asset('js/jquery-3.1.1.min.js') }}"></script>
+<script type="text/javascript" src="{{ URL::asset('js/jquery.min.js') }}"></script>
 
 <script type="text/javascript" src="{{ URL::asset('js/bootstrap-datepicker.min.js') }}"></script>

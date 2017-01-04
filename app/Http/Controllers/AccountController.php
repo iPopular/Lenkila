@@ -28,10 +28,8 @@ class AccountController extends Controller
 
     public function show(Request $request, $stadium)
     {
-        $stadium_users = Stadium::where('id', Auth::user()->stadium_id)->first();        
-                
+        $stadium_users = Stadium::where('id', Auth::user()->stadium_id)->first();
         $roles = Role::all();
-
         return view('pages.account_management', compact('roles', 'stadium', 'stadium_users'));        
     }
 

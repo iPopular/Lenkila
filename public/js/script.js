@@ -189,3 +189,8 @@ $('.btn-delete-customer').click(function (){
     $('#str-ask-del').append($('#nickname-' + Id[2]).val());
     $('#modal-delete-customer').modal('toggle');
 });
+
+$('#datetimepicker2').datetimepicker({
+    language: 'en',
+    pickDate: false
+});
