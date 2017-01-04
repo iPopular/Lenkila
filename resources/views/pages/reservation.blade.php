@@ -53,12 +53,7 @@
         //// uncomment this line to hide the all-day slot
         //allDaySlot: false,
         schedulerLicenseKey: 'GPL-My-Project-Is-Open-Source',
-        resources: [
-            { id: 'a', title: 'Room A' },
-            { id: 'b', title: 'Room B' },
-            { id: 'c', title: 'Room C' },
-            { id: 'd', title: 'Room D' }
-        ],
+        resources: {!! json_encode($resource) !!}, 
         events: [
             { id: '1', resourceId: 'a', start: '2017-01-06', end: '2017-01-08', title: 'event 1', color: '#FF4500'},
             { id: '2', resourceId: 'a', start: '2017-01-07T09:00:00', end: '2017-01-07T14:00:00', title: 'event 2' , color: '#32CD32'},
@@ -128,7 +123,7 @@
     }
 
     $('#colorselector').colorselector();   
-    console.log({!! $resource[0]['id'] !!});
+    console.log({!! json_encode($resource) !!});
 });
 </script>
 <main class="pt-6">
@@ -249,37 +244,37 @@
       <div tabindex="-1" class="modal fade" id="modal-add-field" role="dialog" aria-hidden="true" aria-labelledby="myModalLabel" style="display: none;">
         <div class="modal-dialog" role="document">
           <div class="modal-content">
-            <div class="modal-header">
-                <button class="close" aria-label="Close" type="button" data-dismiss="modal">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                <h4 class="modal-title" id="myModalLabel">เพิ่มสนาม</h4>
-            </div>
-            <div class="modal-body text-xs-left reserve">
-              <form id="taskForm" class="form-horizontal">
-                <input type="hidden" id="hddStartTime" />
-                <input type="hidden" id="hddEndTime" />
-                <input type="hidden" id="hddAllDay" />
-                <div class="form-inline">
-                    <div class="form-group md-form">
-                        <i class="fa fa-font prefix"></i>                                            
-                        <input class="form-control" id="resource" name="resource" type="text" required>
-                        <label for="resource">ชื่อสนาม</label>
+            <form class="form-horizontal" role="form" method="POST" action="/{{ $stadium }}/add-field">
+            {{ csrf_field() }}
+                <div class="modal-header">
+                    <button class="close" aria-label="Close" type="button" data-dismiss="modal">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    <h4 class="modal-title" id="myModalLabel">เพิ่มสนาม</h4>
+                </div>
+                <div class="modal-body text-xs-left reserve">
+                
+                    <div class="form-inline">
+                        <div class="form-group md-form">
+                            <i class="fa fa-font prefix"></i>                                            
+                            <input class="form-control" id="title" name="title" type="text" required>
+                            <label for="title">ชื่อสนาม</label>
+                        </div>
                     </div>
+                    <div class="form-inline">
+                        <div class="md-form">
+                            <i class="fa fa-file-text-o prefix"></i>
+                            <textarea class="md-textarea" id="detail" name="detail" type="text"></textarea>
+                            <label for="detail">รายละเอียด</label>
+                        </div>                                        
+                    </div>
+                
                 </div>
-                <div class="form-inline">
-                    <div class="md-form">
-                        <i class="fa fa-file-text-o prefix"></i>
-                        <textarea class="md-textarea" id="note-edit" name="note" type="text"></textarea>
-                        <label for="note">รายละเอียด</label>
-                    </div>                                        
+                <div class="modal-footer">
+                    <button type="submit" id="btnSave" class="btn btn-primary">บันทึก</button>
+                    <button type="button" id="btnCancel" class="btn btn-default" data-dismiss="modal">ยกเลิก</button>
                 </div>
-              </form>
-            </div>
-            <div class="modal-footer">
-              <button type="button" id="btnSave" class="btn btn-primary">บันทึก</button>
-              <button type="button" id="btnCancel" class="btn btn-default" data-dismiss="modal">ยกเลิก</button>
-            </div>
+            </form>
           </div>
         </div>
       </div>

@@ -26,6 +26,12 @@ Route::get('/{stadium}/reservation', [
     'roles' => ['owner', 'administrator', 'staff']
 ]);
 
+Route::post('/{stadium}/add-field', [
+    'middleware' => ['auth', 'roles'],
+    'uses' => 'ReservationController@addField',
+    'roles' => ['owner']
+]);
+
 Route::get('/{stadium}/customer_info', [
     'middleware' => ['auth', 'roles'],
     'uses' => 'CustomerInfoController@show',
