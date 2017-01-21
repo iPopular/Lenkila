@@ -45,7 +45,8 @@
                         <!--Table body-->
                         <tbody>                            
                             <!--First row-->
-                            <script>console.log({!! $stadium_customer !!});</script>
+                            <!--<script>console.log({!! json_encode($countDay) !!});</script>-->
+                            <!--<script>console.log({!! json_encode($maxDay) !!});</script>-->
                             @foreach($stadium_customer->tmp_customer_stadium as $tmp)                           
                             <tr>
                                 <form id="form-{{$tmp->member_id}}" class="form-horizontal" role="form" method="POST">
@@ -58,6 +59,12 @@
                                     <input id="workplace-{{$tmp->member_id}}" type="hidden" value="{{ $tmp->customer->workplace }}">
                                     <input id="sex-{{$tmp->member_id}}" type="hidden" value="{{ $tmp->customer->sex }}">
                                     <input id="note-{{$tmp->member_id}}" type="hidden" value="{{ $tmp->note }}">
+                                    @if(array_key_exists($tmp->customer->id, $maxTime))
+                                        <input id="visited-time-{{$tmp->member_id}}" type="hidden" value="{{ $maxTime[$tmp->customer->id][0] }}">
+                                    @endif
+                                     @if(array_key_exists($tmp->customer->id, $countDay))
+                                        <input id="visited-count-{{$tmp->member_id}}" type="hidden" value="{{ $countDay[$tmp->customer->id] }}">
+                                    @endif
                                     <td>                                        
                                         {{ $tmp->customer->nickname }}                                        
                                     </td>
@@ -65,10 +72,14 @@
                                         {{ $tmp->customer->mobile_number }}                                        
                                     </td>
                                     <td>
-                                        
+                                    @if(array_key_exists($tmp->customer->id, $maxDay))
+                                        {{ $maxDay[$tmp->customer->id][0] }}
+                                    @endif
                                     </td>
                                     <td>
-                                        
+                                    @if(array_key_exists($tmp->customer->id, $maxTime))
+                                        {{ $maxTime[$tmp->customer->id][0] }}
+                                    @endif
                                     </td>
                                     <td>                                       
                                         <button form="form-{{$tmp->member_id}}" id="btn-edit-customer-{{$tmp->member_id}}" class="btn btn-xs btn-warning waves-effect waves-light btn-table btn-edit-customer" type="button" data-toggle="modal" data-target="#modal-edit-customer">

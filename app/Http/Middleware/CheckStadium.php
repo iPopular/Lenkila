@@ -14,30 +14,18 @@ class CheckStadium
      * @param  \Closure  $next
      * @return mixed
      */
-    // public function handle($request, Closure $next)
-    // {
-
-
-    //     return $next($request);
-    // }
-
     public function handle($request, Closure $next)
     {
-        //if (Auth::check()) {
-            $user = Auth::user();
-            $stadium = $user->stadium;
-            $tmpStadium = null;
-            if ($request->stadium != null) {
-                $tmpStadium = $request->stadium;
-
-                if ($tmpStadium != $stadium) {
-                    return "You don't have privileges to access this resource";
-                }
-                
-            }
-        //}
-
+        if($request->user()->hasStadium($request->route('stadium')))
+        {
+			return $next($request);
+		}
+        return response()->view('errors.401' , array('error' => 
+                array( 'code' => 'INSUFFICIENT ROLE',
+                    'description' => 'คุณไม่มีสิทธิ์ในการเข้าถึงหน้านี้'))
+                , 401);
 
         return $next($request);
     }
+
 }

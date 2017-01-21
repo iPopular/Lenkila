@@ -15,7 +15,7 @@
               <hr>
               <br>
 
-              <div class="text-xs-left">
+              <div class="form-login text-xs-left">
                 <div class="md-form{{ $errors->has('username') ? ' has-error' : '' }}">
                   <i class="fa fa-user prefix"></i>
                   <input class="form-control" id="username" name="username" type="text" required>

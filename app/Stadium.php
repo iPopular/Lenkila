@@ -17,4 +17,9 @@ class Stadium extends Model
     {
         return $this->hasMany('App\Tmp_Customer_Stadium','stadium_id');
     }
+
+    public function field()
+    {
+        return $this->hasMany('App\Field','stadium_id');
+    }    
 }

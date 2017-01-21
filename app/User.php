@@ -53,7 +53,7 @@ class User extends Model implements AuthenticatableContract
     public function hasRole($roles)
 	{
 		$this->have_role = $this->getUserRole();
-		// Check if the user is a root account
+		// Check if the user is a Owner account
 		if($this->have_role->name == 'Owner') {
 			return true;
 		}
@@ -77,6 +77,32 @@ class User extends Model implements AuthenticatableContract
 	private function checkIfUserHasRole($need_role)
 	{
 		return (strtolower($need_role)==strtolower($this->have_role->name)) ? true : false;
+	}
+
+	public function hasStadium($stadium)
+    {
+		$this->have_stadium = $this->getUserStadium();
+
+		if(is_array($stadium)){
+			foreach($stadium as $need_stadium){
+				if($this->checkIfUserHasStadium($need_stadium)) {
+					return true;
+				}
+			}
+		} else{
+			return $this->checkIfUserHasStadium($stadium);
+		}
+		return false;
+    }
+
+	private function getUserStadium()
+	{
+		return $this->stadium()->getResults();
+	}
+
+	private function checkIfUserHasStadium($need_stadium)
+	{
+		return ($need_stadium==$this->have_stadium->name) ? true : false;
 	}
 }
 

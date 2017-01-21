@@ -12,4 +12,9 @@ class Customer extends Model
     {
         return $this->hasMany('App\Tmp_Customer_Stadium', 'customer_id');
     }
+
+    public function reservation()
+    {
+        return $this->belongsTo('App\Reservation');
+    }
 }

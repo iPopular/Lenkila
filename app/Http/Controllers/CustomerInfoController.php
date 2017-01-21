@@ -32,8 +32,123 @@ class CustomerInfoController extends Controller
         if($stadium != $stadium_customer->name)
             return Redirect::to('/');
         
-        return view('pages.customer_info', compact('stadium', 'stadium_customer'));
+        $events = array();
+        $j = 0;
+        foreach($stadium_customer->field as $field)
+        {
+            foreach($field->reservation as $reserv)
+            {
+                $events[$j]['id'] = $reserv['customer_id'];
+                $events[$j]['start'] = date("H:i:s",strtotime($reserv['start_time']));
+                $events[$j]['end'] = date("H:i:s",strtotime($reserv['end_time']));//$reserv['end_time'];
+                $day = date('l', strtotime($reserv['start_time']));
+                $events[$j]['day'] = $day;
+                $events[$j]['ref_code'] = $reserv['ref_code'];
+                $j++;
+            }                       
+            
+        }
+        $arrays = array();
+        foreach($events as $key => $item)
+        {
+            $arrays[$item['id']][$key] = $item;
+        }
+
+        ksort($arrays, SORT_NUMERIC);
+        //$count = $this->array_count($events, 'day');
+
+        $outDay = array();
+        $outTime = array();
+        $outDayCount = array();
+        foreach ($arrays as $arr){
+            foreach ($arr as $key => $value){
+                foreach ($value as $key2 => $value2){
+                    if($key2 == 'day')
+                    {
+                        $index = $value['id'] .'-' .$key2.'-'.$value2;
+                        if (array_key_exists($index, $outDay)){
+                            $outDay[$index]++;
+                        } else {
+                            $outDay[$index] = 1;
+                        }
+                    }
+                    if($key2 == 'ref_code')
+                    {
+                        $index = $value['id'] .'-' .$value['ref_code'];
+                        if (array_key_exists($index, $outDay)){
+                            $outDayCount[$index]++;
+                        } else {
+                            $outDayCount[$index] = 1;
+                        }
+                    }
+                    if($key2 == 'start')
+                    {
+                        $index = $value['id'] .'-' .$key2.'-'.$value2;
+                        if (array_key_exists($index, $outTime)){
+                            $outTime[$index]++;
+                        } else {
+                            $outTime[$index] = 1;
+                        }
+                    }          
+                }
+            }
+        }
+        $tmp = array();
+        foreach ($outDay as $key => $value) 
+        {
+            $key_str = explode("-", $key);           
+            $tmp[$key_str[0]][$key_str[2]] = $value; 
+        }
+        $maxDay = array();
+        foreach($tmp as $key => $value)
+        {            
+            $maxs = array_keys($value, max($value));
+            $maxDay[$key] = $maxs;
+        }
+        
+        $tmp2 = array();
+        foreach ($outTime as $key => $value) 
+        {
+            $key_str = explode("-", $key);           
+            $tmp2[$key_str[0]][$key_str[2]] = $value; 
+        }
+        $maxTime = array();
+        foreach($tmp2 as $key => $value)
+        {            
+            $maxs = array_keys($value, max($value));
+            $maxTime[$key] = $maxs;
+        }
+
+        $tmp3 = array();
+        foreach ($outDayCount as $key => $value) 
+        {
+            $key_str = explode("-", $key);
+            if($key_str[1] != 0)        
+                $tmp3[$key_str[0]][$key_str[1]] = $value; 
+        }
+        $countDay = array();
+        foreach($tmp3 as $key => $value)
+        {            
+            $countDay[$key] = array_sum($value);
+        }
+        
+        return view('pages.customer_info', compact('stadium', 'stadium_customer', 'maxTime', 'maxDay', 'countDay'));
      
+    }
+
+    function array_count ($array, $key, $value = NULL) {
+        // count($array[*][$key])
+        $c = 0;
+        if (is_null($value)) {
+            foreach ($array as $i=>$subarray) {
+                $c += ($subarray[$key]!='');
+            }
+        } else {
+            foreach ($array as $i=>$subarray) {
+                $c += ($subarray[$key]==$value);
+            }
+        }
+        return $c;
     }
 
     public function addCustomer(Request $request, $stadium)

@@ -23,7 +23,7 @@
     <li class="nav-item dropdown">
       <a class="nav-link dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-user"></i> {{Auth::user()->username}}</a>
       <div class="dropdown-menu dropdown-primary dd-right" aria-labelledby="dropdownMenu1" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
-        <a class="dropdown-item waves-effect dd-light" href="#"><i class="fa fa-cog" aria-hidden="true"></i> การตั้งค่า</a>
+        <!--<a class="dropdown-item waves-effect dd-light" href="#"><i class="fa fa-cog" aria-hidden="true"></i> การตั้งค่า</a>-->
         <a class="dropdown-item waves-effect dd-light" href="{{ url('/logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
             <i class="fa fa-sign-out" aria-hidden="true"></i> ออกจากระบบ
         </a>

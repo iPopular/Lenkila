@@ -157,6 +157,98 @@ $('.datepicker').datepicker({
     maxDate: '0'
 });
 
+$('.input-daterange').datepicker({
+    format: "MM-yyyy",
+    minViewMode: 1,
+    maxViewMode: 2,
+    autoclose: true,
+    defaultViewDate: new Date(2017, 1, 20)
+});
+
+$( document ).ready(function() {
+
+    var sPath = window.location.pathname;
+    var sPage = sPath.substring(sPath.lastIndexOf('/') + 1);
+    if(sPage == "analysis") {    
+        var monthNames = [
+            "January", "February", "March",
+            "April", "May", "June", "July",
+            "August", "September", "October",
+            "November", "December"
+        ];
+
+        var date = new Date();
+        var monthIndex = date.getMonth();
+        var year = date.getFullYear();
+
+        $('.input-daterange input').val(monthNames[monthIndex] + '-' + year);
+        getLinechart();
+    }
+    else if(sPage == "login") {
+        $('.form-login label').addClass('active');
+    }
+});
+
+
+$('.input-daterange').change(function() {
+    getLinechart();
+});
+
+var myLineChart = null;
+
+function getLinechart(){
+    var start = $("input[name=mount]").val();
+    $.ajax({
+        url: 'analysis-getStat',
+        type: 'POST',
+        beforeSend: function (xhr) {
+            var token = $('meta[name="csrf_token"]').attr('content');
+
+            if (token) {
+                return xhr.setRequestHeader('X-CSRF-TOKEN', token);
+            }
+        },
+        data: { _date: start },        
+        success: function(info){
+            tmpLabels = info[0];
+            tmpData = info[1];
+
+            var data = {
+                labels: info[0],
+                datasets: [
+                    {
+                        label: "My Second dataset",
+                        fillColor: "rgba(151,187,205,0.2)",
+                        strokeColor: "rgba(151,187,205,1)",
+                        pointColor: "rgba(151,187,205,1)",
+                        pointStrokeColor: "#fff",
+                        pointHighlightFill: "#fff",
+                        pointHighlightStroke: "rgba(151,187,205,1)",
+                        data: info[1]
+                    }
+                ]
+            };
+            
+            var option = {
+                responsive: true,
+            };
+            
+            if(myLineChart!=null){
+                myLineChart.destroy();
+            }
+            // Get the context of the canvas element we want to select
+            var ctx = document.getElementById("lineChartEx").getContext('2d');
+            myLineChart = new Chart(ctx).Line(data, option); //'Line' defines type of the chart.
+            
+            document.getElementById('income').innerText = info[2] + ' บาท';
+            document.getElementById('count_reserve').innerText = info[3] + ' ครั้ง';
+            document.getElementById('best_customer').innerText = '    คุณ ' + info[4];
+        },error:function(){ 
+            console.log('error');
+        }
+    });
+}
+
 $('.btn-edit-customer').click(function (){
     var Id = this.id.split('-');
     $('.edit label').addClass('active');
@@ -166,6 +258,8 @@ $('.btn-edit-customer').click(function (){
     $('#lastname-edit').val($('#lastname-' + Id[3]).val());
     $('#workplace-edit').val($('#workplace-' + Id[3]).val());
     $('#note-edit').val($('#note-' + Id[3]).val());
+    $('#visited-edit').val($('#visited-count-' + Id[3]).val());
+    $('#time-often-edit').val($('#visited-time-' + Id[3]).val());
 
     var sex = $('#sex-' + Id[3]).val();
     if( sex === 'male')
@@ -188,9 +282,4 @@ $('.btn-delete-customer').click(function (){
     $('#str-ask-del').empty();
     $('#str-ask-del').append($('#nickname-' + Id[2]).val());
     $('#modal-delete-customer').modal('toggle');
-});
-
-$('#datetimepicker2').datetimepicker({
-    language: 'en',
-    pickDate: false
 });
