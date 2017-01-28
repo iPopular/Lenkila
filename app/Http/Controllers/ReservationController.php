@@ -37,18 +37,7 @@ class ReservationController extends Controller
             $resource[$i]['title'] = $field['name'];
             $resource[$i]['detail'] = $field['detail'];
             $resource[$i]['status'] = $field['status'];
-            // if($field['status'] == 1)
-            // {
-            //     $resource[$i]['businessHours']['start'] ='08:00';
-            //     $resource[$i]['businessHours']['end'] ='23:00';
-            //     $resource[$i]['businessHours']['dow'] =6;
-            // }
-            // else
-            // {
-            //     $resource[$i]['businessHours']['start'] ='10:00';
-            //     $resource[$i]['businessHours']['end'] = '20:00';
-            //     $resource[$i]['businessHours']['dow'] =5;
-            // }
+            
             $i++;
 
             foreach($field->reservation as $reserv)

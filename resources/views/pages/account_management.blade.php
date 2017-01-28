@@ -27,7 +27,7 @@
                 
                 <!--Account table-->
                 <div class="table-responsive">
-                    <table class="table product-table">
+                    <table class="table" data-page-length="5" cellspacing="0" width="100%">
                         <!--Table head-->
                         <thead>
                             <tr>

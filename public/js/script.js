@@ -149,21 +149,7 @@ function toggleOneRow(id) {
     return checkEmpty;    
 }
 
-$('.datepicker').datepicker({
-    format: 'yyyy/mm/dd',
-    startView: 3,
-    autoclose: true,
-    maxViewMode: 2,
-    maxDate: '0'
-});
 
-$('.input-daterange').datepicker({
-    format: "MM-yyyy",
-    minViewMode: 1,
-    maxViewMode: 2,
-    autoclose: true,
-    defaultViewDate: new Date(2017, 1, 20)
-});
 
 $( document ).ready(function() {
 
@@ -181,18 +167,80 @@ $( document ).ready(function() {
         var monthIndex = date.getMonth();
         var year = date.getFullYear();
 
+        $('.input-daterange').change(function() {
+            getLinechart();
+        });
+
         $('.input-daterange input').val(monthNames[monthIndex] + '-' + year);
         getLinechart();
     }
     else if(sPage == "login") {
         $('.form-login label').addClass('active');
     }
+    if(sPage == "dashboard") {
+        // Material Select Initialization
+        $('.mdb-select').material_select();
+
+        $('.input-daterange').datepicker({
+            format: "yyyy-mm-dd",
+            maxViewMode: 2,
+            autoclose: true
+        });
+
+        // store the currently selected tab in the hash value
+        $("ul.nav-tabs > li > a").on("shown.bs.tab", function(e) {
+            var id = $(e.target).attr("href").substr(1);
+            window.location.hash = id;
+        });
+
+        // on load of the page: switch to the currently selected tab
+        var hash = window.location.hash;
+        $('#myTab a[href="' + hash + '"]').tab('show');
+    }
+    else {
+        $('.datepicker').datepicker({
+            format: 'yyyy-mm-dd',
+            startView: 3,
+            autoclose: true,
+            maxViewMode: 2,
+            maxDate: '0'
+        });
+
+        $('.input-daterange').datepicker({
+            format: "MM-yyyy",
+            minViewMode: 1,
+            maxViewMode: 2,
+            autoclose: true,
+            defaultViewDate: new Date(2017, 1, 20)
+        });
+    }
+
+    $('.table').DataTable({
+        
+        language: {
+            search: "_INPUT_",
+            searchPlaceholder: "ค้นหา..."
+        },
+        bLengthChange: false,
+        responsive: true,
+        "bPaginate": true,
+        "autoWidth": false,
+        "dom": "<'row'<'col-sm-3'f><'col-sm-6'><'col-sm-3'l>>" +
+                "<'row'<'col-sm-12'tr>>" +
+                "<'row'<'col-sm-12'i>>"+
+                "<'row'<'col-sm-12'p>>",
+        colResize: {
+           exclude: [2,3,4,5,6,7]
+        },
+        // scrollY:        "300px",
+        // scrollX:        'true',
+        // scrollCollapse: 'true',
+    });
+
 });
 
 
-$('.input-daterange').change(function() {
-    getLinechart();
-});
+
 
 var myLineChart = null;
 
@@ -254,6 +302,7 @@ $('.btn-edit-customer').click(function (){
     $('.edit label').addClass('active');
     $('#nickname-edit').val($('#nickname-' + Id[3]).val());    
     $('#mobile_number-edit').val($('#mobile_number-' + Id[3]).val());
+    $('#hdd_mobile_number').val($('#mobile_number-' + Id[3]).val());
     $('#firstname-edit').val($('#firstname-' + Id[3]).val());
     $('#lastname-edit').val($('#lastname-' + Id[3]).val());
     $('#workplace-edit').val($('#workplace-' + Id[3]).val());
@@ -282,4 +331,53 @@ $('.btn-delete-customer').click(function (){
     $('#str-ask-del').empty();
     $('#str-ask-del').append($('#nickname-' + Id[2]).val());
     $('#modal-delete-customer').modal('toggle');
+});
+
+$('.btn-edit-field_price').click(function (){
+    var Id = this.id.split('-');
+    $('#modal-edit-field_price .edit label').addClass('active');
+    $('#modal-edit-field_price #field_label_edit').removeClass('active');
+    $('#modal-edit-field_price #hdd_field_price').val(Id[3]);
+    $('#modal-edit-field_price #field_price').val(Id[3]);
+    $('#modal-edit-field_price #field_edit').val($('#field-' + Id[3]).val());
+    $('#modal-edit-field_price #field_edit').material_select();
+    $('#modal-edit-field_price #start_time_edit').val($('#start_time-' + Id[3]).val());
+    $('#modal-edit-field_price #end_time_edit').val($('#end_time-' + Id[3]).val());
+    $('#modal-edit-field_price #start_date_edit').val($('#start_date-' + Id[3]).val());
+    $('#modal-edit-field_price #end_date_edit').val($('#end_date-' + Id[3]).val());
+    $('#modal-edit-field_price #field_price_edit').val($('#price-' + Id[3]).val());
+});
+
+$('.btn-delete-field_price').click(function (){
+    var Id = this.id.split('-');
+    $('#del-field_price').val(Id[2]);
+
+    $('#modal-delete-field_price').modal('toggle');
+});
+
+$('.btn-edit-promotion').click(function (){
+    var Id = this.id.split('-');
+    $('#modal-edit-promotion .edit label').addClass('active');    
+    $('#modal-edit-promotion #promotion_name_edit').val($('#pro-promotion_name-' + Id[3]).val());
+    $('#modal-edit-promotion #hddpromotion').val(Id[3]);
+    $('#modal-edit-promotion #discount_type_edit').val($('#pro-discount_type-' + Id[3]).val());
+    $('#modal-edit-promotion #discount_type_edit').material_select();
+    $('#modal-edit-promotion #start_time_edit').val($('#pro-start_time-' + Id[3]).val());
+    $('#modal-edit-promotion #end_time_edit').val($('#pro-end_time-' + Id[3]).val());   
+    $('#modal-edit-promotion #start_date_edit').val($('#pro-start_date-' + Id[3]).val());
+    $('#modal-edit-promotion #end_date_edit').val($('#pro-end_date-' + Id[3]).val());
+    $('#modal-edit-promotion #discount_edit').val($('#pro-discount-' + Id[3]).val());
+    if($('#pro-fixed_range-' + Id[3]).val() == '1')
+        $('#modal-edit-promotion #fixed_range_edit').prop('checked', true); // Checks it
+    else
+        $('#modal-edit-promotion #fixed_range_edit').prop('checked', false); // Unchecks it
+    
+    
+});
+
+$('.btn-delete-promotion').click(function (){
+    var Id = this.id.split('-');
+    $('#del-promotion').val(Id[2]);
+
+    $('#modal-delete-promotion').modal('toggle');
 });

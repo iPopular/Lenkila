@@ -26,6 +26,47 @@ Route::get('/{stadium}/dashboard', [
     'roles' => ['owner']
 ]);
 
+Route::post('/{stadium}/add-field-price', [
+    'middleware' => ['auth', 'roles', 'stadium'],
+    'uses' => 'DashBoardController@addFieldPrice',
+    'roles' => ['owner']
+]);
+
+Route::post('/{stadium}/edit-field-price', [
+    'middleware' => ['auth', 'roles', 'stadium'],
+    'uses' => 'DashBoardController@editFieldPrice',
+    'roles' => ['owner']
+]);
+
+Route::post('/{stadium}/delete-field-price', [
+    'middleware' => ['auth', 'roles', 'stadium'],
+    'uses' => 'DashBoardController@deleteFieldPrice',
+    'roles' => ['owner']
+]);
+
+Route::post('/{stadium}/add-promotion', [
+    'middleware' => ['auth', 'roles', 'stadium'],
+    'uses' => 'DashBoardController@addPromotion',
+    'roles' => ['owner']
+]);
+
+Route::post('/{stadium}/edit-promotion', [
+    'middleware' => ['auth', 'roles', 'stadium'],
+    'uses' => 'DashBoardController@editPromotion',
+    'roles' => ['owner']
+]);
+
+Route::post('/{stadium}/delete-promotion', [
+    'middleware' => ['auth', 'roles', 'stadium'],
+    'uses' => 'DashBoardController@deletePromotion',
+    'roles' => ['owner']
+]);
+
+Route::post('/{stadium}/edit-stadium', [
+    'middleware' => ['auth', 'roles', 'stadium'],
+    'uses' => 'DashBoardController@editStadium',
+    'roles' => ['owner']
+]);
 
 Route::get('/{stadium}/reservation', [
     'middleware' => ['auth', 'roles', 'stadium'],

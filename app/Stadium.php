@@ -21,5 +21,10 @@ class Stadium extends Model
     public function field()
     {
         return $this->hasMany('App\Field','stadium_id');
-    }    
+    }
+
+    public function promotions()
+    {
+        return $this->hasMany('App\Promotions','stadium_id');
+    }
 }

@@ -17,4 +17,9 @@ class Field extends Model
     {
         return $this->hasMany('App\Reservation', 'field_id');
     }
+
+    public function tmp_field_price()
+    {
+        return $this->hasMany('App\Tmp_Field_Price', 'field_id');
+    }
 }

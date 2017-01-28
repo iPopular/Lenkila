@@ -28,8 +28,8 @@
                     <button id="btn-add" class="btn btn-md btn-info waves-effect waves-light" type="button" data-toggle="modal" data-target="#modal-add-customer"><i class="fa fa-plus" aria-hidden="true"></i>   สร้าง</button>
                 </div>
                 <!--Account table-->
-                <div class="table-responsive">
-                    <table class="table product-table">
+                <!--<div class="table-responsive" style="width:100%;">-->
+                    <table id="table_customer" class="table" data-page-length="5" cellspacing="0">
                         <!--Table head-->
                         <thead>
                             <tr>
@@ -50,7 +50,7 @@
                             @foreach($stadium_customer->tmp_customer_stadium as $tmp)                           
                             <tr>
                                 <form id="form-{{$tmp->member_id}}" class="form-horizontal" role="form" method="POST">
-                                    {{ csrf_field() }}
+                                    {{ csrf_field() }}                                    
                                     <input id="nickname-{{$tmp->member_id}}" type="hidden" value="{{ $tmp->customer->nickname }}">
                                     <input id="mobile_number-{{$tmp->member_id}}" type="hidden" value="{{ $tmp->customer->mobile_number }}">
                                     <input id="firstname-{{$tmp->member_id}}" type="hidden" value="{{ $tmp->customer->firstname }}">
@@ -98,7 +98,7 @@
                         </tbody>
                         <!--/Table body-->
                     </table>
-                </div>
+                <!--</div>-->
                 <!--/Account table-->
 
                 <div tabindex="-1" class="modal fade" id="modal-delete-customer" role="dialog" aria-hidden="true" aria-labelledby="myModalLabel" style="display: none;">
@@ -232,6 +232,7 @@
                                 </div>
                                 <!--Body-->
                                 <div class="modal-body text-xs-left edit">
+                                    <input type="hidden" id="hdd_mobile_number" name="hdd_mobile_number">
                                     <div class="form-inline">
                                         <div class="form-group md-form">
                                             <i class="fa fa-user-o prefix"></i>                                            
@@ -240,7 +241,7 @@
                                         </div>
                                         <div class="form-group md-form">
                                             <i class="fa fa-mobile prefix"></i>
-                                            <input class="form-control" id="mobile_number-edit" name="mobile_number" type="text" readonly="readonly" required>
+                                            <input class="form-control" id="mobile_number-edit" name="mobile_number" type="text" required>
                                             <label for="mobile_number">เบอร์โทร</label>
                                         </div>
                                     </div>

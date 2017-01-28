@@ -11,6 +11,11 @@
 
 <script type="text/javascript" src="{{ URL::asset('js/script.js') }}"></script>
 
+<script type="text/javascript" src="{{ URL::asset('js/jquery.dataTables.min.js') }}"></script>
+
+<script type="text/javascript" src="{{ URL::asset('js/dataTables.bootstrap4.min.js') }}"></script>
+
+
 @if (!Auth::guest())
 <script>
     $(".button-collapse").sideNav();

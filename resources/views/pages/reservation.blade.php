@@ -19,6 +19,14 @@
     else
       left = 'prev';
 
+    $('#date').datepicker({
+        inline: true,
+        onSelect: function(dateText, inst) {
+            var d = new Date(dateText);
+            $('#fullcalendar').fullCalendar('gotoDate', d);
+        }
+    });
+
     $('#calendar').fullCalendar({
       defaultView: 'agendaDay',
       editable: true,
@@ -27,7 +35,7 @@
       header: {
         left: left,
         center: 'title',
-        right: 'next'
+        right: 'next dateButton'
       },
       customButtons: {
         promptResource: {
@@ -35,6 +43,16 @@
           click: function() {
             $('#modal-add-field').modal('show');
           }
+        },
+        dateButton: {
+            text: ' ',
+            click: function () {
+                //it scrolls to the position of the datepicker
+                $('body,html').animate({
+                    scrollTop: $(document).height()
+                }, 1000);
+                $('#date').DatePickerShow();
+            }
         }
       },
       resourceLabelText: 'Rooms',
@@ -67,7 +85,7 @@
       nowIndicator: true,
       //firstHour: 6,
       minTime: "08:00:00",
-      // maxTime: "23:00:00",
+      maxTime: "27:00:00",
 
       //// uncomment this line to hide the all-day slot
       allDaySlot: false,
@@ -110,7 +128,6 @@
         $('#reserve_tooltip #tooltip_label').text(calEvent.description);
         $('#reserve_tooltip').tooltip('show');
       },
-
       eventMouseout: function(calEvent, jsEvent) {
         $('#reserve_tooltip').tooltip('toggle');
       },
@@ -214,6 +231,7 @@
       </script>
       @endif
       <div id='calendar'></div>
+      <div id="date"></div>
 
       <div tabindex="-1" class="modal fade" id="modal-add-reserve" role="dialog" aria-hidden="true" aria-labelledby="myModalLabel" style="display: none;">
         <div class="modal-dialog" role="document">

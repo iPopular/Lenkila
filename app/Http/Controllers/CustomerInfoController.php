@@ -163,7 +163,7 @@ class CustomerInfoController extends Controller
                 'nickname' => 'required',
                 'mobile_number' => 'required|unique:customer',
                 'workplace' => 'max:50',
-                'birthday' => 'date_format:Y/m/d',
+                'birthday' => 'date_format:Y-m-d',
                 'note'  => 'max:300'            
             );
 
@@ -217,7 +217,7 @@ class CustomerInfoController extends Controller
 
     public function editCustomer(Request $request, $stadium)
     {
-        $customer = Customer::where('mobile_number', $request->input('mobile_number'))->first();
+        $customer = Customer::where('mobile_number', $request->input('hdd_mobile_number'))->first();
         
         if(count($customer) > 0)
         {
@@ -231,7 +231,7 @@ class CustomerInfoController extends Controller
                     'lastname' => 'max:255',
                     'nickname' => 'required',
                     'workplace' => 'max:50',
-                    'birthday' => 'date_format:Y/m/d',
+                    'birthday' => 'date_format:Y-m-d',
                     'note'  => 'max:300'
                 );
 
@@ -246,9 +246,10 @@ class CustomerInfoController extends Controller
                 }
                 else
                 {
+                    $customer->mobile_number  	= $request->input('mobile_number');
                     $customer->firstname	= $request->input('firstname');
                     $customer->lastname   	= $request->input('lastname');
-                    $customer->nickname  	= $request->input('nickname');
+                    $customer->nickname  	= $request->input('nickname');                    
                     $customer->sex          = $request->input('sex');
                     if(Input::has('birthday'))
                         $customer->birthday     = $request->input('birthday');
