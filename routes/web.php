@@ -146,6 +146,12 @@ Route::get('/{stadium}/analysis', [
     'roles' => ['owner', 'administrator', 'staff']
 ]);
 
+Route::post('/{stadium}/edit-best-customer', [
+    'middleware' => ['auth', 'roles', 'stadium'], 
+    'uses' => 'AnalysisController@editBestCustomer',
+    'roles' => ['owner', 'administrator', 'staff']
+]);
+
 Route::post('/{stadium}/analysis-getStat', [
     'middleware' => ['auth', 'roles', 'stadium'], 
     'uses' => 'AnalysisController@getStat',

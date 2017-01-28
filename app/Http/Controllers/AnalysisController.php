@@ -2,10 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use Validator;
+use Session;
+use Hash;
+use Auth;
 use Illuminate\Http\Request;
 use App\Stadium as Stadium;
-use Auth;
+use App\Tmp_Customer_Stadium as Tmp_Customer_Stadium;
 use App\Customer as Customer;
+use Illuminate\Support\Facades\Input;
+use Illuminate\Support\Facades\Redirect;
 
 class AnalysisController extends Controller
 {
@@ -22,6 +28,47 @@ class AnalysisController extends Controller
     public function show(Request $request, $stadium)
     {
         return view('pages.analysis', compact('stadium'));        
+    }
+
+    public function editBestCustomer(Request $request, $stadium)
+    {
+        $customer = Customer::where('mobile_number', $request->input('hdd_mobile_number'))->first();
+        
+        if(count($customer) > 0)
+        {
+            $member_id = str_pad(Auth::user()->stadium_id, 3, "0", STR_PAD_LEFT) . str_pad($customer->id, 5, "0", STR_PAD_LEFT); 
+            $tmp_customer_stadium = Tmp_Customer_Stadium::where('member_id', $member_id)->first();
+
+            if(count($tmp_customer_stadium) > 0)
+            {
+                $rules = array(
+                    'note'  => 'max:300'
+                );
+
+                $validator = Validator::make($request->all(), $rules);
+
+                if ($validator->fails()) 
+                {                
+                    Session::flash('error_msg', 'ไม่สามารถแก้ไขข้อมูลลูกค้าได้!');
+                    return Redirect::to('/'. $stadium .'/analysis')
+                        ->withErrors($validator)
+                        ->withInput(Input::except('password'));
+                }
+                else
+                {                   
+                    $tmp_customer_stadium->note = $request->input('note');
+                    $tmp_customer_stadium->updated_by = Auth::user()->id;
+                    $tmp_customer_stadium->save();
+
+                    Session::flash('success_msg', 'แก้ไขข้อมูลลูกค้าเรียบร้อยแล้ว!');
+                    return Redirect::to('/'. $stadium .'/analysis');
+                }
+            }            
+        }
+        
+        Session::flash('error_msg', 'ไม่พบข้อมูลลูกค้าในฐานข้อมูล! กรุณาสร้างข้อมูลลูกค้า');
+        return Redirect::to('/'. $stadium .'/analysis')
+            ->withInput(Input::except('password'));
     }
 
     public function getStat(Request $request, $stadium)
@@ -54,6 +101,7 @@ class AnalysisController extends Controller
                     $chart[$i]['labels'] = intval(date('d', strtotime($reserv['start_time'])));
                     $chart[$i]['data'] = $reserv['field_price'];
                     $chart[$i]['ref_code'] = $reserv['ref_code'];
+                    $chart[$i]['start'] = date("H:i:s",strtotime($reserv['start_time']));
                     $i++;
                 }
             }
@@ -69,6 +117,7 @@ class AnalysisController extends Controller
         $outData = array();
         $outDayCount = array();
         $outBestCustomer = array();
+        $outTime = array();
         foreach ($arrays as $arr){
             foreach ($arr as $key => $value){
                 foreach ($value as $key2 => $value2){
@@ -95,7 +144,16 @@ class AnalysisController extends Controller
                         if (!array_key_exists($index, $outBestCustomer)){
                             $outBestCustomer[$index] = 1;
                         }
-                    }     
+                    }
+                    if($key2 == 'start')
+                    {
+                        $index = $value['id'] . '-' . $value2;
+                        if (array_key_exists($index, $outTime)){
+                            $outTime[$index]++;
+                        } else {
+                            $outTime[$index] = 1;
+                        }
+                    }    
                 }
             }
         }
@@ -112,14 +170,37 @@ class AnalysisController extends Controller
         {            
             $bestCutomer[$key] = array_sum($value);
         }
+
+        $tmp2 = array();
+        foreach ($outTime as $key => $value) 
+        {
+            $key_str = explode("-", $key);           
+            $tmp2[$key_str[0]][$key_str[1]] = $value; 
+        }
+        $maxTime = array();
+        foreach($tmp2 as $key => $value)
+        {            
+            $maxs = array_keys($value, max($value));
+            $maxTime[$key] = $maxs;
+        }
+
         $bestCustomerName = '';
+        $max;
+        $customer = array();
+        $customer_note;
         if($bestCutomer != null)
         {
-            $max = array_keys($bestCutomer, max($bestCutomer));
-            $customer = Customer::where('id', $max)->first();
+            $max_key = array_keys($bestCutomer, max($bestCutomer));
+            $max = max($bestCutomer);
+            $customer = Customer::where('id', $max_key)->first();
             $bestCustomerName = $customer->nickname;
+            $member_id = str_pad(Auth::user()->stadium_id, 3, "0", STR_PAD_LEFT) . str_pad($customer->id, 5, "0", STR_PAD_LEFT); 
+            $tmp_customer_stadium = Tmp_Customer_Stadium::where('member_id', $member_id)->first();
+            $customer_note = $tmp_customer_stadium->note;
         }
         
-        return array($outLabels, $outData, $income, $dayCount, $bestCustomerName);
+        
+        
+        return array($outLabels, $outData, $income, $dayCount, $bestCustomerName, $customer, $max, $maxTime, $customer_note);
     }
 }

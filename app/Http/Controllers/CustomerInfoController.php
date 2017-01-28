@@ -239,7 +239,7 @@ class CustomerInfoController extends Controller
 
                 if ($validator->fails()) 
                 {                
-                    Session::flash('error_msg', 'ไม่สามารถเพิ่มข้อมูลลูกค้าได้!');
+                    Session::flash('error_msg', 'ไม่สามารถแก้ไขข้อมูลลูกค้าได้!');
                     return Redirect::to('/'. $stadium .'/customer_info')
                         ->withErrors($validator)
                         ->withInput(Input::except('password'));

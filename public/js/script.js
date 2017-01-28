@@ -155,6 +155,10 @@ $( document ).ready(function() {
 
     var sPath = window.location.pathname;
     var sPage = sPath.substring(sPath.lastIndexOf('/') + 1);
+
+    // Material Select Initialization
+    $('.mdb-select').material_select();
+    
     if(sPage == "analysis") {    
         var monthNames = [
             "January", "February", "March",
@@ -172,14 +176,13 @@ $( document ).ready(function() {
         });
 
         $('.input-daterange input').val(monthNames[monthIndex] + '-' + year);
-        getLinechart();
+        //getLinechart();
     }
     else if(sPage == "login") {
         $('.form-login label').addClass('active');
     }
     if(sPage == "dashboard") {
-        // Material Select Initialization
-        $('.mdb-select').material_select();
+        
 
         $('.input-daterange').datepicker({
             format: "yyyy-mm-dd",
@@ -291,10 +294,39 @@ function getLinechart(){
             document.getElementById('income').innerText = info[2] + ' บาท';
             document.getElementById('count_reserve').innerText = info[3] + ' ครั้ง';
             document.getElementById('best_customer').innerText = '    คุณ ' + info[4];
+            console.log(info[8]);
+            getCutomerDataAnalysis(info[5], info[6], info[7], info[8]);
         },error:function(){ 
             console.log('error');
         }
     });
+}
+
+function getCutomerDataAnalysis(info, visited, oftenTime, note){
+    $('.edit label').addClass('active');
+    $('#nickname').val(info['nickname']);    
+    $('#mobile_number').val(info['mobile_number']);
+    $('#hdd_mobile_number').val(info['mobile_number']);
+    $('#firstname').val(info['firstname']);
+    $('#lastname').val(info['lastname']);
+    $('#workplace').val(info['workplace']);
+    $('#note').val(note);
+    $('#visited').val(visited);
+    $('#time-often').val(oftenTime[info['id']][0]);
+
+    var sex = info['sex'];
+    if( sex === 'male')
+        $('#male').prop('checked', true);
+    else
+        $('#female').prop('checked', true);
+
+
+    var queryDate = info['birthday'];
+    var dateParts = queryDate.split('-');
+    var parsedDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]); 
+    
+    $('#birthday').datepicker('setDate', parsedDate);
+
 }
 
 $('.btn-edit-customer').click(function (){
