@@ -14,6 +14,7 @@ use Validator;
 use Session;
 use DateTime;
 use DateInterval;
+use DatePeriod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Redirect;
@@ -30,6 +31,15 @@ class ReservationController extends Controller
         $reservation = Stadium::where('id', Auth::user()->stadium_id)->first();
         $events = array();
         $j = 0;
+
+        $openTime = intval(date('G', strtotime($reservation->open_time)));
+        $closeTime = intval(date('G', strtotime($reservation->close_time)));
+
+        if($closeTime < $openTime)
+            $closeTime+=24;
+
+        $openTime = $openTime . ':00:00';
+        $closeTime = $closeTime . ':00:00';
         foreach($reservation->field as $field)
         {
             
@@ -37,6 +47,16 @@ class ReservationController extends Controller
             $resource[$i]['title'] = $field['name'];
             $resource[$i]['detail'] = $field['detail'];
             $resource[$i]['status'] = $field['status'];
+            
+            if($field['status'] == 0)
+            {
+                $events[$j]['resourceId'] = $field['id'];                   
+                $events[$j]['start'] = '2014-01-01T00:00:00';
+                $events[$j]['end'] = '2020-01-01T00:00:00';
+                $events[$j]['rendering'] = 'background';
+                $events[$j]['color'] = '#c1c1c1';
+                $j++;
+            }
             
             $i++;
 
@@ -52,13 +72,42 @@ class ReservationController extends Controller
                 $events[$j]['title'] = $reserv['customer']['nickname'] . '_' . $reserv['customer']['mobile_number'];                
                 $events[$j]['color'] = $reserv['background_color'];
                 $events[$j]['description'] = $reserv['note'];
+                if($reserv['status'] == '2')
+                    $events[$j]['borderColor'] = '#54ff78';
+                else if($reserv['status'] == '1')
+                    $events[$j]['borderColor'] = '#fff662';
+                else if($reserv['status'] == '99')
+                    $events[$j]['borderColor'] = 'red';
                 $j++;
             }
-                        
-            
+
+            foreach($field->tmp_field_price as $field_price)
+            {                
+                $begin = new DateTime( $field_price->start_date );
+                $end = new DateTime( $field_price->end_date );
+                $end->modify('+1 day');
+
+                $interval = DateInterval::createFromDateString('1 day');
+                $period = new DatePeriod($begin, $interval, $end);
+
+                foreach ( $period as $dt )
+                {
+                    $date = $dt->format( "Y-m-d" );
+                    $start_time = $field_price['start_time'];
+                    $end_time = $field_price['end_time'];
+                    $events[$j]['resourceId'] = $field_price['field_id'];
+                    $events[$j]['title'] = $field_price['price'];                    
+                    $events[$j]['start'] = date('Y-m-d H:i:s', strtotime("$date $start_time"));
+                    $events[$j]['end'] = date('Y-m-d H:i:s', strtotime("$date $end_time"));
+                    $events[$j]['rendering'] = 'background';
+                    $events[$j]['color'] = $field_price['set_color'];
+                    $j++;
+
+                }
+            }  
         }
 
-        return view('pages.reservation', compact('stadium', 'resource', 'reservation', 'events'));
+        return view('pages.reservation', compact('stadium', 'resource', 'reservation', 'events', 'openTime', 'closeTime'));
     }
 
     public function addField(Request $request, $stadium)
@@ -374,6 +423,7 @@ class ReservationController extends Controller
         {
             try
             {
+                $reservation->status = 2;
                 $reservation->field_price = $request->input('field_price');
                 $reservation->water_price = $request->input('water_price');
                 $reservation->supplement_price = $request->input('supplement_price');
@@ -511,5 +561,15 @@ class ReservationController extends Controller
                     ->withInput(Input::except('password'));
             }                   
         }
+    }
+
+    public function getCustomer(Request $request)
+    {
+        $customer = Customer::where('mobile_number', $request->input('_mobile_number'))->first();
+        $result = '';
+        if(count($customer) > 0)
+            $result = $customer->nickname;
+
+        return $result;
     }
 }

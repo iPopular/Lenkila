@@ -116,6 +116,12 @@ Route::post('/{stadium}/delete-reserve', [
     'roles' => ['owner', 'administrator', 'staff']
 ]);
 
+Route::post('/{stadium}/getCustomer', [
+    'middleware' => ['auth', 'roles', 'stadium'],
+    'uses' => 'ReservationController@getCustomer',
+    'roles' => ['owner', 'administrator', 'staff']
+]);
+
 Route::get('/{stadium}/customer_info', [
     'middleware' => ['auth', 'roles', 'stadium'],
     'uses' => 'CustomerInfoController@show',

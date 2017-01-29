@@ -60,7 +60,7 @@ class DashBoardController extends Controller
             $tmp_field_price->end_time = $request->input('end_time');//
             $tmp_field_price->start_date = $request->input('start');
             $tmp_field_price->end_date = $request->input('end');
-            $tmp_field_price->set_color = '#A0522D';
+            $tmp_field_price->set_color = $request->input('bgColor');
             $tmp_field_price->save();
             Session::flash('success_msg', 'เพิ่มข้อมูลราคาสนามเรียบร้อยแล้ว!');
             return Redirect::to('/'. $stadium_name .'/dashboard#panel1_field_price');
@@ -98,7 +98,7 @@ class DashBoardController extends Controller
                 $tmp_field_price->end_time = $request->input('end_time');//
                 $tmp_field_price->start_date = $request->input('start');
                 $tmp_field_price->end_date = $request->input('end');
-                $tmp_field_price->set_color = '#A0522D';
+                $tmp_field_price->set_color = $request->input('bgColor');
                 $tmp_field_price->save();
                 Session::flash('success_msg', 'เพิ่มข้อมูลราคาสนามเรียบร้อยแล้ว!');
                 return Redirect::to('/'. $stadium_name .'/dashboard#panel1_field_price');
@@ -155,7 +155,7 @@ class DashBoardController extends Controller
             }
             else
             {
-                $stadium->name = $request->input('staduim_name');
+                $stadium->name = $request->input('staduim_name_edit');
                 $stadium->open_time = $request->input('openTime');
                 $stadium->close_time = $request->input('closeTime');
                 $stadium->address = $request->input('address');

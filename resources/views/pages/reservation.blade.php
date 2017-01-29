@@ -1,11 +1,14 @@
 @extends('layouts.master') @section('main')
 <link href="{{ URL::asset('css/fullcalendar.min.css') }}" rel="stylesheet">
 <link href="{{ URL::asset('css/fullcalendar.print.min.css') }}" rel="stylesheet" media='print'>
+<link href="{{ URL::asset('css/fullcalendar.annotations.css') }}" rel="stylesheet">
 <link href="{{ URL::asset('css/scheduler.min.css') }}" rel="stylesheet">
 <link href="{{ URL::asset('css/bootstrap-datetimepicker.css') }}" rel="stylesheet">
 <link href="{{ URL::asset('css/bootstrap-colorselector.css') }}" rel="stylesheet">
 <script type="text/javascript" src="{{ URL::asset('js/moment.min.js') }}"></script>
 <script type="text/javascript" src="{{ URL::asset('js/fullcalendar.min.js') }}"></script>
+<!--<script type="text/javascript" src="{{ URL::asset('js/fullcalendar.js') }}"></script>-->
+<script type="text/javascript" src="{{ URL::asset('js/fullcalendar.annotations.js') }}"></script>
 <script type="text/javascript" src="{{ URL::asset('js/scheduler.min.js') }}"></script>
 <script type="text/javascript" src="{{ URL::asset('js/bootstrap-datetimepicker.js') }}"></script>
 <script type="text/javascript" src="{{ URL::asset('js/bootstrap-colorselector.js') }}"></script>
@@ -19,23 +22,32 @@
     else
       left = 'prev';
 
-    $('#date').datepicker({
-        inline: true,
-        onSelect: function(dateText, inst) {
-            var d = new Date(dateText);
-            $('#fullcalendar').fullCalendar('gotoDate', d);
-        }
+    $('#datepicker').datepicker({
+
+        showOn: "both",
+        buttonImage: "http://jqueryui.com/resources/demos/datepicker/images/calendar.gif",
+        buttonImageOnly: true,
+        buttonText: " ",
+        dateFormat:"yy-mm-dd",
+        onSelect: function (dateText, inst) {
+            $('#calendar').fullCalendar('gotoDate', dateText);
+        },
+
     });
+
+    console.log({!!json_encode($resource)!!});
 
     $('#calendar').fullCalendar({
       defaultView: 'agendaDay',
       editable: true,
       selectable: true,
+      //defaultDate: '2016-12-12',
+      //businessHours: true, // display business hours
       //eventLimit: true, // allow "more" link when too many events
       header: {
         left: left,
         center: 'title',
-        right: 'next dateButton'
+        right: 'next'
       },
       customButtons: {
         promptResource: {
@@ -43,19 +55,9 @@
           click: function() {
             $('#modal-add-field').modal('show');
           }
-        },
-        dateButton: {
-            text: ' ',
-            click: function () {
-                //it scrolls to the position of the datepicker
-                $('body,html').animate({
-                    scrollTop: $(document).height()
-                }, 1000);
-                $('#date').DatePickerShow();
-            }
-        }
+        },        
       },
-      resourceLabelText: 'Rooms',
+      //resourceLabelText: 'Rooms',
       resourceRender: function(resource, cellEls) {
         cellEls.on('click', function() {
           if (userRole == 3) {
@@ -80,39 +82,42 @@
       slotDuration: "01:00:00",
       //snapMinutes: 60,
       height: "auto",
-      selectOverlap: false,
-      eventOverlap: false,
+      //selectOverlap: false,
+      eventOverlap: true,
       nowIndicator: true,
-      //firstHour: 6,
-      minTime: "08:00:00",
-      maxTime: "27:00:00",
+      minTime: {!!json_encode($openTime)!!},
+      maxTime: {!!json_encode($closeTime)!!},
+
 
       //// uncomment this line to hide the all-day slot
       allDaySlot: false,
       schedulerLicenseKey: 'GPL-My-Project-Is-Open-Source',
       resources: {!!json_encode($resource)!!},
       events: {!!json_encode($events)!!},
+      // selectConstraint: 'available_hours',
+      // eventConstraint: 'available_hours',
       select: function(start, end, jsEvent, view, resource, allDay) {
-
-        endtime = moment(end).format('HH:mm');
-        starttime = moment(start).format('HH:mm');
-        day = moment(start).format('dd ll');
-        date = moment(start).format('Y-M-D');
-        var range = starttime + ' - ' + endtime;
-        $('#modal-add-reserve #hddStartTime').val(starttime);
-        $('#modal-add-reserve #hddEndTime').val(endtime);
-        $('#modal-add-reserve #hddStart').val(start);
-        $('#modal-add-reserve #hddEnd').val(end);
-        $('#modal-add-reserve #hddAllDay').val(allDay);
-        $('#modal-add-reserve #resource').val(resource.title);
-        $('#modal-add-reserve #hddResourceId').val(resource.id);
-        $('#modal-add-reserve #hddDate').val(date);
-        $('#modal-add-reserve #day').val(day);
-        //$('#modal-add-reserve #time').val(range);
-        $('#modal-add-reserve #startTime').val(starttime);
-        $('#modal-add-reserve #endTime').val(endtime);
-        $('.reserve label').addClass('active');
-        $('#modal-add-reserve').modal('show');
+        if(resource.status == 1) {
+          endtime = moment(end).format('HH:mm');
+          starttime = moment(start).format('HH:mm');
+          day = moment(start).format('dd ll');
+          date = moment(start).format('Y-M-D');
+          var range = starttime + ' - ' + endtime;
+          $('#modal-add-reserve #hddStartTime').val(starttime);
+          $('#modal-add-reserve #hddEndTime').val(endtime);
+          $('#modal-add-reserve #hddStart').val(start);
+          $('#modal-add-reserve #hddEnd').val(end);
+          $('#modal-add-reserve #hddAllDay').val(allDay);
+          $('#modal-add-reserve #resource').val(resource.title);
+          $('#modal-add-reserve #hddResourceId').val(resource.id);
+          $('#modal-add-reserve #hddDate').val(date);
+          $('#modal-add-reserve #day').val(day);
+          //$('#modal-add-reserve #time').val(range);
+          $('#modal-add-reserve #startTime').val(starttime);
+          $('#modal-add-reserve #endTime').val(endtime);
+          $('.reserve label').addClass('active');
+          $('#modal-add-reserve').modal('show');
+        }        
 
       },
       eventClick: function(calEvent, start, end) {
@@ -130,15 +135,11 @@
       },
       eventMouseout: function(calEvent, jsEvent) {
         $('#reserve_tooltip').tooltip('toggle');
-      },
-      // dayClick: function(date, jsEvent, view, resource) {
-      //     console.log(
-      //         'dayClick',
-      //         date.format(),
-      //         resource ? resource.id : '(no resource)'
-      //     );
-      // }
+      }
     });
+
+    $(".fc-right > button, .fc-left > button").removeClass();
+    $('.fc-right > button, .fc-left > button').addClass('btn btn-cyan waves-effect waves-light');
 
     function callEditModal(calEvent, start, end) {
       var resource = $('#calendar').fullCalendar('getResourceById', calEvent.resourceId);
@@ -230,14 +231,20 @@
         });
       </script>
       @endif
-      <div id='calendar'></div>
-      <div id="date"></div>
+      <div class="row">
+        <div class="col-md-12">
+          <div id='calendar'></div>
+        </div>
+      </div>
+      
+      
 
       <div tabindex="-1" class="modal fade" id="modal-add-reserve" role="dialog" aria-hidden="true" aria-labelledby="myModalLabel" style="display: none;">
         <div class="modal-dialog" role="document">
           <div class="modal-content">
             <form class="form-horizontal" role="form" method="POST" action="/{{ $stadium }}/add-reserve">
-              {{ csrf_field() }}
+              <meta name="csrf_token" content="{{ csrf_token() }}" />
+               {{ csrf_field() }}
               <div class="modal-header">
                 <button class="close" aria-label="Close" type="button" data-dismiss="modal">
                   <span aria-hidden="true">×</span>
@@ -275,15 +282,15 @@
                   </div>
                 </div>
                 <div class="form-inline">
+                <div class="form-group md-form">
+                    <i class="fa fa-mobile prefix"></i>
+                    <input class="form-control" id="mobile_number" name="mobile_number" type="text" onchange="checkCustomer();" required>
+                    <label for="mobile_number">เบอร์โทร</label>
+                  </div>
                   <div class="form-group md-form">
                     <i class="fa fa-user-o prefix"></i>
                     <input class="form-control" id="nickname" name="nickname" type="text" required>
                     <label for="nickname">ชื่อเล่น</label>
-                  </div>
-                  <div class="form-group md-form">
-                    <i class="fa fa-mobile prefix"></i>
-                    <input class="form-control" id="mobile_number" name="mobile_number" type="text" required>
-                    <label for="mobile_number">เบอร์โทร</label>
                   </div>
                 </div>
                 <div class="form-inline">
@@ -346,15 +353,15 @@
                   </div>
                 </div>
                 <div class="form-inline">
+                <div class="form-group md-form">
+                    <i class="fa fa-mobile prefix"></i>
+                    <input class="form-control" id="mobile_number-edit" name="mobile_number" type="text" readonly="readonly" required>
+                    <label for="mobile_number">เบอร์โทร</label>
+                  </div>
                   <div class="form-group md-form">
                     <i class="fa fa-user-o prefix"></i>
                     <input class="form-control" id="nickname" name="nickname" type="text" required>
                     <label for="nickname">ชื่อเล่น</label>
-                  </div>
-                  <div class="form-group md-form">
-                    <i class="fa fa-mobile prefix"></i>
-                    <input class="form-control" id="mobile_number-edit" name="mobile_number" type="text" readonly="readonly" required>
-                    <label for="mobile_number">เบอร์โทร</label>
                   </div>
                 </div>
                 <div class="form-inline">

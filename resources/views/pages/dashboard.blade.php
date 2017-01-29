@@ -131,7 +131,8 @@
                                     <input id="end_time-{{$field_price->id}}" type="hidden" value="{{ $field_price->end_time }}">
                                     <input id="start_date-{{$field_price->id}}" type="hidden" value="{{ $field_price->start_date }}">
                                     <input id="end_date-{{$field_price->id}}" type="hidden" value="{{ $field_price->end_date }}">
-                                    <input id="price-{{$field_price->id}}" type="hidden" value="{{ $field_price->price }}">                                   
+                                    <input id="price-{{$field_price->id}}" type="hidden" value="{{ $field_price->price }}">
+                                    <input id="bgColor-{{$field_price->id}}" type="hidden" value="{{ $field_price->set_color }}">                                   
                                     <td>                                        
                                         {{ $field->name }}                                        
                                     </td>
@@ -329,6 +330,16 @@
                               </div>
                             </div>
                           </div>
+                          <br>
+                          <div class="row">
+                            <div class="col-md-6">
+                              <div class="md-form">
+                                <i class="fa fa-eyedropper prefix"></i>                                                               
+                                <input id="bgColor" name="bgColor" type="color" value="" class="form-control" style="height: 50px;  border: none;"/>
+                                <label class="active" for="bgColor">สีพื้นหลัง</label>
+                              </div> 
+                            </div>
+                          </div>
                         
                       </div>
                       <!--Footer-->
@@ -413,6 +424,16 @@
                                     <label for="end_date">วันที่สิ้นสุด</label>
                                 </div>
                               </div>
+                            </div>
+                          </div>
+                          <br>
+                          <div class="row">
+                            <div class="col-md-6">
+                              <div class="md-form">
+                                <i class="fa fa-eyedropper prefix"></i>                                                               
+                                <input id="bgColor_edit" name="bgColor" type="color" value="" class="form-control" style="height: 50px;  border: none;"/>
+                                <label class="active" for="bgColor_edit">สีพื้นหลัง</label>
+                              </div> 
                             </div>
                           </div>
                         

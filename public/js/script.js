@@ -149,7 +149,16 @@ function toggleOneRow(id) {
     return checkEmpty;    
 }
 
-
+var myLineChart = null
+    dataAmountDays = null,
+    dataCntDays = null,
+    labelsDays = null,
+    dataAmountWeek = null,
+    dataCntWeek = null,
+    labelsWeek = null,
+    dataAmountTimes = null,
+    dataCntTimes = null,
+    labelsTimes = null;
 
 $( document ).ready(function() {
 
@@ -158,7 +167,7 @@ $( document ).ready(function() {
 
     // Material Select Initialization
     $('.mdb-select').material_select();
-    
+
     if(sPage == "analysis") {    
         var monthNames = [
             "January", "February", "March",
@@ -175,6 +184,50 @@ $( document ).ready(function() {
             getLinechart();
         });
 
+        $('#lineChartData').change(function() {
+            // if(this.value == 'amount')
+            //     drawLineChart(labelsDays, dataAmountDays);
+            // else
+            //     drawLineChart(labelsDays, dataCntDays);
+            var activeTab = $('.nav-tabs .active').text();
+            if(activeTab.indexOf('วันที่') >= 0) {
+                if(this.value == 'amount')
+                    drawLineChart(labelsDays, dataAmountDays);
+                else
+                    drawLineChart(labelsDays, dataCntDays);
+            }
+            else if(activeTab.indexOf('สัปดาห์') >= 0)
+                if(this.value == 'amount')
+                    drawLineChart(labelsWeek, dataAmountWeek);
+                else
+                    drawLineChart(labelsWeek, dataCntWeek);
+            else if(activeTab.indexOf('ช่วงเวลา') >= 0)
+                if(this.value == 'amount')
+                    drawLineChart(labelsTimes, dataAmountTimes);
+                else
+                    drawLineChart(labelsTimes, dataCntTimes);
+        });
+
+        $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+            var target = $(e.target).attr("href") // activated tab
+            if(target == '#lineChartDate') {
+                if($('#lineChartData').val() == 'amount')
+                    drawLineChart(labelsDays, dataAmountDays);
+                else
+                    drawLineChart(labelsDays, dataCntDays);
+            }
+            else if(target == '#lineChartWeek')
+                if($('#lineChartData').val() == 'amount')
+                    drawLineChart(labelsWeek, dataAmountWeek);
+                else
+                    drawLineChart(labelsWeek, dataCntWeek);
+            else if(target == '#lineChartTime')
+                if($('#lineChartData').val() == 'amount')
+                    drawLineChart(labelsTimes, dataAmountTimes);
+                else
+                    drawLineChart(labelsTimes, dataCntTimes);
+        });
+
         $('.input-daterange input').val(monthNames[monthIndex] + '-' + year);
         //getLinechart();
     }
@@ -182,8 +235,6 @@ $( document ).ready(function() {
         $('.form-login label').addClass('active');
     }
     if(sPage == "dashboard") {
-        
-
         $('.input-daterange').datepicker({
             format: "yyyy-mm-dd",
             maxViewMode: 2,
@@ -200,7 +251,7 @@ $( document ).ready(function() {
         var hash = window.location.hash;
         $('#myTab a[href="' + hash + '"]').tab('show');
     }
-    else {
+    else if(sPage != "reservation"){
         $('.datepicker').datepicker({
             format: 'yyyy-mm-dd',
             startView: 3,
@@ -243,10 +294,6 @@ $( document ).ready(function() {
 });
 
 
-
-
-var myLineChart = null;
-
 function getLinechart(){
     var start = $("input[name=mount]").val();
     $.ajax({
@@ -261,72 +308,113 @@ function getLinechart(){
         },
         data: { _date: start },        
         success: function(info){
-            tmpLabels = info[0];
-            tmpData = info[1];
 
-            var data = {
-                labels: info[0],
-                datasets: [
-                    {
-                        label: "My Second dataset",
-                        fillColor: "rgba(151,187,205,0.2)",
-                        strokeColor: "rgba(151,187,205,1)",
-                        pointColor: "rgba(151,187,205,1)",
-                        pointStrokeColor: "#fff",
-                        pointHighlightFill: "#fff",
-                        pointHighlightStroke: "rgba(151,187,205,1)",
-                        data: info[1]
-                    }
-                ]
-            };
-            
-            var option = {
-                responsive: true,
-            };
-            
-            if(myLineChart!=null){
-                myLineChart.destroy();
+            dataAmountDays = info[1];
+            dataCntDays = info[2];
+            labelsDays = info[0];
+            dataAmountWeek = info[6][0];
+            dataCntWeek = info[6][1];
+            labelsWeek = info[6][2];
+            dataAmountTimes = info[7][0];
+            dataCntTimes = info[7][1];
+            labelsTimes = info[7][2];
+
+            var activeTab = $('.nav-tabs .active').text();
+            if(activeTab.indexOf('วันที่') >= 0) {
+                if($('#lineChartData').val() == 'amount')
+                    drawLineChart(labelsDays, dataAmountDays);
+                else
+                    drawLineChart(labelsDays, dataCntDays);
             }
-            // Get the context of the canvas element we want to select
-            var ctx = document.getElementById("lineChartEx").getContext('2d');
-            myLineChart = new Chart(ctx).Line(data, option); //'Line' defines type of the chart.
+            else if(activeTab.indexOf('สัปดาห์') >= 0)
+                if($('#lineChartData').val() == 'amount')
+                    drawLineChart(labelsWeek, dataAmountWeek);
+                else
+                    drawLineChart(labelsWeek, dataCntWeek);
+            else if(activeTab.indexOf('ช่วงเวลา') >= 0)
+                if($('#lineChartData').val() == 'amount')
+                    drawLineChart(labelsTimes, dataAmountTimes);
+                else
+                    drawLineChart(labelsTimes, dataCntTimes);
+
+            document.getElementById('income').innerText = info[3] + ' บาท';
+            document.getElementById('count_reserve').innerText = info[4] + ' ครั้ง';
+            if(info[5][0] != '')
+            {
+                document.getElementById('btn-customer').style.display = "block";
+                document.getElementById('best_customer').innerText = 'คุณ ' + info[5][0];
+                getCutomerDataAnalysis(info[5][1], info[5][2], info[5][3], info[5][4]);
+            }
+            else
+            {
+                document.getElementById('btn-customer').style.display = "none";
+            }
             
-            document.getElementById('income').innerText = info[2] + ' บาท';
-            document.getElementById('count_reserve').innerText = info[3] + ' ครั้ง';
-            document.getElementById('best_customer').innerText = '    คุณ ' + info[4];
-            console.log(info[8]);
-            getCutomerDataAnalysis(info[5], info[6], info[7], info[8]);
         },error:function(){ 
             console.log('error');
         }
     });
 }
 
-function getCutomerDataAnalysis(info, visited, oftenTime, note){
-    $('.edit label').addClass('active');
-    $('#nickname').val(info['nickname']);    
-    $('#mobile_number').val(info['mobile_number']);
-    $('#hdd_mobile_number').val(info['mobile_number']);
-    $('#firstname').val(info['firstname']);
-    $('#lastname').val(info['lastname']);
-    $('#workplace').val(info['workplace']);
-    $('#note').val(note);
-    $('#visited').val(visited);
-    $('#time-often').val(oftenTime[info['id']][0]);
-
-    var sex = info['sex'];
-    if( sex === 'male')
-        $('#male').prop('checked', true);
-    else
-        $('#female').prop('checked', true);
-
-
-    var queryDate = info['birthday'];
-    var dateParts = queryDate.split('-');
-    var parsedDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]); 
+function drawLineChart(labels, data) {
+    var data = {
+        labels: labels,
+        datasets: [
+            {
+                label: "My Second dataset",
+                fillColor: "rgba(151,187,205,0.2)",
+                strokeColor: "rgba(151,187,205,1)",
+                pointColor: "rgba(151,187,205,1)",
+                pointStrokeColor: "#fff",
+                pointHighlightFill: "#fff",
+                pointHighlightStroke: "rgba(151,187,205,1)",
+                data: data
+            }
+        ]
+    };
     
-    $('#birthday').datepicker('setDate', parsedDate);
+    var option = {
+        responsive: true,
+    };
+    
+    if(myLineChart!=null){
+        myLineChart.destroy();
+    }
+    // Get the context of the canvas element we want to select
+    var ctx = document.getElementById("lineChartEx").getContext('2d');
+    myLineChart = new Chart(ctx).Line(data, option); //'Line' defines type of the chart.
+}
 
+function getCutomerDataAnalysis(info, visited, oftenTime, note){
+    try {
+        $('.edit label').addClass('active');
+        $('#nickname').val(info['nickname']);    
+        $('#mobile_number').val(info['mobile_number']);
+        $('#hdd_mobile_number').val(info['mobile_number']);
+        $('#firstname').val(info['firstname']);
+        $('#lastname').val(info['lastname']);
+        $('#workplace').val(info['workplace']);
+        $('#note').val(note);
+        $('#visited').val(visited);        
+        $('#time-often').val(oftenTime[info['id']][0]);
+        
+
+        var sex = info['sex'];
+        if( sex === 'male')
+            $('#male').prop('checked', true);
+        else
+            $('#female').prop('checked', true);
+
+
+        var queryDate = info['birthday'];
+        var dateParts = queryDate.split('-');
+        var parsedDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]); 
+        
+        $('#birthday').datepicker('setDate', parsedDate);
+    }
+    catch(err) {
+        //console.log(err.message);
+    }
 }
 
 $('.btn-edit-customer').click(function (){
@@ -378,6 +466,7 @@ $('.btn-edit-field_price').click(function (){
     $('#modal-edit-field_price #start_date_edit').val($('#start_date-' + Id[3]).val());
     $('#modal-edit-field_price #end_date_edit').val($('#end_date-' + Id[3]).val());
     $('#modal-edit-field_price #field_price_edit').val($('#price-' + Id[3]).val());
+    $('#modal-edit-field_price #bgColor_edit').val($('#bgColor-' + Id[3]).val());
 });
 
 $('.btn-delete-field_price').click(function (){
@@ -413,3 +502,26 @@ $('.btn-delete-promotion').click(function (){
 
     $('#modal-delete-promotion').modal('toggle');
 });
+
+function checkCustomer() {
+    var mobile_number = $("#mobile_number").val();
+    $.ajax({
+        url: 'getCustomer',
+        type: 'POST',
+        beforeSend: function (xhr) {
+            var token = $('meta[name="csrf_token"]').attr('content');
+
+            if (token) {
+                return xhr.setRequestHeader('X-CSRF-TOKEN', token);
+            }
+        },
+        data: { _mobile_number: mobile_number },        
+        success: function(info) {
+            $('#nickname').val(info);
+        },
+        error: function() {
+            console.log('error');
+        }
+    });
+
+}

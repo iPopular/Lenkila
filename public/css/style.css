@@ -48,3 +48,30 @@ select {
   width:92%; 
   width:calc(100% - 3rem);
 }
+
+#calendar {
+  max-width: 100%;
+  margin: 0;
+}
+
+/*Styles added to show Horizontal Scroll Bar*/
+.fc-view-container {
+  width: auto;
+}
+
+.fc-view-container .fc-view {
+  overflow-x: scroll;
+}
+
+.fc-view-container .fc-view > table {
+  width: 2500px;
+}
+
+/*.fc-myCustomButton-button {
+    content: "\f073"; 
+    font-family: FontAwesome;
+    left:-5px;
+    position:absolute;
+    top:0;
+}*/
+

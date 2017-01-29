@@ -20,7 +20,7 @@ class Stadium extends Model
 
     public function field()
     {
-        return $this->hasMany('App\Field','stadium_id');
+        return $this->hasMany('App\Field','stadium_id')->orderBy('status', 'DESC')->orderBy('id', 'ASC');
     }
 
     public function promotions()

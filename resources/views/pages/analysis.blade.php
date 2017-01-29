@@ -52,26 +52,41 @@
                         <div class="col-md-9">
                         </div>
                         <div class="col-md-3">
-                            <select id="discount_type_edit" name="discount_type" class="mdb-select colorful-select dropdown-ins" required>
-                                <option value="money">รายได้ทั้งหมด</option>
+                            <select id="lineChartData" name="lineChartData" class="mdb-select colorful-select dropdown-ins" required>
+                                <option value="amount">รายได้ทั้งหมด</option>
                                 <option value="visit">จำนวนการจอง</option>
                             </select> 
                         </div>
                     </div>
-                    <canvas id="lineChartEx"></canvas>
+                    <canvas id="lineChartEx"></canvas>                   
+                    <ul class="nav nav-tabs tabs-3 indigo" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-toggle="tab" href="#lineChartDate" role="tab"><i class="fa fa-calendar-o"></i> วันที่</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#lineChartWeek" role="tab"><i class="fa fa-calendar"></i> สัปดาห์</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#lineChartTime" role="tab"><i class="fa fa-clock-o"></i> ช่วงเวลา</a>
+                        </li>
+                    </ul>
                 </div>
             </div>
-            <br><br><br>
+            
             <div class="row">
+                <div class="col-md-1">
+                </div>
                 <div class="col-md-4 md-form">
                     <label style="font-size: 1.25rem;">ลูกค้าดีเด่นประจำเดือน</label>
                 </div>
             </div>
             <br>
-            <div class="row">                
+            <div class="row">
+                <div class="col-md-1">
+                </div>             
                 <div class="col-md-3 md-form">                    
                     <button id="btn-customer" class="btn btn-xs btn-warning waves-effect waves-light btn-table btn-customer" type="button" data-toggle="modal" data-target="#modal-customer">
-                        <h2 id="best_customer"></h2>
+                        <h4 id="best_customer"></h4>
                     </button> 
                 </div>
             </div>
