@@ -35,9 +35,9 @@ class AccountController extends Controller
 
     public function addAccount(Request $request, $stadium)
     {
+        
         $rules = array(
-            'firstname' => 'required|max:255',
-            'lastname' => 'required|max:255',
+            'name' => 'required|max:255',
             'username' => 'required|max:255|unique:users',
             'password' => 'required|min:6',
             'email' => 'required|email|max:255|unique:users',            
@@ -55,17 +55,26 @@ class AccountController extends Controller
         }
         else
         {
-            $user = New Users();
-            $user->firstname	= Input::get('firstname');
-	        $user->lastname   	= Input::get('lastname');
-	        $user->username  	= Input::get('username');
-            $user->password     = Hash::make(Input::get('password'));
-	        $user->email      	= Input::get('email');
-            $user->role_id      = Input::get('role_id');
-            $user->stadium_id   = Auth::user()->stadium_id;
-            $user->save();
-            Session::flash('success_msg', 'เพิ่มบัญชีผู้ใช้เรียบร้อยแล้ว!');
-	        return Redirect::to('/' . $stadium . '/account_management');
+            if(Auth::user()->role_id > Input::get('role_id'))
+            {
+                $name = explode(" ", Input::get('name'));
+                $user = New Users();
+                $user->firstname	= $name[0];
+                $user->lastname   	= $name[1];
+                $user->username  	= Input::get('username');
+                $user->password     = Hash::make(Input::get('password'));
+                $user->email      	= Input::get('email');
+                $user->role_id      = Input::get('role_id');
+                $user->stadium_id   = Auth::user()->stadium_id;
+                $user->save();
+                Session::flash('success_msg', 'เพิ่มบัญชีผู้ใช้เรียบร้อยแล้ว!');
+                return Redirect::to('/' . $stadium . '/account_management');
+            }
+            else
+            {
+                Session::flash('error_msg', 'สิทธิ์ในการสร้างไม่เพียงพอ กรุณาติดต่อคนที่มีสิทธิ์สูงกว่าคุณ');
+                return Redirect::to('/' . $stadium . '/account_management');
+            }           
         }
     }
 
@@ -92,19 +101,27 @@ class AccountController extends Controller
         }
         else
         {
-            if(Input::has('password'))
-	        {
-	            $user->password = Hash::make(Input::get('password'));
-	        }             
-            $user->firstname	= Input::get('firstname');
-	        $user->lastname   	= Input::get('lastname');
-	        $user->username  	= Input::get('username');
-	        $user->email      	= Input::get('email');
-            $user->role_id      = Input::get('role_id');
-            $user->stadium_id   = Auth::user()->stadium_id;
-            $user->save();
-            Session::flash('success_msg', 'แก้ไขบัญชีผู้ใช้เรียบร้อยแล้ว!');
-	        return Redirect::to('/'. $stadium .'/account_management');
+            if(Auth::user()->role_id > Input::get('role_id'))
+            {
+                if(Input::has('password'))
+                {
+                    $user->password = Hash::make(Input::get('password'));
+                }             
+                $user->firstname	= Input::get('firstname');
+                $user->lastname   	= Input::get('lastname');
+                $user->username  	= Input::get('username');
+                $user->email      	= Input::get('email');
+                $user->role_id      = Input::get('role_id');
+                $user->stadium_id   = Auth::user()->stadium_id;
+                $user->save();
+                Session::flash('success_msg', 'แก้ไขบัญชีผู้ใช้เรียบร้อยแล้ว!');
+                return Redirect::to('/'. $stadium .'/account_management');
+            }
+            else
+            {
+                Session::flash('error_msg', 'สิทธิ์ในการสร้างไม่เพียงพอ กรุณาติดต่อคนที่มีสิทธิ์สูงกว่าคุณ');
+                return Redirect::to('/' . $stadium . '/account_management');
+            } 
         }
     }
 
@@ -113,29 +130,37 @@ class AccountController extends Controller
         $validator = Validator::make(Input::all(), array('del-user' => 'required'));
         if (!$validator->fails())
         {
-            $username = $request->input('del-user');
-            if($username != Auth::user()->username)
+            if(Auth::user()->role_id > Input::get('role_id'))
             {
-                $user = Users::where('username', $username) -> first();
-                $stadium_users = Stadium::where('id', Auth::user()->stadium_id)->first();
-
-                if($stadium == $stadium_users->name)
+                $username = $request->input('del-user');
+                if($username != Auth::user()->username)
                 {
-                    $user->delete();
-                    Session::flash('success_msg', 'ลบบัญชีผู้ใช้เรียบร้อยแล้ว!');
-                    return Redirect::to('/'. $stadium .'/account_management');
+                    $user = Users::where('username', $username) -> first();
+                    $stadium_users = Stadium::where('id', Auth::user()->stadium_id)->first();
+
+                    if($stadium == $stadium_users->name)
+                    {
+                        $user->delete();
+                        Session::flash('success_msg', 'ลบบัญชีผู้ใช้เรียบร้อยแล้ว!');
+                        return Redirect::to('/'. $stadium .'/account_management');
+                    }
+                    else
+                    {
+                        Session::flash('error_msg', 'ไม่สามารถลบบัญชีผู้ใช้ได้!');
+                        return Redirect::to('/'. $stadium .'/account_management');
+                    }
                 }
                 else
                 {
-                    Session::flash('error_msg', 'ไม่สามารถลบบัญชีผู้ใช้ได้!');
+                    Session::flash('error_msg', 'คุณไม่สามารถลบบัญชีของตนเองได้!');
                     return Redirect::to('/'. $stadium .'/account_management');
                 }
             }
             else
             {
-                Session::flash('error_msg', 'คุณไม่สามารถลบบัญชีของตนเองได้!');
-                return Redirect::to('/'. $stadium .'/account_management');
-            }
+                Session::flash('error_msg', 'สิทธิ์ในการสร้างไม่เพียงพอ กรุณาติดต่อคนที่มีสิทธิ์สูงกว่าคุณ');
+                return Redirect::to('/' . $stadium . '/account_management');
+            } 
         }
         else
         {

@@ -19,7 +19,7 @@
                 <div class="md-form{{ $errors->has('username') ? ' has-error' : '' }}">
                   <i class="fa fa-user prefix"></i>
                   <input class="form-control" id="username" name="username" type="text" required>
-                  <label for="username">ชื่อผู้ใช้</label>
+                  <label class="active" for="username">ชื่อผู้ใช้</label>
                   @if ($errors->has('username'))
                     <span class="help-block">
                         <strong>{{ $errors->first('username') }}</strong>
@@ -30,7 +30,7 @@
                 <div class="md-form{{ $errors->has('password') ? ' has-error' : '' }}">
                   <i class="fa fa-lock prefix"></i>
                   <input class="form-control" id="password" name="password" type="password" required>
-                  <label for="password">รหัสผ่าน</label>
+                  <label class="active" for="password">รหัสผ่าน</label>
                   @if ($errors->has('password'))
                     <span class="help-block">
                         <strong>{{ $errors->first('password') }}</strong>

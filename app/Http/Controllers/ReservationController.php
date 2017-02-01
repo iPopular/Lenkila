@@ -7,6 +7,7 @@ use App\Customer as Customer;
 use App\Field as Field;
 use App\User as User;
 use App\Reservation as Reservation;
+use App\Promotions as Promotions;
 use App\Tmp_Field_Price as Tmp_Field_Price;
 use App\Tmp_Customer_Stadium as Tmp_Customer_Stadium;
 use App\Stadium as Stadium;
@@ -67,6 +68,7 @@ class ReservationController extends Controller
                 $events[$j]['field_price'] = $reserv['field_price'];
                 $events[$j]['water_price'] = $reserv['water_price'];
                 $events[$j]['supplement_price'] = $reserv['supplement_price'];
+                $events[$j]['discount_price'] = $reserv['discount_price'];
                 $events[$j]['start'] = $reserv['start_time'];
                 $events[$j]['end'] = $reserv['end_time'];
                 $events[$j]['title'] = $reserv['customer']['nickname'] . '_' . $reserv['customer']['mobile_number'];                
@@ -238,11 +240,13 @@ class ReservationController extends Controller
             $reserveStarttime = new Datetime($request->input('startTime'));
             $reserveEndttime = new Datetime($request->input('endTime'));
             $date = new Datetime($request->input('hddDate'));
-            $over_flag = 0;
+            $over_flag = 0;            
             $reserved_flag = 0;
-            $minutes_to_add = 1;
+            $minutes_to_add = 1;            
             $ref_code = time();
-            
+
+            $totalDiscount = $this->promotion($reserveStarttime, $reserveEndttime);
+           
             foreach($tmp_field_price as $field_price)
             {
                 $fieldStarttime = new Datetime($field_price->start_time);
@@ -263,8 +267,8 @@ class ReservationController extends Controller
                         $tmpStarttime->add(new DateInterval('PT' . $minutes_to_add . 'M'));                            
                         $over_flag = 1;
                     }
-
-                    $this->newReservation($customer, $field_price, $startTime, $endTime, $request, $minCost, $date, $ref_code);
+                    if($endTime > $startTime)
+                        $this->newReservation($customer, $field_price, $totalDiscount, $startTime, $endTime, $request, $minCost, $date, $ref_code);
                     $reserved_flag = 1;                        
                     
                 }
@@ -283,7 +287,8 @@ class ReservationController extends Controller
                         $tmpStarttime->add(new DateInterval('PT' . $minutes_to_add . 'M'));                            
                         $over_flag = 1;
                     }
-                    $this->newReservation($customer, $field_price, $startTime, $endTime, $request, $minCost, $date, $ref_code);
+                    if($endTime > $startTime)
+                        $this->newReservation($customer, $field_price, 0, $startTime, $endTime, $request, $minCost, $date, $ref_code);
                     $reserved_flag = 1;
                 }
             }
@@ -308,6 +313,86 @@ class ReservationController extends Controller
                 ->withErrors($validator)
                 ->withInput(Input::except('password'));
         }
+    }
+
+    public function promotion($reserveStarttime, $reserveEndttime)
+    {
+        $promotions = Promotions::where('stadium_id', Auth::user()->stadium_id)->get();
+        $totalDiscount = 0;
+        $over_flag_promo = 0;
+        $minutes_to_add = 1;
+        $minDiscount = 0;
+        foreach($promotions as $promotion)
+        {
+            $promo_start = new Datetime($promotion->start_time);
+            $promo_end = new Datetime($promotion->end_time);
+
+            $minDiscount = $promotion->discount/60;//$totalMinPromo
+            $discountType = '';
+            if($promotion->discount_type == 'THB')
+            {
+                $discountType = 'THB';
+            }
+            else
+            {
+                $discountType = 'percent';
+            }
+
+            if($over_flag_promo == 0 && $reserveStarttime >= $promo_start && $reserveStarttime <= $promo_end)
+            {
+                if($reserveEndttime <= $promo_end)
+                {
+                    $startTime = $reserveStarttime;
+                    $endTime = $reserveEndttime;                                                 
+                }
+                else
+                {
+                    $startTime = $reserveStarttime;                            
+                    $endTime = $promo_end;
+                    $tmpStarttime = $promo_end;
+                    $tmpStarttime->add(new DateInterval('PT' . $minutes_to_add . 'M'));                            
+                    $over_flag_promo = 1;
+                }
+                if($discountType == 'THB')
+                    $totalDiscount += $this->discounting($startTime, $endTime, $minDiscount);
+                else
+                    $totalDiscount = $promotion->discount;
+                
+            }
+            else if($over_flag_promo == 1 && $tmpStarttime >= $promo_start && $tmpStarttime <= $promo_end)
+            {
+                if($reserveEndttime <= $promo_end)
+                {
+                    $startTime = $tmpStarttime;
+                    $endTime = $reserveEndttime;
+                }
+                else
+                {
+                    $startTime = $tmpStarttime;                            
+                    $endTime = $promo_end;
+                    $tmpStarttime = $promo_end;
+                    $tmpStarttime->add(new DateInterval('PT' . $minutes_to_add . 'M'));                            
+                    $over_flag_promo = 1;
+                }
+                if($discountType == 'THB')
+                    $totalDiscount += $this->discounting($startTime, $endTime, $minDiscount);
+                else
+                    $totalDiscount = $promotion->discount;
+            }
+        }
+
+        return array($totalDiscount, $discountType);
+    }
+
+    function discounting($startTime, $endTime, $minDiscount)
+    {
+        $totalDiscount = 0;
+        $diffReserve = $startTime->diff($endTime)->format('%H:%i:%s');
+        $arrTimeReserve = explode(":", $diffReserve);
+        $totalMinReserve = (($arrTimeReserve[0] * 60) + $arrTimeReserve[1]);
+        $totalDiscount += $totalMinReserve * $minDiscount;
+
+        return $totalDiscount;
     }
 
     public function editReserve(Request $request, $stadium)
@@ -357,6 +442,8 @@ class ReservationController extends Controller
                 $over_flag = 0;
                 $minutes_to_add = 1;
                 $ref_code = $reservation->ref_code;
+
+                $totalDiscount = $this->promotion($reserveStarttime, $reserveEndttime);
                 
                 foreach($tmp_field_price as $field_price)
                 {
@@ -378,8 +465,8 @@ class ReservationController extends Controller
                             $tmpStarttime->add(new DateInterval('PT' . $minutes_to_add . 'M'));                            
                             $over_flag = 1;
                         }
-
-                        $this->editReservation($reservation, $field_price, $startTime, $endTime, $request, $minCost, $date);                        
+                        if($endTime > $startTime)
+                            $this->editReservation($reservation, $field_price, $totalDiscount, $startTime, $endTime, $request, $minCost, $date);                        
                         
                     }
                     else if($over_flag == 1 && $tmpStarttime >= $fieldStarttime && $tmpStarttime <= $fieldEndtime)
@@ -397,7 +484,8 @@ class ReservationController extends Controller
                             $tmpStarttime->add(new DateInterval('PT' . $minutes_to_add . 'M'));                            
                             $over_flag = 1;
                         }
-                        $this->newReservation($customer, $field_price, $startTime, $endTime, $request, $minCost, $date, $ref_code);
+                        if($endTime > $startTime)
+                            $this->newReservation($customer, $field_price, $totalDiscount, $startTime, $endTime, $request, $minCost, $date, $ref_code);
                                                 
                     }
                 }
@@ -476,7 +564,7 @@ class ReservationController extends Controller
         }
     }
     
-    public function editReservation($reservation, $field_price, $startTime, $endTime, $request, $minCost, $date)
+    public function editReservation($reservation, $field_price, $totalDiscount, $startTime, $endTime, $request, $minCost, $date)
     {
         try
         {       
@@ -492,6 +580,14 @@ class ReservationController extends Controller
             $reservation->end_time = $mergeEnd;
             $reservation->total_time = $time;
             $reservation->field_price = $total_price;
+            if($totalDiscount[1] == 'THB')
+            {
+                $reservation->discount_price = $totalDiscount[0];
+            }
+            else
+            {
+                $reservation->discount_price = $total_price * ($totalDiscount[0]/100);
+            }
             $reservation->background_color = $field_price->set_color;
             $reservation->note = $request->input('note');
             $reservation->updated_by = Auth::user()->id;
@@ -505,13 +601,15 @@ class ReservationController extends Controller
         }
     }
 
-    function newReservation($customer, $field_price, $startTime, $endTime, $request, $minCost, $date, $ref_code)
+    function newReservation($customer, $field_price, $totalDiscount, $startTime, $endTime, $request, $minCost, $date, $ref_code)
     {
         try
         {       
             $time = $startTime->diff($endTime)->format('%H:%i:%s');
             $arrTime = explode(":", $time);
             $total_price = (($arrTime[0] * 60) + $arrTime[1]) * $minCost;
+
+            
 
             $mergeStart = new DateTime($date->format('Y-m-d') .' ' . $startTime->format('H:i:s'));
             $mergeEnd = new DateTime($date->format('Y-m-d') .' ' . $endTime->format('H:i:s'));
@@ -524,6 +622,14 @@ class ReservationController extends Controller
             $reservation->end_time = $mergeEnd;
             $reservation->total_time = $time;
             $reservation->field_price = $total_price;
+            if($totalDiscount[1] == 'THB')
+            {
+                $reservation->discount_price = $totalDiscount[0];
+            }
+            else
+            {
+                $reservation->discount_price = $total_price * ($totalDiscount[0]/100);
+            }
             $reservation->background_color = $field_price->set_color;
             $reservation->ref_code = $ref_code;
             $reservation->note = $request->input('note');

@@ -67,11 +67,22 @@ select {
   width: 2500px;
 }
 
-/*.fc-myCustomButton-button {
-    content: "\f073"; 
+table.dataTable thead th.sorting:after {
     font-family: FontAwesome;
-    left:-5px;
-    position:absolute;
-    top:0;
-}*/
+    content: "\f0dc";
+    color: #ddd;
+    font-size: 0.8em;
+    padding-top: 0.12em;
+}
+table.dataTable thead th.sorting_asc:after {
+    font-family: FontAwesome;
+    content: "\f0de";
+}
+table.dataTable thead th.sorting_desc:after {
+    font-family: FontAwesome;
+    content: "\f0dd";
+}
 
+#datepicker{
+    display: none;
+}

@@ -13,6 +13,9 @@ use App\Customer as Customer;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\DB;
+use DateTime;
+use DateInterval;
+use DatePeriod;
 
 class AnalysisController extends Controller
 {
@@ -101,6 +104,8 @@ class AnalysisController extends Controller
                     $chart[$i]['id'] = $reserv['customer_id'];
                     $chart[$i]['labels'] = intval(date('d', strtotime($reserv['start_time']))) - 1;
                     $chart[$i]['data'] = $reserv['field_price'];
+                    $chart[$i]['water_price'] = $reserv['water_price'];
+                    $chart[$i]['supplement_price'] = $reserv['supplement_price'];
                     $chart[$i]['ref_code'] = $reserv['ref_code'];
                     $chart[$i]['start'] = date("H:i:s",strtotime($reserv['start_time']));
                     $i++;
@@ -116,6 +121,7 @@ class AnalysisController extends Controller
 
         $chartByDay = $this->getLineChartByDay($reservation, $first_day, $last_day);
         $chartByTime = $this->getLineChartByTime($reservation, $first_day, $last_day);
+        
 
         $income = 0;
         $outDataAmount = array();
@@ -166,7 +172,11 @@ class AnalysisController extends Controller
                         }
                         $index = $value['id'] .'-' . $value['ref_code'];
                         if (!array_key_exists($index, $outBestCustomer)){
-                            $outBestCustomer[$index] = 1;
+                            $outBestCustomer[$index] = $value['data'] + $value['water_price'] + $value['supplement_price'];
+                        }
+                        else
+                        {
+                            $outBestCustomer[$index] += $value['data'] + $value['water_price'] + $value['supplement_price'];
                         }
                         
                     }
@@ -212,7 +222,8 @@ class AnalysisController extends Controller
         $bestCustomerName = '';
         $totalVisited = '';
         $customer = array();
-        $reserves = '';
+        $reserves = array();
+        $customer_note = '';
         if($bestCutomer != null)
         {
             $max_key = array_keys($bestCutomer, max($bestCutomer));
@@ -311,15 +322,22 @@ class AnalysisController extends Controller
 
         $i = 0;
         $chart = array();
-        $diffOpenClose = $closeTime - $openTime;
-        $time = $openTime;
-        for($i = 0; $i <= $diffOpenClose; $i++)
-        {
-            $chart[$i]['times'] = $time;
+        
+        $begin = new Datetime($reservation->open_time);
+        $end = new Datetime($reservation->close_time);
+        if($end < $begin)
+            $end->modify('+1 day');
+
+        $interval = DateInterval::createFromDateString('1 hour');
+        $period = new DatePeriod($begin, $interval, $end);
+
+        foreach ( $period as $dt )
+        {            
+            $chart[$i]['times'] = intval(date_format($dt, 'G')) - 7;
             $chart[$i]['data'] = 0;
-            $outTimeLabels[$i] = $time . ':' . '00' ;
-            $time++;
-        }   
+            $outTimeLabels[$i] = date_format($dt, 'g:i A');
+            $i++;
+        }
 
         foreach($reservation->field as $field)
         {
@@ -328,7 +346,7 @@ class AnalysisController extends Controller
                 if(strtotime($reserv['start_time']) >= strtotime($first_day) && strtotime($reserv['start_time']) <= strtotime($last_day))
                 {
                     $chart[$i]['ref_code'] = $reserv['ref_code'];
-                    $chart[$i]['times'] = intval(date('G', strtotime($reserv['start_time'])));
+                    $chart[$i]['times'] = intval(date('G', strtotime($reserv['start_time']))) - 7;
                     $chart[$i]['data'] = $reserv['field_price'];
                     $i++;
                 }
@@ -340,6 +358,7 @@ class AnalysisController extends Controller
         {
             $allData[$item['times']][$key] = $item;
         }
+        
 
         foreach ($allData as $arr){
             foreach ($arr as $key => $value){
@@ -359,8 +378,8 @@ class AnalysisController extends Controller
                             if (array_key_exists($index, $tmpDataCnt)){
                                 $tmpDataCnt[$index]++;
                             } else {
-                                $tmpDataCnt[$index] = 1;
-                                $outDataCnt[$value['times']]++;
+                                $tmpDataCnt[$index] = 1;                                
+                                $outDataCnt[$value['times']]++;                                
                             }
                         }
                         else
@@ -372,6 +391,6 @@ class AnalysisController extends Controller
             }
         }
 
-        return array($outDataAmount, $outDataCnt, $outTimeLabels);
+        return array($outDataAmount, $outDataCnt, $outTimeLabels, $allData);
     }
 }

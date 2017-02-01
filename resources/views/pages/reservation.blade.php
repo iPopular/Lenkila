@@ -22,21 +22,6 @@
     else
       left = 'prev';
 
-    $('#datepicker').datepicker({
-
-        showOn: "both",
-        buttonImage: "http://jqueryui.com/resources/demos/datepicker/images/calendar.gif",
-        buttonImageOnly: true,
-        buttonText: " ",
-        dateFormat:"yy-mm-dd",
-        onSelect: function (dateText, inst) {
-            $('#calendar').fullCalendar('gotoDate', dateText);
-        },
-
-    });
-
-    console.log({!!json_encode($resource)!!});
-
     $('#calendar').fullCalendar({
       defaultView: 'agendaDay',
       editable: true,
@@ -55,7 +40,7 @@
           click: function() {
             $('#modal-add-field').modal('show');
           }
-        },        
+        },
       },
       //resourceLabelText: 'Rooms',
       resourceRender: function(resource, cellEls) {
@@ -139,7 +124,19 @@
     });
 
     $(".fc-right > button, .fc-left > button").removeClass();
-    $('.fc-right > button, .fc-left > button').addClass('btn btn-cyan waves-effect waves-light');
+    $('.fc-right > button, .fc-left > button').addClass('btn btn-cyan waves-effect waves-light');    
+
+    $('.fc-right').prepend('<button id="hiddenField" class="datepicker btn btn-cyan waves-effect waves-light"><i class="fa fa-calendar prefix"></i></button>');
+
+    $('#hiddenField').datepicker({
+    todayHighlight: true,
+    showOn: "button",
+    autoclose: true,
+    todayBtn: "linked",
+    buttonText: "day",
+    }).on('changeDate', function(e){
+      $('#calendar').fullCalendar('gotoDate', new Date(e.format('mm/dd/yy')));
+    });
 
     function callEditModal(calEvent, start, end) {
       var resource = $('#calendar').fullCalendar('getResourceById', calEvent.resourceId);
@@ -181,39 +178,7 @@
       format: 'LT'
     });
 
-    //console.log({!! json_encode($reservation->field[0]->reservation[0]->note) !!});
   });
-
-  function checkMax() {
-    var startTime = $("#modal-edit-reserve #startTime").val();
-    var endTime = $("#modal-edit-reserve #endTime").val();
-
-    if (startTime >= endTime) {
-      $("#modal-edit-reserve #startTime").val(endTime);
-    }
-  }
-
-  function sumPrice() {
-      var field_price = $('#field_price').val(),
-        water_price = $('#water_price').val(),
-        supplement_price = $('#supplement_price').val();
-        var total = int_try_parse(field_price, 0) + int_try_parse(water_price, 0) + int_try_parse(supplement_price, 0);
-
-      $('#total_price').val(total);
-  }
-
-    var int_try_parse = function TryParseInt(str,defaultValue) {
-     var retValue = defaultValue;
-     if(str !== null) {
-         if(str.length > 0) {
-             if (!isNaN(str)) {
-                 retValue = parseInt(str);
-             }
-         }
-     }
-     return retValue;
-}
-
 </script>
 <main class="pt-6">
   <div class="container text-xs-center">
@@ -236,8 +201,6 @@
           <div id='calendar'></div>
         </div>
       </div>
-      
-      
 
       <div tabindex="-1" class="modal fade" id="modal-add-reserve" role="dialog" aria-hidden="true" aria-labelledby="myModalLabel" style="display: none;">
         <div class="modal-dialog" role="document">

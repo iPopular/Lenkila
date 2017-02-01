@@ -107,12 +107,12 @@
                     <!--Table head-->
                     <thead>
                         <tr>
-                            <th>ชื่อสนาม</th>
-                            <th>เวลาเริ่ม</th>
-                            <th>เวลาสิ้นสุด</th>
-                            <th>วันที่เริ่ม</th>
-                            <th>วันที่สิ้นสุด</th>
-                            <th>ราคา</th>
+                            <th>ชื่อสนาม  </th>
+                            <th>เวลาเริ่ม  </th>
+                            <th>เวลาสิ้นสุด  </th>
+                            <th>วันที่เริ่ม  </th>
+                            <th>วันที่สิ้นสุด  </th>
+                            <th>ราคา/ชม.  </th>
                             <th></th>
                         </tr>
                     </thead>
@@ -185,13 +185,13 @@
                     <!--Table head-->
                     <thead>
                         <tr>
-                            <th>ชื่อโปรโมชั่น</th>
-                            <th>เวลาเริ่ม</th>
-                            <th>เวลาสิ้นสุด</th>
-                            <th>วันที่เริ่ม</th>
-                            <th>วันที่สิ้นสุด</th>
-                            <th>ส่วนลด</th>
-                            <th>ล็อคช่วงเวลา</th>
+                            <th>ชื่อโปรโมชั่น  </th>
+                            <th>เวลาเริ่ม  </th>
+                            <th>เวลาสิ้นสุด  </th>
+                            <th>วันที่เริ่ม  </th>
+                            <th>วันที่สิ้นสุด  </th>
+                            <th>ส่วนลด/ชม.  </th>
+                            <!--<th>ล็อคช่วงเวลา  </th>-->
                             <th></th>
                         </tr>
                     </thead>
@@ -229,13 +229,13 @@
                                 <td>
                                     {{ $promotion->discount }} {{ $promotion->discount_type }}
                                 </td>
-                                <td>
+                                <!--<td>
                                     @if($promotion->fixed_range == '1')
                                       ใช่ 
                                     @else 
                                       ไม่ 
                                     @endif
-                                </td>
+                                </td>-->
                                 <td>                                       
                                     <button form="form-promotion-{{$promotion->id}}" id="btn-edit-promotion-{{$promotion->id}}" class="btn btn-xs btn-warning waves-effect waves-light btn-table btn-edit-promotion" type="button" data-toggle="modal" data-target="#modal-edit-promotion">
                                         <i class="fa fa-pencil" aria-hidden="true"></i>
@@ -509,14 +509,14 @@
                             <div class="col-md-6">
                               <div class="md-form">
                                 <i class="fa fa-clock-o prefix"></i>
-                                <input class="form-control" id="start_time" name="start_time" type="time" step="1800" max="23:00" required onchange="checkMax();">
+                                <input class="form-control" id="start_time" name="start_time" type="time" required>
                                 <label class="active" for="start_time">เวลาเริ่ม</label>
                               </div>
                             </div>
                             <div class="col-md-6">
                               <div class="md-form">
                                 <i class="fa fa-times-circle-o prefix"></i>
-                                <input class="form-control" id="end_time" name="end_time" type="time" step="1800" max="23:00" required onchange="checkMax();">
+                                <input class="form-control" id="end_time" name="end_time" type="time" required>
                                 <label class="active" for="end_time">เวลาสิ้นสุด</label>
                               </div>
                             </div>
@@ -549,7 +549,7 @@
                               </div>
                             </div>
                             <div class="col-md-6">
-                              <div class="md-form">
+                              <div class="md-form discount_type">
                                 <i class="fa fa-percent prefix"></i>
                                 <select id="discount_type" name="discount_type" class="mdb-select colorful-select dropdown-ins" required>
                                     <option value="THB">บาท</option>
@@ -558,14 +558,14 @@
                               </div>
                             </div>                            
                           </div>
-                          <div class="row">
+                          <!--<div class="row">
                             <div class="col-md-12">
                               <fieldset class="form-group">
                                   <input type="checkbox" id="fixed_range" name="fixed_range">
                                   <label for="fixed_range">ล็อคช่วงเวลา</label>
                               </fieldset>
                             </div>
-                          </div>
+                          </div>-->
                         
                       </div>
                       <!--Footer-->
@@ -610,14 +610,14 @@
                             <div class="col-md-6">
                               <div class="md-form">
                                 <i class="fa fa-clock-o prefix"></i>
-                                <input class="form-control" id="start_time_edit" name="start_time" type="time" step="1800" max="23:00" required onchange="checkMax();">
+                                <input class="form-control" id="start_time_edit" name="start_time" type="time" required >
                                 <label class="active" for="start_time_edit">เวลาเริ่ม</label>
                               </div>
                             </div>
                             <div class="col-md-6">
                               <div class="md-form">
                                 <i class="fa fa-times-circle-o prefix"></i>
-                                <input class="form-control" id="end_time_edit" name="end_time" type="time" step="1800" max="23:00" required onchange="checkMax();">
+                                <input class="form-control" id="end_time_edit" name="end_time" type="time" required>
                                 <label class="active" for="end_time_edit">เวลาสิ้นสุด</label>
                               </div>
                             </div>
@@ -650,7 +650,7 @@
                               </div>
                             </div>
                             <div class="col-md-6">
-                              <div class="md-form">
+                              <div class="md-form discount_type">
                                 <i class="fa fa-percent prefix"></i>
                                 <select id="discount_type_edit" name="discount_type" class="mdb-select colorful-select dropdown-ins" required>
                                     <option value="THB">บาท</option>
@@ -659,14 +659,14 @@
                               </div>
                             </div>                            
                           </div>
-                          <div class="row">
+                          <!--<div class="row">
                             <div class="col-md-12">
                               <fieldset class="form-group">
                                   <input type="checkbox" id="fixed_range_edit" name="fixed_range">
                                   <label for="fixed_range_edit">ล็อคช่วงเวลา</label>
                               </fieldset>
                             </div>
-                          </div>
+                          </div>-->
                         
                       </div>
                       <!--Footer-->

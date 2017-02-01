@@ -184,7 +184,7 @@ class DashBoardController extends Controller
         if ($validator->fails()) 
         {
             Session::flash('error_msg', 'ไม่สามารถเพิ่มข้อมูลโปรโมรชั่นได้');
-            return Redirect::to('/'. $stadium_name .'/dashboard#panel1_field_price')
+            return Redirect::to('/'. $stadium_name .'/dashboard#panel1_promotion')
                 ->withErrors($validator)
                 ->withInput(Input::except('password')); 
         }
@@ -202,7 +202,7 @@ class DashBoardController extends Controller
             $promotion->fixed_range = $request->input('fixed_range') == 'on' ? 1 : 0;
             $promotion->save();
             Session::flash('success_msg', 'เพิ่มข้อมูลราคาโปรโมรชั่นเรียบร้อยแล้ว!');
-            return Redirect::to('/'. $stadium_name .'/dashboard#panel1_field_price');
+            return Redirect::to('/'. $stadium_name .'/dashboard#panel1_promotion');
         }
     }
 

@@ -27,16 +27,15 @@
                 
                 <!--Account table-->
                 <div class="table-responsive">
-                    <table class="table" data-page-length="5" cellspacing="0" width="100%">
+                    <table class="table" data-page-length="5">
                         <!--Table head-->
                         <thead>
                             <tr>
-                                <th>ชื่อ</th>
-                                <th>นามสกุล</th>
-                                <th>ชื่อผู้ใช้</th>
-                                <th>รหัสผ่าน</th>
-                                <th>อีเมล</th>
-                                <th>สิทธิ์</th>
+                                <th>ชื่อ - นามสกุล  </th>
+                                <th>ชื่อผู้ใช้  </th>
+                                <th>รหัสผ่าน  </th>
+                                <th>อีเมล  </th>
+                                <th>สิทธิ์  </th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -46,69 +45,65 @@
                         <tbody>
                             
                             <!--First row-->
-                            @foreach($stadium_users->users as $user)                           
-                            <tr>
-                                <form id="form-{{$user->id}}" class="form-horizontal" role="form" method="POST" action="/{{ $stadium }}/update-account/{{ $user->username }}">
-                                    {{ csrf_field() }}
-                                    <td>
-                                        <div class="div-row div-row-{{$user->id}}" style="display:block;">
-                                            {{ $user->firstname }}
-                                        </div>
-                                        <input form="form-{{$user->id}}" class="form-control form-table input-row input-row-{{$user->id}}" id="firstname-{{$user->id}}" name="firstname" type="text" placeholder="Firstname" value="{{$user->firstname}}" style="display:none;" required>
-                                    </td>
-                                    <td>
-                                        <div class="div-row div-row-{{$user->id}}" style="display:block;">
-                                            {{ $user->lastname }}
-                                        </div>
-                                        <input form="form-{{$user->id}}" class="form-control form-table input-row input-row-{{$user->id}}" id="lastname-{{$user->id}}" name="lastname" type="text" placeholder="Lastname" value="{{$user->lastname}}" style="display:none;" required>
-                                    </td>
-                                    <td>
-                                        <div class="div-row div-row-{{$user->id}}" style="display:block;">
-                                            {{ $user->username }}
-                                        </div>
-                                        <input form="form-{{$user->id}}" class="form-control form-table input-row input-row-{{$user->id}}" id="username-{{$user->id}}" name="username" type="text" placeholder="Username" value="{{$user->username}}" style="display:none;" required>
-                                    </td>
-                                    <td>
-                                        <div id="div-btn-password-{{$user->id}}" class="div-btn-password" style="display:block;">
-                                            <button title="" id="btn-password-{{$user->id}}" class="btn btn-sm btn-primary waves-effect waves-light btn-password" type="button" data-original-title="Change Password" data-toggle="tooltip" data-placement="top" disabled="true">เปลี่ยนรหัสผ่าน
-                                            </button>
-                                        </div>
-                                        <div id="div-password-{{$user->id}}" class="div-password" style="display:none;">
-                                            <input form="form-{{$user->id}}" class="form-control form-table input-row input-password" id="password-{{$user->id}}" name="password" type="password" placeholder="Password" value="">
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="div-row div-row-{{$user->id}}" style="display:block;">
-                                            {{ $user->email }}
-                                        </div>
-                                        <input form="form-{{$user->id}}" class="form-control form-table input-row input-row-{{$user->id}}" id="email-{{$user->id}}" name="email" type="email" placeholder="Email" value="{{$user->email}}" style="display:none;" required>
-                                    </td>
-                                    <td>
-                                        <div class="div-row div-row-{{$user->id}}" style="display:block;">
-                                            {{ $user->role->name }}
-                                        </div>
-                                        <select form="form-{{$user->id}}"  id="role_id-{{$user->id}}" name="role_id" class="form-control select-border form-table input-row input-row-{{$user->id}}" autocomplete="off"  style="display:none;">
-                                            <option value="">Please select role</option>
-                                            @foreach($roles as $role)
-                                                <option value="{{ $role->id }}">{{ $role->name }}</option>
-                                            @endforeach
-                                        </select>
-                                        <script>
-                                            // $('#role_id-{{$user->id}}').val({{ $user->role_id }});
-                                            $("select#role_id-{{$user->id}} option[value='{{ $user->role_id }}']").attr("selected", "selected");
-                                        </script>
-                                    </td>
-                                    <td>
+                            @foreach($stadium_users->users as $user)
+                                @if(Auth::user()->role_id > $user->role_id || Auth::user()->role_id == 3)                           
+                                    <tr>
+                                        <form id="form-{{$user->id}}" class="form-horizontal" role="form" method="POST" action="/{{ $stadium }}/update-account/{{ $user->username }}">
+                                            {{ csrf_field() }}
+                                            <td>
+                                                <div class="div-row div-row-{{$user->id}}" style="display:block;">
+                                                    {{ $user->firstname }} {{ $user->lastname }}
+                                                </div>
+                                                <input form="form-{{$user->id}}" class="form-control form-table input-row input-row-{{$user->id}}" id="name-{{$user->id}}" name="name" type="text" placeholder="์Name" value="{{$user->firstname}} {{$user->lastname}}" style="display:none;" required>
+                                            </td>
+                                            <td>
+                                                <div class="div-row div-row-{{$user->id}}" style="display:block;">
+                                                    {{ $user->username }}
+                                                </div>
+                                                <input form="form-{{$user->id}}" class="form-control form-table input-row input-row-{{$user->id}}" id="username-{{$user->id}}" name="username" type="text" placeholder="Username" value="{{$user->username}}" style="display:none;" required>
+                                            </td>
+                                            <td>
+                                                <div id="div-btn-password-{{$user->id}}" class="div-btn-password" style="display:block;">
+                                                    <button title="" id="btn-password-{{$user->id}}" class="btn btn-sm btn-primary waves-effect waves-light btn-password" type="button" data-original-title="Change Password" data-toggle="tooltip" data-placement="top" disabled="true">เปลี่ยนรหัสผ่าน
+                                                    </button>
+                                                </div>
+                                                <div id="div-password-{{$user->id}}" class="div-password" style="display:none;">
+                                                    <input form="form-{{$user->id}}" class="form-control form-table input-row input-password" id="password-{{$user->id}}" name="password" type="password" placeholder="Password" value="">
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="div-row div-row-{{$user->id}}" style="display:block;">
+                                                    {{ $user->email }}
+                                                </div>
+                                                <input form="form-{{$user->id}}" class="form-control form-table input-row input-row-{{$user->id}}" id="email-{{$user->id}}" name="email" type="email" placeholder="Email" value="{{$user->email}}" style="display:none;" required>
+                                            </td>
+                                            <td>
+                                                <div class="div-row div-row-{{$user->id}}" style="display:block;">
+                                                    {{ $user->role->name }}
+                                                </div>
+                                                <select form="form-{{$user->id}}"  id="role_id-{{$user->id}}" name="role_id" class="form-control select-border form-table input-row input-row-{{$user->id}}" autocomplete="off"  style="display:none;">
+                                                    <option value="">Please select role</option>
+                                                    @foreach($roles as $role)
+                                                        <option value="{{ $role->id }}">{{ $role->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                                <script>
+                                                    // $('#role_id-{{$user->id}}').val({{ $user->role_id }});
+                                                    $("select#role_id-{{$user->id}} option[value='{{ $user->role_id }}']").attr("selected", "selected");
+                                                </script>
+                                            </td>
+                                            <td>
 
-                                        <button form="form-{{$user->id}}" id="btn-edit-{{$user->id}}" class="btn btn-xs btn-warning waves-effect waves-light btn-table btn-edit" type="button" data-original-title="Remove item" data-toggle="tooltip" data-placement="top"><i id="icon-edit-{{$user->id}}" class="fa fa-pencil" aria-hidden="true"></i>
-                                        </button>
+                                                <button form="form-{{$user->id}}" id="btn-edit-{{$user->id}}" class="btn btn-xs btn-warning waves-effect waves-light btn-table btn-edit" type="button" data-original-title="Remove item" data-toggle="tooltip" data-placement="top"><i id="icon-edit-{{$user->id}}" class="fa fa-pencil" aria-hidden="true"></i>
+                                                </button>
 
-                                        <button id="btn-delete-{{$user->id}}" class="btn btn-xs btn-danger waves-effect waves-light btn-table btn-delete" type="button" data-original-title="Remove item" data-toggle="tooltip" data-placement="top"><i id="icon-delete-{{$user->id}}" class="fa fa-trash-o" aria-hidden="true"></i>
-                                        </button>
+                                                <button id="btn-delete-{{$user->id}}" class="btn btn-xs btn-danger waves-effect waves-light btn-table btn-delete" type="button" data-original-title="Remove item" data-toggle="tooltip" data-placement="top"><i id="icon-delete-{{$user->id}}" class="fa fa-trash-o" aria-hidden="true"></i>
+                                                </button>
 
-                                    </td>
-                                </form>
-                            </tr>
+                                            </td>
+                                        </form>
+                                    </tr>
+                                @endif
                              @endforeach
                             <!--/First row-->
                             
@@ -118,11 +113,8 @@
                                 <form id="form-add-account" class="form-horizontal" role="form" method="POST" action="/{{ $stadium }}/add-account">
                                 {{ csrf_field() }}
                                     <td>
-                                        <input form="form-add-account" class="form-control form-table" id="firstname" name="firstname" type="text" placeholder="ชื่อ" value="" required>
-                                    </td>
-                                    <td>
-                                        <input form="form-add-account" class="form-control form-table" id="lastname" name="lastname" type="text" placeholder="นามสกุล" value="" required>
-                                    </td>
+                                        <input form="form-add-account" class="form-control form-table" id="name" name="name" type="text" placeholder="ชื่อ - สกุล" value="" required>
+                                    </td>                                    
                                     <td>
                                         <input form="form-add-account" class="form-control form-table" id="username" name="username" type="text" placeholder="ชื่อผู้ใช้" value="" required>
                                     </td>

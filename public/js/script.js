@@ -233,7 +233,7 @@ $( document ).ready(function() {
     }
     else if(sPage == "login") {
         $('.form-login label').addClass('active');
-    }
+    }    
     if(sPage == "dashboard") {
         $('.input-daterange').datepicker({
             format: "yyyy-mm-dd",
@@ -250,6 +250,16 @@ $( document ).ready(function() {
         // on load of the page: switch to the currently selected tab
         var hash = window.location.hash;
         $('#myTab a[href="' + hash + '"]').tab('show');
+
+        $('#discount_type').change(function(){
+            changeDiscountTypeIcon();
+        });
+
+        $('#discount_type_edit').change(function(){
+            changeDiscountTypeIcon();
+        });
+
+        changeDiscountTypeIcon();
     }
     else if(sPage != "reservation"){
         $('.datepicker').datepicker({
@@ -293,6 +303,25 @@ $( document ).ready(function() {
 
 });
 
+function changeDiscountTypeIcon() {
+    if($('#discount_type').val() == 'THB') {
+        $('.discount_type > i').removeClass('fa fa-percent prefix');
+        $('.discount_type > i').addClass('fa fa-money prefix');
+    }
+    else {
+        $('.discount_type > i').removeClass('fa fa-money prefix');
+        $('.discount_type > i').addClass('fa fa-percent prefix');
+    }
+    if($('#discount_type_edit').val() == 'THB') {
+        $('.discount_type > i').removeClass('fa fa-percent prefix');
+        $('.discount_type > i').addClass('fa fa-money prefix');
+    }
+    else {
+        $('.discount_type > i').removeClass('fa fa-money prefix');
+        $('.discount_type > i').addClass('fa fa-percent prefix');
+    }
+}
+
 
 function getLinechart(){
     var start = $("input[name=mount]").val();
@@ -308,7 +337,8 @@ function getLinechart(){
         },
         data: { _date: start },        
         success: function(info){
-
+            console.log(info[7]);
+            
             dataAmountDays = info[1];
             dataCntDays = info[2];
             labelsDays = info[0];
@@ -488,12 +518,11 @@ $('.btn-edit-promotion').click(function (){
     $('#modal-edit-promotion #start_date_edit').val($('#pro-start_date-' + Id[3]).val());
     $('#modal-edit-promotion #end_date_edit').val($('#pro-end_date-' + Id[3]).val());
     $('#modal-edit-promotion #discount_edit').val($('#pro-discount-' + Id[3]).val());
-    if($('#pro-fixed_range-' + Id[3]).val() == '1')
-        $('#modal-edit-promotion #fixed_range_edit').prop('checked', true); // Checks it
-    else
-        $('#modal-edit-promotion #fixed_range_edit').prop('checked', false); // Unchecks it
-    
-    
+    // if($('#pro-fixed_range-' + Id[3]).val() == '1')
+    //     $('#modal-edit-promotion #fixed_range_edit').prop('checked', true); // Checks it
+    // else
+    //     $('#modal-edit-promotion #fixed_range_edit').prop('checked', false); // Unchecks it
+        
 });
 
 $('.btn-delete-promotion').click(function (){
@@ -525,3 +554,75 @@ function checkCustomer() {
     });
 
 }
+
+$('.btn-edit-paid').click(function (){
+
+    var Id = this.id.split('-');
+    $('#modal-paid-reserve .reserve label').addClass('active');    
+
+    var reserve_id = '', 
+        field_price = 0, 
+        water_price = 0, 
+        supplement_price = 0,
+        discount_price = 0;
+    $('#table_reserve_today tr').filter(':has(:checkbox:checked)').each(function() {
+        // this = tr
+        
+        var tr = this.id;
+        reserve_id = reserve_id + '-' + tr;
+        field_price += parseInt($('#field_price-' + tr).val());
+        water_price += parseInt($('#supplement_price-' + tr).val());
+        supplement_price += parseInt($('#water_price-' + tr ).val());
+        discount_price += parseInt($('#discount_price-' + tr ).val());
+
+    });
+    $('#checkbox-' + Id[3]).trigger('click');
+    $('#modal-paid-reserve #hddReserveId').val(reserve_id);
+    $('#modal-paid-reserve #field_price').val(field_price);
+    $('#modal-paid-reserve #supplement_price').val(water_price);
+    $('#modal-paid-reserve #discount_price').val(discount_price);
+
+    sumPrice();
+
+        
+});
+
+$('#table_reserve_today tr').click(function(event) {
+    if (event.target.type !== 'checkbox') {
+        $(':checkbox', this).trigger('click');
+        // if($('#checkbox-' + this.id).is(":checked"))
+        //     $('#btn-edit-paid-' + this.id).prop('disabled', false);
+        // else
+        //     $('#btn-edit-paid-' + this.id).prop('disabled', true);
+    }
+});
+
+function sumPrice() {
+    var field_price = $('#field_price').val(),
+    water_price = $('#water_price').val(),
+    supplement_price = $('#supplement_price').val();
+    var total = int_try_parse(field_price, 0) + int_try_parse(water_price, 0) + int_try_parse(supplement_price, 0);
+
+    $('#total_price').val(total);
+}
+
+var int_try_parse = function TryParseInt(str,defaultValue) {
+    var retValue = defaultValue;
+    if(str !== null) {
+        if(str.length > 0) {
+            if (!isNaN(str)) {
+                retValue = parseInt(str);
+            }
+        }
+    }
+    return retValue;
+}
+
+function checkMax() {
+    var startTime = $("#modal-edit-reserve #startTime").val();
+    var endTime = $("#modal-edit-reserve #endTime").val();
+
+    if (startTime >= endTime) {
+      $("#modal-edit-reserve #startTime").val(endTime);
+    }
+  }

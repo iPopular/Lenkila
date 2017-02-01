@@ -13,17 +13,29 @@
 
 Route::get('/', function () {
     if(count(Auth::user()) > 0)
-        return Redirect::to('/'. Auth::user()->stadium->name .'/report_problems');
+        return Redirect::to('/'. Auth::user()->stadium->name .'/today');
     else
         return Redirect::to('/login');
 });
 
 Auth::routes();
 
+Route::get('/{stadium}/today', [
+    'middleware' => ['auth', 'roles', 'stadium'],
+    'uses' => 'ReserveTodayController@show',
+    'roles' => ['owner', 'administrator', 'staff']
+]);
+
+Route::post('/{stadium}/today-paid-reserve', [
+    'middleware' => ['auth', 'roles', 'stadium'],
+    'uses' => 'ReserveTodayController@paidReserve',
+    'roles' => ['owner', 'administrator', 'staff']
+]);
+
 Route::get('/{stadium}/dashboard', [
     'middleware' => ['auth', 'roles', 'stadium'],
     'uses' => 'DashBoardController@show',
-    'roles' => ['owner']
+    'roles' => ['owner', 'administrator']
 ]);
 
 Route::post('/{stadium}/add-field-price', [
@@ -167,25 +179,25 @@ Route::post('/{stadium}/analysis-getStat', [
 Route::get('/{stadium}/account_management', [
     'middleware' => ['auth', 'roles', 'stadium'], 
     'uses' => 'AccountController@show',
-    'roles' => ['owner']
+    'roles' => ['owner', 'administrator']
 ]);
 
 Route::post('/{stadium}/add-account', [
     'middleware' => ['auth', 'roles', 'stadium'], 
     'uses' => 'AccountController@addAccount',
-    'roles' => ['owner']
+    'roles' => ['owner', 'administrator']
 ]);
 
 Route::post('/{stadium}/update-account/{username}', [
     'middleware' => ['auth', 'roles', 'stadium'], 
     'uses' => 'AccountController@updateAccount',
-    'roles' => ['owner']
+    'roles' => ['owner', 'administrator']
 ]);
 
 Route::post('/{stadium}/delete-account', [
     'middleware' => ['auth', 'roles', 'stadium'], 
     'uses' => 'AccountController@deleteAccount',
-    'roles' => ['owner']
+    'roles' => ['owner', 'administrator']
 ]);
 
 Route::get('/{stadium}/report_problems', [
