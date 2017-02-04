@@ -322,21 +322,19 @@ class ReservationController extends Controller
         $over_flag_promo = 0;
         $minutes_to_add = 1;
         $minDiscount = 0;
+        $discountType = '';
         foreach($promotions as $promotion)
         {
             $promo_start = new Datetime($promotion->start_time);
             $promo_end = new Datetime($promotion->end_time);
 
             $minDiscount = $promotion->discount/60;//$totalMinPromo
-            $discountType = '';
-            if($promotion->discount_type == 'THB')
-            {
-                $discountType = 'THB';
-            }
-            else
-            {
+            
+            if($promotion->discount_type == 'THB')            
+                $discountType = 'THB';            
+            else            
                 $discountType = 'percent';
-            }
+            
 
             if($over_flag_promo == 0 && $reserveStarttime >= $promo_start && $reserveStarttime <= $promo_end)
             {
