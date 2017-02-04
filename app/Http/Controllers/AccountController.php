@@ -59,8 +59,13 @@ class AccountController extends Controller
             {
                 $name = explode(" ", Input::get('name'));
                 $user = New Users();
-                $user->firstname	= $name[0];
-                $user->lastname   	= $name[1];
+                if(count($name) > 1)
+                {
+                    $user->firstname	= $name[0];
+                    $user->lastname   	= $name[1];
+                }
+                else
+                    $user->firstname    = Input::get('name');
                 $user->username  	= Input::get('username');
                 $user->password     = Hash::make(Input::get('password'));
                 $user->email      	= Input::get('email');
@@ -82,8 +87,7 @@ class AccountController extends Controller
     {
         $user = Users::where('username', $username) -> first();
         $rules = array(
-            'firstname' => 'required|max:255',
-            'lastname' => 'required|max:255',
+            'name' => 'required|max:255',
             'username' => 'required|max:255|unique:users,username,'.$user->id,
             'password' => 'min:6',
             'email' => 'required|email|max:255|unique:users,email,'.$user->id,          
@@ -106,9 +110,15 @@ class AccountController extends Controller
                 if(Input::has('password'))
                 {
                     $user->password = Hash::make(Input::get('password'));
-                }             
-                $user->firstname	= Input::get('firstname');
-                $user->lastname   	= Input::get('lastname');
+                }
+                $name = explode(" ", Input::get('name'));
+                if(count($name) > 1)
+                {
+                    $user->firstname	= $name[0];
+                    $user->lastname   	= $name[1];
+                }
+                else
+                    $user->firstname    = Input::get('name');
                 $user->username  	= Input::get('username');
                 $user->email      	= Input::get('email');
                 $user->role_id      = Input::get('role_id');

@@ -82,7 +82,7 @@
                                                     {{ $user->role->name }}
                                                 </div>
                                                 <select form="form-{{$user->id}}"  id="role_id-{{$user->id}}" name="role_id" class="form-control select-border form-table input-row input-row-{{$user->id}}" autocomplete="off"  style="display:none;">
-                                                    <option value="">Please select role</option>
+                                                    <option value="">กรุณาเลือกสิทธิ์</option>
                                                     @foreach($roles as $role)
                                                         <option value="{{ $role->id }}">{{ $role->name }}</option>
                                                     @endforeach

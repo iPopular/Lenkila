@@ -54,7 +54,7 @@ class User extends Model implements AuthenticatableContract
 	{
 		$this->have_role = $this->getUserRole();
 		// Check if the user is a Owner account
-		if($this->have_role->name == 'Owner') {
+		if($this->have_role->name == 'root') {
 			return true;
 		}
 		if(is_array($roles)){

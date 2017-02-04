@@ -106,11 +106,22 @@ $('.btn-delete').click(function () {
         } 
     }
     else
-    {        
+    {
+        var sPath = window.location.pathname;
+        var sPage = sPath.substring(sPath.lastIndexOf('/') + 1);
         $('#str-ask-del').empty();
-        $('#str-ask-del').append($('#username-'+divId[2]).val());
-        $('#del-user').val($('#username-'+divId[2]).val());
+        if(sPage == "account_management" || sPage == "owner_management")
+        {            
+            $('#str-ask-del').append($('#username-'+divId[2]).val());
+            $('#del-user').val($('#username-'+divId[2]).val());            
+        }
+        else if(sPage == "stadium_management")
+        {
+            $('#str-ask-del').append($('#name-'+divId[2]).val());
+            $('#del-stadium').val($('#hddStadiumId-'+divId[2]).val());
+        }
         $('#modal-ConfirmDelete').modal('toggle');
+        
     }
 });
 

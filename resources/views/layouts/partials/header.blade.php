@@ -2,7 +2,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta http-equiv="x-ua-compatible" content="ie=edge">
 
-<title>Material Design Bootstrap</title>
+<title>Lenkila Stadium</title>
 
 <!-- Font Awesome -->
 <link href="{{ URL::asset('css/font-awesome.min.css') }}" rel="stylesheet">

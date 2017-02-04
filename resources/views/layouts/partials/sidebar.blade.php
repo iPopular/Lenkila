@@ -22,15 +22,20 @@
   <!-- Side navigation links -->
   <li>
     <ul class="collapsible collapsible-accordion">
-    <li><a href="/{{Auth::user()->stadium->name}}/today" class="collapsible-header waves-effect arrow-r"><i class="fa fa-newspaper-o"></i> รายการวันนี้</a></li>      
-      <li><a href="/{{Auth::user()->stadium->name}}/reservation" class="collapsible-header waves-effect arrow-r"><i class="fa fa-calendar-plus-o"></i> การจอง</a></li>
-      <li><a href="/{{Auth::user()->stadium->name}}/customer_info" class="collapsible-header waves-effect arrow-r"><i class="fa fa-users"></i> ข้อมูลลูกค้า</a></li>
-      <li><a href="/{{Auth::user()->stadium->name}}/analysis" class="collapsible-header waves-effect arrow-r"><i class="fa fa-line-chart"></i> วิเคราะห์ข้อมูล</a></li>
-      <li><a href="/{{Auth::user()->stadium->name}}/dashboard" class="collapsible-header waves-effect arrow-r"><i class="fa fa-tachometer"></i> แผงควบคุม</a></li>
-      @if(Auth::user()->role_id == 3 || Auth::user()->role_id == 2)
-        <li><a href="/{{Auth::user()->stadium->name}}/account_management" class="collapsible-header waves-effect arrow-r"><i class="fa fa-address-book-o"></i> การจัดการบัญชีผู้ใช้</a>
+      @if(Auth::user()->role_id != 4)
+        <li><a href="/{{Auth::user()->stadium->name}}/today" class="collapsible-header waves-effect arrow-r"><i class="fa fa-newspaper-o"></i> รายการวันนี้</a></li>      
+        <li><a href="/{{Auth::user()->stadium->name}}/reservation" class="collapsible-header waves-effect arrow-r"><i class="fa fa-calendar-plus-o"></i> การจอง</a></li>
+        <li><a href="/{{Auth::user()->stadium->name}}/customer_info" class="collapsible-header waves-effect arrow-r"><i class="fa fa-users"></i> ข้อมูลลูกค้า</a></li>
+        <li><a href="/{{Auth::user()->stadium->name}}/analysis" class="collapsible-header waves-effect arrow-r"><i class="fa fa-line-chart"></i> วิเคราะห์ข้อมูล</a></li>
+        <li><a href="/{{Auth::user()->stadium->name}}/dashboard" class="collapsible-header waves-effect arrow-r"><i class="fa fa-tachometer"></i> แผงควบคุม</a></li>
+        @if(Auth::user()->role_id == 3 || Auth::user()->role_id == 2)
+          <li><a href="/{{Auth::user()->stadium->name}}/account_management" class="collapsible-header waves-effect arrow-r"><i class="fa fa-address-book-o"></i> การจัดการบัญชีผู้ใช้</a>
+        @endif 
+        <li><a href="/{{Auth::user()->stadium->name}}/report_problems" class="collapsible-header waves-effect arrow-r"><i class="fa fa-bug"></i> แจ้งปัญหาการใช้งาน</a></li>
+      @else
+        <li><a href="/{{Auth::user()->stadium->name}}/owner_management" class="collapsible-header waves-effect arrow-r"><i class="fa fa-address-book-o"></i> Owner Manager</a></li>
+        <li><a href="/{{Auth::user()->stadium->name}}/stadium_management" class="collapsible-header waves-effect arrow-r"><i class="fa fa-clone"></i> Stadium Manager</a></li>
       @endif 
-      <li><a href="/{{Auth::user()->stadium->name}}/report_problems" class="collapsible-header waves-effect arrow-r"><i class="fa fa-bug"></i> แจ้งปัญหาการใช้งาน</a></li>
     </ul>
   </li>
   <!--/. Side navigation links -->

@@ -22,6 +22,7 @@
                     });                    
                 </script>
             @endforeach
+
             <h2>รายการวันนี้ </h2>
             <table id="table_reserve_today" class="table table-striped table-hover" data-page-length="5" cellspacing="0">
                 <!--Table head-->

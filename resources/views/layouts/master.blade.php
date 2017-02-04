@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>        
-        <title>Bold - Multipurpose Template</title>        
+        <title>Lenkila Stadium</title>        
         @include('layouts.partials.header')            
     </head>
     <body class="fixed-sn blue-skin">

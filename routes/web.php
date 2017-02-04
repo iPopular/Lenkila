@@ -13,12 +13,67 @@
 
 Route::get('/', function () {
     if(count(Auth::user()) > 0)
-        return Redirect::to('/'. Auth::user()->stadium->name .'/today');
+    {
+        if(Auth::user()->role_id != 4)
+            return Redirect::to('/'. Auth::user()->stadium->name .'/today');
+        else
+            return Redirect::to('/'. Auth::user()->stadium->name .'/owner_management');
+    }        
     else
+    {
         return Redirect::to('/login');
+    }
 });
 
 Auth::routes();
+
+Route::get('/{stadium}/owner_management', [
+    'middleware' => ['auth', 'roles', 'stadium'],
+    'uses' => 'OwnerController@show',
+    'roles' => ['root']
+]);
+
+Route::post('/{stadium}/owner_management/add-owner', [
+    'middleware' => ['auth', 'roles', 'stadium'],
+    'uses' => 'OwnerController@addOwner',
+    'roles' => ['root']
+]);
+
+Route::post('/{stadium}/owner_management/update-account/{username}', [
+    'middleware' => ['auth', 'roles', 'stadium'],
+    'uses' => 'OwnerController@updateOwner',
+    'roles' => ['root']
+]);
+
+Route::post('/{stadium}/owner_management/delete-owner', [
+    'middleware' => ['auth', 'roles', 'stadium'],
+    'uses' => 'OwnerController@deleteOwner',
+    'roles' => ['root']
+]);
+
+Route::get('/{stadium}/stadium_management', [
+    'middleware' => ['auth', 'roles', 'stadium'],
+    'uses' => 'StadiumController@show',
+    'roles' => ['root']
+]);
+
+Route::post('/{stadium}/stadium_management/add-stadium', [
+    'middleware' => ['auth', 'roles', 'stadium'],
+    'uses' => 'StadiumController@addStadium',
+    'roles' => ['root']
+]);
+
+Route::post('/{stadium}/stadium_management/update-stadium', [
+    'middleware' => ['auth', 'roles', 'stadium'],
+    'uses' => 'StadiumController@updateStadium',
+    'roles' => ['root']
+]);
+
+Route::post('/{stadium}/stadium_management/delete-stadium', [
+    'middleware' => ['auth', 'roles', 'stadium'],
+    'uses' => 'StadiumController@deleteStadium',
+    'roles' => ['root']
+]);
 
 Route::get('/{stadium}/today', [
     'middleware' => ['auth', 'roles', 'stadium'],

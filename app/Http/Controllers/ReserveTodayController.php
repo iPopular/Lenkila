@@ -24,7 +24,7 @@ class ReserveTodayController extends Controller
         {
             foreach($field->reservation as $reserv)
             {
-                if($reserv->start_time >= date("Y-m-d 00:00:00") && $reserv->end_time <= date("Y-m-d 23:59:59"))
+                if($reserv->start_time >= date("Y-m-d 00:00:00") && $reserv->start_time <= date("Y-m-d 23:59:59"))
                 {
                     $events[$j]['id'] = $reserv->id;
                     $events[$j]['field_price'] = $reserv->field_price;

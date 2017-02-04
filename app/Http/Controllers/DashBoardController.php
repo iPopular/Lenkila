@@ -139,7 +139,7 @@ class DashBoardController extends Controller
         if(count($stadium) > 0)
         {
             $rules = array(
-                'staduim_name_edit' => 'max:50',
+                'staduim_name_edit' => 'max:50|unique:stadium,name,'.$stadium->id,
                 'address' => 'max:200',
                 'detail' => 'max:200',
             );
