@@ -11,8 +11,7 @@ class StadiumTableSeeder extends Seeder
      */
     public function run()
     {
-        Stadium::truncate();  
-        Stadium::create( [
+        App\Stadium::create( [
             'id' => '0',
             'name'=>'system',
             'detail' => 'System for SU',

@@ -10,9 +10,8 @@ class UsersTableSeeder extends Seeder
      * @return void
      */
     public function run()
-    {
-        User::truncate();  
-        User::create( [
+    {  
+        App\User::create( [
             'stadium_id' => '0',
             'username'=>'su',
             'email' => 'system@lenkila.com',

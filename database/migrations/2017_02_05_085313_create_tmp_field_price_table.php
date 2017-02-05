@@ -15,14 +15,13 @@ class CreateTmpFieldPriceTable extends Migration
     {
         Schema::create('tmp_field_price', function (Blueprint $table) {
             $table->increments('id');
-            $table->primary('id');
-            $table->integer('field_id');
+            $table->integer('field_id')->unsigned();
             $table->integer('price')->default(0)->comment('price/hr');
             $table->timeTz('start_time');
             $table->timeTz('end_time');
             $table->date('start_date');
             $table->date('end_date');
-            $table->string('set_color', 15);
+            $table->string('set_color', 15)->nullable();
             $table->timestampsTz();
         });
     }

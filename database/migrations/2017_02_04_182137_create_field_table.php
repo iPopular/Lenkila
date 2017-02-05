@@ -15,10 +15,9 @@ class CreateFieldTable extends Migration
     {
         Schema::create('field', function (Blueprint $table) {
             $table->increments('id');
-            $table->primary('id');
-            $table->integer('stadium_id');
+            $table->integer('stadium_id')->unsigned();
             $table->string('name', 50);
-            $table->string('detail', 200);
+            $table->string('detail', 200)->nullable();
             $table->integer('status')->default(1);
             $table->integer('created_by')->unsigned();
             $table->integer('updated_by')->unsigned()->nullable();

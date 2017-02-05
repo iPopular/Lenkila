@@ -15,9 +15,8 @@ class CreateTmpCustomerStadiumTable extends Migration
     {
         Schema::create('tmp_customer_stadium', function (Blueprint $table) {
             $table->increments('id');
-            $table->primary('id');
-            $table->integer('stadium_id');
-            $table->integer('customer_id');
+            $table->integer('stadium_id')->unsigned();
+            $table->integer('customer_id')->unsigned();
             $table->string('member_id', 10);
             $table->string('note', 300)->nullable();
             $table->integer('created_by')->unsigned();

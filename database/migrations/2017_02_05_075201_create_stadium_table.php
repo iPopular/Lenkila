@@ -15,7 +15,6 @@ class CreateStadiumTable extends Migration
     {
         Schema::create('stadium', function (Blueprint $table) {
             $table->increments('id');
-            $table->primary('id');
             $table->string('name', 50);
             $table->string('detail', 200)->nullable();
             $table->string('address', 200)->nullable();
