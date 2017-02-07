@@ -163,6 +163,7 @@
       $('#modal-paid-reserve #field_price').val(calEvent.field_price);
       $('#modal-paid-reserve #water_price').val(calEvent.water_price);
       $('#modal-paid-reserve #supplement_price').val(calEvent.supplement_price);
+      $('#modal-paid-reserve #discount_price').val(calEvent.discount_price);
       $('#modal-paid-reserve #hddReserveId').val(calEvent.id);
       //$('#modal-edit-reserve #time').val(range);
       $('#modal-edit-reserve #startTime').val(starttime);
@@ -377,6 +378,11 @@
                   <i class="fa fa-plus-square-o prefix"></i>
                   <input class="form-control price" id="supplement_price" name="supplement_price" type="text" onkeyup="sumPrice();">
                   <label for="supplement_price">อื่น ๆ</label>
+                </div>
+                <div class="md-form">
+                  <i class="fa fa-scissors prefix"></i>
+                  <input class="form-control price" id="discount_price" name="discount_price" type="text" onkeyup="sumPrice();">
+                  <label for="discount_price">ส่วนลด</label>
                 </div>
                 <div class="md-form">
                   <i class="fa fa-money prefix"></i>

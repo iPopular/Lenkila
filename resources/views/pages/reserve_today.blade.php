@@ -136,8 +136,8 @@
                                 </div>
                                 <div class="col-md-6 md-form">
                                     <i class="fa fa-scissors prefix"></i>
-                                    <input class="form-control" id="discount" name="discount" type="text">
-                                    <label for="discount">ส่วนลด</label>
+                                    <input class="form-control" id="discount_price" name="discount_price" type="text">
+                                    <label for="discount_price">ส่วนลด</label>
                                 </div>
                             </div>
                             <div class="row">

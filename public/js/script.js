@@ -611,8 +611,9 @@ $('#table_reserve_today tr').click(function(event) {
 function sumPrice() {
     var field_price = $('#field_price').val(),
     water_price = $('#water_price').val(),
-    supplement_price = $('#supplement_price').val();
-    var total = int_try_parse(field_price, 0) + int_try_parse(water_price, 0) + int_try_parse(supplement_price, 0);
+    supplement_price = $('#supplement_price').val(),
+    discount_price = $('#discount_price').val();
+    var total = int_try_parse(field_price, 0) + int_try_parse(water_price, 0) + int_try_parse(supplement_price, 0) - int_try_parse(discount_price);
 
     $('#total_price').val(total);
 }
