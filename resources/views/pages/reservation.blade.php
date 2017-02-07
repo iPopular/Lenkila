@@ -223,45 +223,61 @@
                 <input type="hidden" id="hddResourceId" name="hddResourceId" />
                 <input type="hidden" id="hddAllDay" name="hddAllDay" />
                 <input type="hidden" id="hddDate" name="hddDate" />
-                <div class="form-inline">
-                  <div class="form-group md-form">
-                    <i class="fa fa-columns prefix"></i>
-                    <input class="form-control" id="resource" name="resource" type="text" readonly="readonly" required>
-                    <label for="resource">สนาม</label>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="md-form">
+                      <i class="fa fa-columns prefix"></i>
+                      <input class="form-control" id="resource" name="resource" type="text" readonly="readonly" required>
+                      <label for="resource">สนาม</label>
+                    </div>
                   </div>
-                  <div class="form-group md-form">
-                    <i class="fa fa-calendar-times-o prefix"></i>
-                    <input class="form-control" id="day" name="day" type="text" readonly="readonly" required>
-                    <label for="day">วัน</label>
-                  </div>
-                </div>
-                <div class="form-inline">
-                  <div class="form-group md-form" style="margin-right:0">
-                    <i class="fa fa-clock-o prefix"></i>
-                    <input class="form-control" id="startTime" name="startTime" type="time" step="1800" max="23:00" required onchange="checkMax();">
-                    <label for="startTime">เวลา</label>
-                  </div>&nbsp;&nbsp;-&nbsp;&nbsp;
-                  <div class="form-group md-form">
-                    <input class="form-control" id="endTime" name="endTime" type="time" step="1800" max="23:00" required onchange="checkMax();">
+                  <div class="col-md-6">
+                    <div class="md-form">
+                      <i class="fa fa-calendar-times-o prefix"></i>
+                      <input class="form-control" id="day" name="day" type="text" readonly="readonly" required>
+                      <label for="day">วัน</label>
+                    </div>
                   </div>
                 </div>
-                <div class="form-inline">
-                <div class="form-group md-form">
-                    <i class="fa fa-mobile prefix"></i>
-                    <input class="form-control" id="mobile_number" name="mobile_number" type="text" onchange="checkCustomer();" required>
-                    <label for="mobile_number">เบอร์โทร</label>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="md-form">
+                      <i class="fa fa-clock-o prefix"></i>
+                      <input class="form-control" id="startTime" name="startTime" type="time" step="1800" max="23:00" required onchange="checkMax();">
+                      <label for="startTime">เวลาเริ่มต้น</label>
+                    </div>
                   </div>
-                  <div class="form-group md-form">
-                    <i class="fa fa-user-o prefix"></i>
-                    <input class="form-control" id="nickname" name="nickname" type="text" required>
-                    <label for="nickname">ชื่อเล่น</label>
+                  <div class="col-md-6">
+                    <div class="md-form">
+                      <i class="fa fa-times-circle-o prefix"></i>
+                      <input class="form-control" id="endTime" name="endTime" type="time" step="1800" max="23:00" required onchange="checkMax();">
+                      <label for="endTime">เวลาสิ้นสุด</label>
+                    </div>
                   </div>
                 </div>
-                <div class="form-inline">
-                  <div class="form-group md-form">
-                    <i class="fa fa-file-text-o prefix"></i>
-                    <textarea class="md-textarea" id="note" name="note" type="text"></textarea>
-                    <label for="note">โน๊ต</label>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="md-form">
+                      <i class="fa fa-mobile prefix"></i>
+                      <input class="form-control" id="mobile_number" name="mobile_number" type="text" onchange="checkCustomer();" required>
+                      <label for="mobile_number">เบอร์โทร</label>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="md-form">
+                      <i class="fa fa-user-o prefix"></i>
+                      <input class="form-control" id="nickname" name="nickname" type="text" required>
+                      <label for="nickname">ชื่อเล่น</label>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-12">
+                    <div class="md-form">
+                      <i class="fa fa-file-text-o prefix"></i>
+                      <textarea class="md-textarea" id="note" name="note" type="text"></textarea>
+                      <label for="note">โน๊ต</label>
+                    </div>
                   </div>
                 </div>
 
@@ -294,45 +310,61 @@
                 <input type="hidden" id="hddResourceId" name="hddResourceId" />
                 <input type="hidden" id="hddDate" name="hddDate" />
                 <input type="hidden" id="hddReserveId" name="hddReserveId" />
-                <div class="form-inline">
-                  <div class="form-group md-form">
-                    <i class="fa fa-columns prefix"></i>
-                    <input class="form-control" id="resource" name="resource" type="text" readonly="readonly" required>
-                    <label for="resource">สนาม</label>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="md-form">
+                      <i class="fa fa-columns prefix"></i>
+                      <input class="form-control" id="resource" name="resource" type="text" readonly="readonly" required>
+                      <label for="resource">สนาม</label>
+                    </div>
                   </div>
-                  <div class="form-group md-form">
-                    <i class="fa fa-calendar-times-o prefix"></i>
-                    <input class="form-control" id="day" name="day" type="text" readonly="readonly" required>
-                    <label for="day">วัน</label>
-                  </div>
-                </div>
-                <div class="form-inline">
-                  <div class="form-group md-form" style="margin-right:0">
-                    <i class="fa fa-clock-o prefix"></i>
-                    <input class="form-control" id="startTime" name="startTime" type="time" step="1800" max="23:00" required onchange="checkMax();">
-                    <label for="startTime">เวลา</label>
-                  </div>&nbsp;&nbsp;-&nbsp;&nbsp;
-                  <div class="form-group md-form">
-                    <input class="form-control" id="endTime" name="endTime" type="time" step="1800" max="23:00" required onchange="checkMax();">
+                  <div class="col-md-6">
+                    <div class="md-form">
+                      <i class="fa fa-calendar-times-o prefix"></i>
+                      <input class="form-control" id="day" name="day" type="text" readonly="readonly" required>
+                      <label for="day">วัน</label>
+                    </div>
                   </div>
                 </div>
-                <div class="form-inline">
-                <div class="form-group md-form">
-                    <i class="fa fa-mobile prefix"></i>
-                    <input class="form-control" id="mobile_number-edit" name="mobile_number" type="text" readonly="readonly" required>
-                    <label for="mobile_number">เบอร์โทร</label>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="md-form">
+                      <i class="fa fa-clock-o prefix"></i>
+                      <input class="form-control" id="startTime" name="startTime" type="time" step="1800" max="23:00" required onchange="checkMax();">
+                      <label for="startTime">เวลาเริ่มต้น</label>
+                    </div>
                   </div>
-                  <div class="form-group md-form">
-                    <i class="fa fa-user-o prefix"></i>
-                    <input class="form-control" id="nickname" name="nickname" type="text" required>
-                    <label for="nickname">ชื่อเล่น</label>
+                  <div class="col-md-6">
+                    <div class="md-form">
+                      <i class="fa fa-times-circle-o prefix"></i>
+                      <input class="form-control" id="endTime" name="endTime" type="time" step="1800" max="23:00" required onchange="checkMax();">
+                      <label for="endTime">เวลาสิ้นสุด</label>
+                    </div>
                   </div>
                 </div>
-                <div class="form-inline">
-                  <div class="md-form">
-                    <i class="fa fa-file-text-o prefix"></i>
-                    <textarea class="md-textarea" id="note-edit" name="note" type="text"></textarea>
-                    <label for="note">โน๊ต</label>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="md-form">
+                      <i class="fa fa-mobile prefix"></i>
+                      <input class="form-control" id="mobile_number-edit" name="mobile_number" type="text" readonly="readonly" required>
+                      <label for="mobile_number">เบอร์โทร</label>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="md-form">
+                      <i class="fa fa-user-o prefix"></i>
+                      <input class="form-control" id="nickname" name="nickname" type="text" required>
+                      <label for="nickname">ชื่อเล่น</label>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-12">
+                    <div class="md-form">
+                      <i class="fa fa-file-text-o prefix"></i>
+                      <textarea class="md-textarea" id="note-edit" name="note" type="text"></textarea>
+                      <label for="note">โน๊ต</label>
+                    </div>
                   </div>
                 </div>
               </form>

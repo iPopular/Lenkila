@@ -64,7 +64,7 @@ select {
 }
 
 .fc-view-container .fc-view > table {
-  width: 2500px;
+  width: 1600px;
 }
 
 table.dataTable thead th.sorting:after {

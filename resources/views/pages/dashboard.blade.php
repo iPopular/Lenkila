@@ -313,7 +313,7 @@
                             </div>
                           </div>
                           <div class="row">
-                            <div class="input-daterange input-group" id="field_price_datepicker">
+                            <div class="input-daterange" id="field_price_datepicker">
                               <div class="col-md-6">
                                 <div class="md-form">
                                     <i class="fa fa-calendar-check-o prefix"></i>
@@ -409,7 +409,7 @@
                             </div>
                           </div>
                           <div class="row">
-                            <div class="input-daterange input-group" id="field_price_datepicker">
+                            <div class="input-daterange" id="field_price_datepicker">
                               <div class="col-md-6">
                                 <div class="md-form">
                                     <i class="fa fa-calendar-check-o prefix"></i>
@@ -522,7 +522,7 @@
                             </div>
                           </div>
                           <div class="row">
-                            <div class="input-daterange input-group" id="field_price_datepicker">
+                            <div class="input-daterange" id="field_price_datepicker">
                               <div class="col-md-6">
                                 <div class="md-form">
                                     <i class="fa fa-calendar-check-o prefix"></i>
@@ -623,7 +623,7 @@
                             </div>
                           </div>
                           <div class="row">
-                            <div class="input-daterange input-group" id="field_price_datepicker">
+                            <div class="input-daterange" id="field_price_datepicker">
                               <div class="col-md-6">
                                 <div class="md-form">
                                     <i class="fa fa-calendar-check-o prefix"></i>

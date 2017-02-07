@@ -179,7 +179,10 @@ $( document ).ready(function() {
     // Material Select Initialization
     $('.mdb-select').material_select();
 
-    if(sPage == "analysis") {    
+    if(sPage == "login") {
+        $('.fixed-sn .double-nav, .fixed-sn footer, .fixed-sn main').css("padding-left", " 0px");
+    }   
+    else if(sPage == "analysis") {    
         var monthNames = [
             "January", "February", "March",
             "April", "May", "June", "July",
