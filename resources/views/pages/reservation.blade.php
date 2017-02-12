@@ -14,7 +14,7 @@
 <script type="text/javascript" src="{{ URL::asset('js/bootstrap-colorselector.js') }}"></script>
 <script>
   $(document).ready(function() {
-
+    console.log({!!json_encode($date)!!});
     var userRole = {!!json_encode(Auth::user()->role_id)!!};
     var left = '';
     if (userRole == 3)
@@ -23,16 +23,30 @@
       left = 'prev';
 
     $('#calendar').fullCalendar({
-      defaultView: 'agendaDay',
+      defaultView: 'agendaTwoDay',
+      views: {
+        agendaTwoDay: {
+          type: 'agenda',
+          duration: { days: 2 },
+          buttonText: '2 day',
+          groupByResource: true
+        }
+      },
+      eventDataTransform: function(event) {                                                                                                                                
+        if(event.allDay) {                                                                                                                                               
+          event.end = moment(event.end).add(1, 'days')                                                                                                                 
+        }
+        return event;  
+      },
       editable: true,
       selectable: true,
-      //defaultDate: '2016-12-12',
+      //defaultDate: '2017-02-14',
       //businessHours: true, // display business hours
       //eventLimit: true, // allow "more" link when too many events
       header: {
         left: left,
         center: 'title',
-        right: 'next'
+        right: 'agendaDay, agendaTwoDay, next'
       },
       customButtons: {
         promptResource: {
@@ -41,7 +55,7 @@
             $('#modal-add-field').modal('show');
           }
         },
-      },
+      },      
       //resourceLabelText: 'Rooms',
       resourceRender: function(resource, cellEls) {
         cellEls.on('click', function() {
@@ -70,8 +84,8 @@
       //selectOverlap: false,
       eventOverlap: true,
       nowIndicator: true,
-      minTime: {!!json_encode($openTime)!!},
-      maxTime: {!!json_encode($closeTime)!!},
+      minTime: 0,//{!!json_encode($openTime)!!}
+      maxTime: '24:00',//{!!json_encode($closeTime)!!}
 
 
       //// uncomment this line to hide the all-day slot
@@ -86,7 +100,8 @@
           endtime = moment(end).format('HH:mm');
           starttime = moment(start).format('HH:mm');
           day = moment(start).format('dd ll');
-          date = moment(start).format('Y-M-D');
+          startDate = moment(start).format('Y-M-D');
+          endDate = moment(end).format('Y-M-D');
           var range = starttime + ' - ' + endtime;
           $('#modal-add-reserve #hddStartTime').val(starttime);
           $('#modal-add-reserve #hddEndTime').val(endtime);
@@ -95,7 +110,8 @@
           $('#modal-add-reserve #hddAllDay').val(allDay);
           $('#modal-add-reserve #resource').val(resource.title);
           $('#modal-add-reserve #hddResourceId').val(resource.id);
-          $('#modal-add-reserve #hddDate').val(date);
+          $('#modal-add-reserve #hddStartDate').val(startDate);
+          $('#modal-add-reserve #hddEndDate').val(endDate);
           $('#modal-add-reserve #day').val(day);
           //$('#modal-add-reserve #time').val(range);
           $('#modal-add-reserve #startTime').val(starttime);
@@ -104,6 +120,9 @@
           $('#modal-add-reserve').modal('show');
         }        
 
+      },
+      selectOverlap: function(event) {
+          return event.rendering === 'background';
       },
       eventClick: function(calEvent, start, end) {
         callEditModal(calEvent, start, end);
@@ -120,7 +139,25 @@
       },
       eventMouseout: function(calEvent, jsEvent) {
         $('#reserve_tooltip').tooltip('toggle');
-      }
+      },
+      // computeDateTop: function(date, startOfDayDate) {
+      //     var startTime = moment.duration(date - startOfDayDate.clone().stripTime());
+
+      //     var cTT = this.computeTimeTop(startTime);
+
+
+      //     //If an event is at the start of minTime
+      //     if (startTime - this.minTime == 0) {
+      //         return cTT;
+      //     }
+
+      //     //If an event gets dragged past midnight
+      //     if (cTT == 0) {
+      //         return this.computeTimeTop( 86400000 + startTime );
+      //     }
+
+      //     return cTT;
+      // }
     });
 
     $(".fc-right > button, .fc-left > button").removeClass();
@@ -139,38 +176,41 @@
     });
 
     function callEditModal(calEvent, start, end) {
-      var resource = $('#calendar').fullCalendar('getResourceById', calEvent.resourceId);
-      endtime = moment(calEvent.end).format('HH:mm');
-      starttime = moment(calEvent.start).format('HH:mm');
-      day = moment(calEvent.start).format('dd ll');
-      date = moment(calEvent.start).format('Y-M-D');
-      var range = starttime + ' - ' + endtime;
-      var title = calEvent.title.split('_');
-      $('#modal-edit-reserve #hddReserveId').val(calEvent.id);
-      $('#modal-edit-reserve #reserve_id_delete').val(calEvent.id);
-      $('#modal-edit-reserve #myModalLabel').text(calEvent.title + ' - ' + range);
-      $('#modal-edit-reserve #hddStartTime').val(starttime);
-      $('#modal-edit-reserve #hddEndTime').val(endtime);
-      $('#modal-edit-reserve #hddStart').val(calEvent.start);
-      $('#modal-edit-reserve #hddEnd').val(calEvent.end);
-      $('#modal-edit-reserve #resource').val(resource.title);
-      $('#modal-edit-reserve #nickname').val(title[0]);
-      $('#modal-edit-reserve #mobile_number-edit').val(title[1]);
-      $('#modal-edit-reserve #note-edit').val(calEvent.description);
-      $('#modal-edit-reserve #hddResourceId').val(resource.id);
-      $('#modal-edit-reserve #hddDate').val(date);
-      $('#modal-edit-reserve #day').val(day);
-      $('#modal-paid-reserve #field_price').val(calEvent.field_price);
-      $('#modal-paid-reserve #water_price').val(calEvent.water_price);
-      $('#modal-paid-reserve #supplement_price').val(calEvent.supplement_price);
-      $('#modal-paid-reserve #discount_price').val(calEvent.discount_price);
-      $('#modal-paid-reserve #hddReserveId').val(calEvent.id);
-      //$('#modal-edit-reserve #time').val(range);
-      $('#modal-edit-reserve #startTime').val(starttime);
-      $('#modal-edit-reserve #endTime').val(endtime);
-      sumPrice();
-      $('.reserve label').addClass('active');
-      $('#modal-edit-reserve').modal('show');
+      if(calEvent.color != '#c1c1c1')
+      {      
+        var resource = $('#calendar').fullCalendar('getResourceById', calEvent.resourceId);
+        endtime = moment(calEvent.end).format('HH:mm');
+        starttime = moment(calEvent.start).format('HH:mm');
+        day = moment(calEvent.start).format('dd ll');
+        date = moment(calEvent.start).format('Y-M-D');
+        var range = starttime + ' - ' + endtime;
+        var title = calEvent.title.split('_');
+        $('#modal-edit-reserve #hddReserveId').val(calEvent.id);
+        $('#modal-edit-reserve #reserve_id_delete').val(calEvent.id);
+        $('#modal-edit-reserve #myModalLabel').text(calEvent.title + ' - ' + range);
+        $('#modal-edit-reserve #hddStartTime').val(starttime);
+        $('#modal-edit-reserve #hddEndTime').val(endtime);
+        $('#modal-edit-reserve #hddStart').val(calEvent.start);
+        $('#modal-edit-reserve #hddEnd').val(calEvent.end);
+        $('#modal-edit-reserve #resource').val(resource.title);
+        $('#modal-edit-reserve #nickname').val(title[0]);
+        $('#modal-edit-reserve #mobile_number-edit').val(title[1]);
+        $('#modal-edit-reserve #note-edit').val(calEvent.description);
+        $('#modal-edit-reserve #hddResourceId').val(resource.id);
+        $('#modal-edit-reserve #hddDate').val(date);
+        $('#modal-edit-reserve #day').val(day);
+        $('#modal-paid-reserve #field_price').val(calEvent.field_price);
+        $('#modal-paid-reserve #water_price').val(calEvent.water_price);
+        $('#modal-paid-reserve #supplement_price').val(calEvent.supplement_price);
+        $('#modal-paid-reserve #discount_price').val(calEvent.discount_price);
+        $('#modal-paid-reserve #hddReserveId').val(calEvent.id);
+        //$('#modal-edit-reserve #time').val(range);
+        $('#modal-edit-reserve #startTime').val(starttime);
+        $('#modal-edit-reserve #endTime').val(endtime);
+        sumPrice();
+        $('.reserve label').addClass('active');
+        $('#modal-edit-reserve').modal('show');
+      }
     }
 
     $('#colorselector').colorselector();
@@ -222,7 +262,8 @@
                 <input type="hidden" id="hddEndTime" name="hddEndTime" />
                 <input type="hidden" id="hddResourceId" name="hddResourceId" />
                 <input type="hidden" id="hddAllDay" name="hddAllDay" />
-                <input type="hidden" id="hddDate" name="hddDate" />
+                <input type="hidden" id="hddStartDate" name="hddStartDate" />
+                <input type="hidden" id="hddEndDate" name="hddEndDate" />
                 <div class="row">
                   <div class="col-md-6">
                     <div class="md-form">
