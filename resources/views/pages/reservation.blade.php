@@ -32,12 +32,6 @@
           groupByResource: true
         }
       },
-      eventDataTransform: function(event) {                                                                                                                                
-        if(event.allDay) {                                                                                                                                               
-          event.end = moment(event.end).add(1, 'days')                                                                                                                 
-        }
-        return event;  
-      },
       editable: true,
       selectable: true,
       //defaultDate: '2017-02-14',

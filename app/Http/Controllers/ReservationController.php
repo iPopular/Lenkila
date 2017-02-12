@@ -331,9 +331,12 @@ class ReservationController extends Controller
             $minutes_to_add = 1;            
             $ref_code = time();
 
-            $totalDiscount = $this->promotion($reserveStarttime, $reserveEndttime);
 
             $stadium_data = Stadium::where('id', Auth::user()->stadium_id)->first();
+
+            $totalDiscount = $this->promotion($reserveStarttime, $reserveEndttime, $reserveStartDate, $reserveEndDate, $stadium_data);
+
+            
            
             foreach($tmp_field_price as $field_price)
             {
@@ -453,7 +456,7 @@ class ReservationController extends Controller
         }
     }
 
-    public function promotion($reserveStarttime, $reserveEndttime)
+    public function promotion($reserveStarttime, $reserveEndttime, $reserveStartDate, $reserveEndDate, $stadium_data)
     {
         $promotions = Promotions::where('stadium_id', Auth::user()->stadium_id)->get();
         $totalDiscount = 0;
@@ -461,10 +464,14 @@ class ReservationController extends Controller
         $minutes_to_add = 1;
         $minDiscount = 0;
         $discountType = '';
+        $THTTZ = new DateTimeZone('+0700');
         foreach($promotions as $promotion)
         {
-            $promo_start = new Datetime($promotion->start_time);
-            $promo_end = new Datetime($promotion->end_time);
+            $promo_startTime = new Datetime($promotion->start_time, $THTTZ);
+            $promo_endTime = new Datetime($promotion->end_time, $THTTZ);
+
+            $promo_startDate = new Datetime($promotion->start_date, $THTTZ);
+            $promo_endDate = new Datetime($promotion->end_date, $THTTZ);
 
             $minDiscount = $promotion->discount/60;//$totalMinPromo
             
@@ -474,9 +481,9 @@ class ReservationController extends Controller
                 $discountType = 'percent';
             
 
-            if($over_flag_promo == 0 && $reserveStarttime >= $promo_start && $reserveStarttime <= $promo_end)
+            if($over_flag_promo == 0 && ($reserveStarttime >= $promo_startTime && $reserveStarttime <= $promo_endTime) && ($reserveStartDate >= $promo_startDate && $reserveEndDate <= $promo_endDate))
             {
-                if($reserveEndttime <= $promo_end)
+                if($reserveEndttime <= $promo_endTime)
                 {
                     $startTime = $reserveStarttime;
                     $endTime = $reserveEndttime;                                                 
@@ -484,8 +491,8 @@ class ReservationController extends Controller
                 else
                 {
                     $startTime = $reserveStarttime;                            
-                    $endTime = $promo_end;
-                    $tmpStarttime = $promo_end;
+                    $endTime = $promo_endTime;
+                    $tmpStarttime = $promo_endTime;
                     $tmpStarttime->add(new DateInterval('PT' . $minutes_to_add . 'M'));                            
                     $over_flag_promo = 1;
                 }
@@ -495,9 +502,9 @@ class ReservationController extends Controller
                     $totalDiscount = $promotion->discount;
                 
             }
-            else if($over_flag_promo == 1 && $tmpStarttime >= $promo_start && $tmpStarttime <= $promo_end)
+            else if($over_flag_promo == 1 && ($tmpStarttime >= $promo_startTime && $tmpStarttime <= $promo_endTime) && ($reserveStartDate >= $promo_startDate && $reserveEndDate <= $promo_endDate))
             {
-                if($reserveEndttime <= $promo_end)
+                if($reserveEndttime <= $promo_endTime)
                 {
                     $startTime = $tmpStarttime;
                     $endTime = $reserveEndttime;
@@ -505,8 +512,8 @@ class ReservationController extends Controller
                 else
                 {
                     $startTime = $tmpStarttime;                            
-                    $endTime = $promo_end;
-                    $tmpStarttime = $promo_end;
+                    $endTime = $promo_endTime;
+                    $tmpStarttime = $promo_endTime;
                     $tmpStarttime->add(new DateInterval('PT' . $minutes_to_add . 'M'));                            
                     $over_flag_promo = 1;
                 }
@@ -514,6 +521,47 @@ class ReservationController extends Controller
                     $totalDiscount += $this->discounting($startTime, $endTime, $minDiscount);
                 else
                     $totalDiscount = $promotion->discount;
+            }
+            else if(($promo_endTime < new Datetime($stadium_data->open_time, $THTTZ)) && ($reserveStartDate >= $promo_startDate && $reserveEndDate <= $promo_endDate) && 
+            (($reserveStarttime <= new Datetime("23:59", $THTTZ) && $reserveStarttime >= new Datetime($stadium_data->open_time, $THTTZ) && $promo_startTime <= new Datetime("23:59", $THTTZ))))
+            {
+                $mergeStart = new DateTime($reserveStartDate->format('Y-m-d') .' ' .$reserveStarttime->format('H:i:s'), $THTTZ);
+                $mergeEnd = new DateTime($reserveEndDate->format('Y-m-d') .' ' .$reserveEndttime->format('H:i:s'), $THTTZ);
+                if($mergeStart >= new DateTime($reserveStartDate->format('Y-m-d') .' ' .$promo_startTime->format('H:i:s'), $THTTZ))
+                {   
+                    if($mergeEnd <= new DateTime($reserveEndDate->format('Y-m-d') .' ' .$promo_endTime->format('H:i:s'), $THTTZ))
+                    {
+                        $startTime = $mergeStart;
+                        $endTime = $mergeEnd; 
+
+                        if($discountType == 'THB')
+                            $totalDiscount += $this->discounting($startTime, $endTime, $minDiscount);
+                        else
+                            $totalDiscount = $promotion->discount;
+                    }
+                }    
+            }
+            else if(($promo_endTime < new Datetime($stadium_data->open_time, $THTTZ)) && ($reserveStartDate >= $promo_startDate && $reserveEndDate <= $promo_endDate) && 
+            ($reserveStarttime >= new Datetime("00:00", $THTTZ) && $reserveStarttime < new Datetime($stadium_data->open_time, $THTTZ) && $promo_startTime <= new Datetime("23:59", $THTTZ) && $reserveStarttime < new Datetime($stadium_data->open_time, $THTTZ)))
+            {
+                $tmpFieldStartDate = $reserveStartDate;
+                $mergeStart = new DateTime($reserveStartDate->format('Y-m-d') .' ' .$reserveStarttime->format('H:i:s'), $THTTZ);
+                $mergeEnd = new DateTime($reserveEndDate->format('Y-m-d') .' ' .$reserveEndttime->format('H:i:s'), $THTTZ);
+
+                if($mergeStart<= new DateTime($reserveEndDate->format('Y-m-d') .' ' .$promo_endTime->format('H:i:s'), $THTTZ))                    
+                {   
+                    if($mergeEnd  >= new DateTime($tmpFieldStartDate->modify('-1 day')->format('Y-m-d') .' ' .$promo_startTime->format('H:i:s'), $THTTZ))
+                    {               
+                        $startTime = $mergeStart;
+                        $endTime = $mergeEnd; 
+
+                        if($discountType == 'THB')
+                            $totalDiscount += $this->discounting($startTime, $endTime, $minDiscount);
+                        else
+                            $totalDiscount = $promotion->discount;
+
+                    }
+                }          
             }
         }
 
@@ -578,7 +626,7 @@ class ReservationController extends Controller
 
                 $stadium_data = Stadium::where('id', Auth::user()->stadium_id)->first();
 
-                $totalDiscount = $this->promotion($reserveStarttime, $reserveEndttime);
+                $totalDiscount = $this->promotion($reserveStarttime, $reserveEndttime, $reserveStartDate, $reserveEndDate, $stadium_data);
                 
                 foreach($tmp_field_price as $field_price)
                 {
@@ -747,13 +795,13 @@ class ReservationController extends Controller
     public function editReservation($reservation, $field_price, $totalDiscount, $startTime, $endTime, $request, $minCost, $startDate, $endDate)
     {
         try
-        {       
-            $time = $startTime->diff($endTime)->format('%H:%i:%s');
-            $arrTime = explode(":", $time);
-            $total_price = (($arrTime[0] * 60) + $arrTime[1]) * $minCost;
-
+        {      
             $mergeStart = new DateTime($startDate->format('Y-m-d') .' ' . $startTime->format('H:i:s'));
             $mergeEnd = new DateTime($endDate->format('Y-m-d') .' ' . $endTime->format('H:i:s'));
+
+            $time = $mergeStart->diff($mergeEnd)->format('%H:%i:%s');
+            $arrTime = explode(":", $time);
+            $total_price = (($arrTime[0] * 60) + $arrTime[1]) * $minCost;
 
             $reservation->field_id = $request->input('hddResourceId');
             $reservation->start_time = $mergeStart;
@@ -784,15 +832,13 @@ class ReservationController extends Controller
     function newReservation($customer, $field_price, $totalDiscount, $startTime, $endTime, $request, $minCost, $startDate, $endDate, $ref_code)
     {
         try
-        {       
-            $time = $startTime->diff($endTime)->format('%H:%i:%s');
-            $arrTime = explode(":", $time);
-            $total_price = (($arrTime[0] * 60) + $arrTime[1]) * $minCost;
-
-            
-
+        { 
             $mergeStart = new DateTime($startDate->format('Y-m-d') .' ' . $startTime->format('H:i:s'));
             $mergeEnd = new DateTime($endDate->format('Y-m-d') .' ' . $endTime->format('H:i:s'));
+
+            $time = $mergeStart->diff($mergeEnd)->format('%H:%i:%s');
+            $arrTime = explode(":", $time);
+            $total_price = (($arrTime[0] * 60) + $arrTime[1]) * $minCost;
 
 
             $reservation = new Reservation();
