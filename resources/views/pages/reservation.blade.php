@@ -139,25 +139,7 @@
       },
       eventMouseout: function(calEvent, jsEvent) {
         $('#reserve_tooltip').tooltip('toggle');
-      },
-      // computeDateTop: function(date, startOfDayDate) {
-      //     var startTime = moment.duration(date - startOfDayDate.clone().stripTime());
-
-      //     var cTT = this.computeTimeTop(startTime);
-
-
-      //     //If an event is at the start of minTime
-      //     if (startTime - this.minTime == 0) {
-      //         return cTT;
-      //     }
-
-      //     //If an event gets dragged past midnight
-      //     if (cTT == 0) {
-      //         return this.computeTimeTop( 86400000 + startTime );
-      //     }
-
-      //     return cTT;
-      // }
+      }
     });
 
     $(".fc-right > button, .fc-left > button").removeClass();
@@ -182,7 +164,8 @@
         endtime = moment(calEvent.end).format('HH:mm');
         starttime = moment(calEvent.start).format('HH:mm');
         day = moment(calEvent.start).format('dd ll');
-        date = moment(calEvent.start).format('Y-M-D');
+        startDate = moment(calEvent.start).format('Y-M-D');
+        endDate = moment(calEvent.end).format('Y-M-D');
         var range = starttime + ' - ' + endtime;
         var title = calEvent.title.split('_');
         $('#modal-edit-reserve #hddReserveId').val(calEvent.id);
@@ -197,7 +180,8 @@
         $('#modal-edit-reserve #mobile_number-edit').val(title[1]);
         $('#modal-edit-reserve #note-edit').val(calEvent.description);
         $('#modal-edit-reserve #hddResourceId').val(resource.id);
-        $('#modal-edit-reserve #hddDate').val(date);
+        $('#modal-edit-reserve #hddStartDate').val(startDate);
+        $('#modal-edit-reserve #hddEndDate').val(endDate);
         $('#modal-edit-reserve #day').val(day);
         $('#modal-paid-reserve #field_price').val(calEvent.field_price);
         $('#modal-paid-reserve #water_price').val(calEvent.water_price);
@@ -284,14 +268,14 @@
                   <div class="col-md-6">
                     <div class="md-form">
                       <i class="fa fa-clock-o prefix"></i>
-                      <input class="form-control" id="startTime" name="startTime" type="time" step="1800" max="23:00" required onchange="checkMax();">
+                      <input class="form-control" id="startTime" name="startTime" type="time" step="1800" required >
                       <label for="startTime">เวลาเริ่มต้น</label>
                     </div>
                   </div>
                   <div class="col-md-6">
                     <div class="md-form">
                       <i class="fa fa-times-circle-o prefix"></i>
-                      <input class="form-control" id="endTime" name="endTime" type="time" step="1800" max="23:00" required onchange="checkMax();">
+                      <input class="form-control" id="endTime" name="endTime" type="time" step="1800"  required >
                       <label for="endTime">เวลาสิ้นสุด</label>
                     </div>
                   </div>
@@ -349,7 +333,8 @@
                 <input type="hidden" id="hddStartTime" name="hddStartTime" />
                 <input type="hidden" id="hddEndTime" name="hddEndTime" />
                 <input type="hidden" id="hddResourceId" name="hddResourceId" />
-                <input type="hidden" id="hddDate" name="hddDate" />
+                <input type="hidden" id="hddStartDate" name="hddStartDate" />
+                <input type="hidden" id="hddEndDate" name="hddEndDate" />
                 <input type="hidden" id="hddReserveId" name="hddReserveId" />
                 <div class="row">
                   <div class="col-md-6">
@@ -371,14 +356,14 @@
                   <div class="col-md-6">
                     <div class="md-form">
                       <i class="fa fa-clock-o prefix"></i>
-                      <input class="form-control" id="startTime" name="startTime" type="time" step="1800" max="23:00" required onchange="checkMax();">
+                      <input class="form-control" id="startTime" name="startTime" type="time" step="1800" required >
                       <label for="startTime">เวลาเริ่มต้น</label>
                     </div>
                   </div>
                   <div class="col-md-6">
                     <div class="md-form">
                       <i class="fa fa-times-circle-o prefix"></i>
-                      <input class="form-control" id="endTime" name="endTime" type="time" step="1800" max="23:00" required onchange="checkMax();">
+                      <input class="form-control" id="endTime" name="endTime" type="time" step="1800" required>
                       <label for="endTime">เวลาสิ้นสุด</label>
                     </div>
                   </div>

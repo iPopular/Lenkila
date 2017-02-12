@@ -63,14 +63,14 @@
                           <div class="col-md-6">
                             <div class="md-form">
                               <i class="fa fa-clock-o prefix"></i>
-                              <input class="form-control" id="openTime" name="openTime" type="time" step="1800" max="23:00" value="{{$stadium->open_time}}" required>
+                              <input class="form-control" id="openTime" name="openTime" type="time" value="{{$stadium->open_time}}" required>
                               <label class="active" for="openTime">เวลาเปิด</label>
                             </div>
                           </div>
                           <div class="col-md-6">
                             <div class="md-form">
                               <i class="fa fa-times-circle-o prefix"></i>
-                              <input class="form-control" id="closeTime" name="closeTime" type="time" step="1800" max="23:00" value="{{$stadium->close_time}}" required>
+                              <input class="form-control" id="closeTime" name="closeTime" type="time"  value="{{$stadium->close_time}}" required>
                               <label class="active" for="closeTime">เวลาปิด</label>
                             </div>
                           </div>
@@ -300,14 +300,14 @@
                             <div class="col-md-6">
                               <div class="md-form">
                                 <i class="fa fa-clock-o prefix"></i>
-                                <input class="form-control" id="start_time" name="start_time" type="time" step="1800" max="23:00" required onchange="checkMax();">
+                                <input class="form-control" id="start_time" name="start_time" type="time" required>
                                 <label class="active" for="start_time">เวลาเริ่ม</label>
                               </div>
                             </div>
                             <div class="col-md-6">
                               <div class="md-form">
                                 <i class="fa fa-times-circle-o prefix"></i>
-                                <input class="form-control" id="end_time" name="end_time" type="time" step="1800" max="23:00" required onchange="checkMax();">
+                                <input class="form-control" id="end_time" name="end_time" type="time" required>
                                 <label class="active" for="end_time">เวลาสิ้นสุด</label>
                               </div>
                             </div>
@@ -396,14 +396,14 @@
                             <div class="col-md-6">
                               <div class="md-form">
                                 <i class="fa fa-clock-o prefix"></i>
-                                <input class="form-control" id="start_time_edit" name="start_time" type="time" required onchange="checkMax();">
+                                <input class="form-control" id="start_time_edit" name="start_time" type="time" required>
                                 <label class="active" for="start_time_edit">เวลาเริ่ม</label>
                               </div>
                             </div>
                             <div class="col-md-6">
                               <div class="md-form">
                                 <i class="fa fa-times-circle-o prefix"></i>
-                                <input class="form-control" id="end_time_edit" name="end_time" type="time" required onchange="checkMax();">
+                                <input class="form-control" id="end_time_edit" name="end_time" type="time" required>
                                 <label class="active" for="end_time_edit">เวลาสิ้นสุด</label>
                               </div>
                             </div>

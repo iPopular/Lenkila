@@ -425,7 +425,6 @@ class ReservationController extends Controller
                             $reserved_flag = 1;  
 
                         }
-                        $reserved_flag = 1; 
                     }          
                 }    
                 
@@ -566,29 +565,34 @@ class ReservationController extends Controller
             
             if(count($reservation) > 0)
             {
-                //check price before insert
-                // SELECT * 
-                // FROM `reservation` 
-                // WHERE ('2017-01-09 09:00:00' > `start_time` and '2017-01-09 09:00:00' < `end_time` ) 
-                // or ('2017-01-09 10:30:00' > `start_time` and '2017-01-09 10:30:00' < `end_time`) 
+                $THTTZ = new DateTimeZone('+0700');
                 $tmp_field_price = Tmp_Field_Price::where('field_id', $request->input('hddResourceId'))->orderBy('start_time', 'asc')->get();
-                $reserveStarttime = new Datetime($request->input('startTime'));
-                $reserveEndttime = new Datetime($request->input('endTime'));
-                $date = new Datetime($request->input('hddDate'));
+                $reserveStarttime = new Datetime($request->input('startTime'), $THTTZ);
+                $reserveEndttime = new Datetime($request->input('endTime'), $THTTZ);
+                $reserveStartDate = new Datetime($request->input('hddStartDate'), $THTTZ);
+                $reserveEndDate = new Datetime($request->input('hddEndDate'), $THTTZ);
                 //$reservationDay = Reservation::where('start_time', $request->input('hddDate'))->get();
                 $over_flag = 0;
                 $minutes_to_add = 1;
                 $ref_code = $reservation->ref_code;
 
+                $stadium_data = Stadium::where('id', Auth::user()->stadium_id)->first();
+
                 $totalDiscount = $this->promotion($reserveStarttime, $reserveEndttime);
                 
                 foreach($tmp_field_price as $field_price)
                 {
-                    $fieldStarttime = new Datetime($field_price->start_time);
-                    $fieldEndtime = new Datetime($field_price->end_time);
+                    $fieldStarttime = new Datetime($field_price->start_time, $THTTZ);
+                    $fieldEndtime = new Datetime($field_price->end_time, $THTTZ);
+
+                    $fieldStartDate = new Datetime($field_price->start_date, $THTTZ);
+                    $fieldEndDate = new Datetime($field_price->end_date, $THTTZ);
+
                     $minCost = ($field_price->price)/60;
-                    if($over_flag == 0 && $reserveStarttime >= $fieldStarttime && $reserveStarttime <= $fieldEndtime)
+                    if($over_flag == 0 && ($reserveStarttime >= $fieldStarttime && $reserveStarttime <= $fieldEndtime) && ($reserveStartDate >= $fieldStartDate && $reserveEndDate <= $fieldEndDate))
                     {
+                        $startDate = $reserveStartDate;
+                        $endDate = $reserveEndDate;                         
                         if($reserveEndttime <= $fieldEndtime)
                         {
                             $startTime = $reserveStarttime;
@@ -603,11 +607,13 @@ class ReservationController extends Controller
                             $over_flag = 1;
                         }
                         if($endTime > $startTime)
-                            $this->editReservation($reservation, $field_price, $totalDiscount, $startTime, $endTime, $request, $minCost, $date);                        
+                            $this->editReservation($reservation, $field_price, $totalDiscount, $startTime, $endTime, $request, $minCost, $startDate, $endDate);                        
                         
                     }
-                    else if($over_flag == 1 && $tmpStarttime >= $fieldStarttime && $tmpStarttime <= $fieldEndtime)
+                    else if($over_flag == 1 && ($tmpStarttime >= $fieldStarttime && $tmpStarttime <= $fieldEndtime) && ($reserveStartDate >= $fieldStartDate && $reserveEndDate <= $fieldEndDate))
                     {
+                        $startDate = $reserveStartDate;
+                        $endDate = $reserveEndDate;
                         if($reserveEndttime <= $fieldEndtime)
                         {
                             $startTime = $tmpStarttime;
@@ -622,9 +628,46 @@ class ReservationController extends Controller
                             $over_flag = 1;
                         }
                         if($endTime > $startTime)
-                            $this->newReservation($customer, $field_price, $totalDiscount, $startTime, $endTime, $request, $minCost, $date, $ref_code);
+                            $this->newReservation($customer, $field_price, $totalDiscount, $startTime, $endTime, $request, $minCost, $startDate, $endDate, $ref_code);
                                                 
                     }
+                    else if(($fieldEndtime < new Datetime($stadium_data->open_time, $THTTZ)) && ($reserveStartDate >= $fieldStartDate && $reserveEndDate <= $fieldEndDate) && 
+                    (($reserveStarttime <= new Datetime("23:59", $THTTZ) && $reserveStarttime >= new Datetime($stadium_data->open_time, $THTTZ) && $fieldStarttime <= new Datetime("23:59", $THTTZ))))
+                    {
+                        if(new DateTime($reserveStartDate->format('Y-m-d') .' ' .$reserveStarttime->format('H:i:s'), $THTTZ) >= new DateTime($reserveStartDate->format('Y-m-d') .' ' .$fieldStarttime->format('H:i:s'), $THTTZ))
+                        {   
+                            if(new DateTime($reserveEndDate->format('Y-m-d') .' ' .$reserveEndttime->format('H:i:s'), $THTTZ) <= new DateTime($reserveEndDate->format('Y-m-d') .' ' .$fieldEndtime->format('H:i:s'), $THTTZ))
+                            {
+                                $startDate = $reserveStartDate;
+                                $endDate = $reserveEndDate;    
+                        
+                                $startTime = $reserveStarttime;
+                                $endTime = $reserveEndttime;                            
+                                $this->editReservation($reservation, $field_price, $totalDiscount, $startTime, $endTime, $request, $minCost, $startDate, $endDate);
+
+                            }
+                        }      
+                                
+                    }
+                    else if(($fieldEndtime < new Datetime($stadium_data->open_time, $THTTZ)) && ($reserveStartDate >= $fieldStartDate && $reserveEndDate <= $fieldEndDate) && 
+                    ($reserveStarttime >= new Datetime("00:00", $THTTZ) && $reserveStarttime < new Datetime($stadium_data->open_time, $THTTZ) && $fieldStarttime <= new Datetime("23:59", $THTTZ) && $reserveStarttime < new Datetime($stadium_data->open_time, $THTTZ)))
+                    {
+                        $tmpFieldStartDate = $reserveStartDate;
+
+                        if(new DateTime($reserveEndDate->format('Y-m-d') .' ' .$reserveEndttime->format('H:i:s'), $THTTZ) <= new DateTime($reserveEndDate->format('Y-m-d') .' ' .$fieldEndtime->format('H:i:s'), $THTTZ))                    
+                        {   
+                            if(new DateTime($reserveStartDate->format('Y-m-d') .' ' .$reserveStarttime->format('H:i:s'), $THTTZ) >= new DateTime($tmpFieldStartDate->modify('-1 day')->format('Y-m-d') .' ' .$fieldStarttime->format('H:i:s'), $THTTZ))
+                            {
+                                $startDate = new Datetime($request->input('hddStartDate'), $THTTZ);
+                                $endDate = new Datetime($request->input('hddEndDate'), $THTTZ);   
+                        
+                                $startTime = $reserveStarttime;
+                                $endTime = $reserveEndttime;                            
+                                $this->editReservation($reservation, $field_price, $totalDiscount, $startTime, $endTime, $request, $minCost, $startDate, $endDate);
+
+                            }
+                        }          
+                    } 
                 }
 
                 Session::flash('success_msg', 'แก้ไขการจองเข้าระบบเรียบร้อยแล้ว');
@@ -701,7 +744,7 @@ class ReservationController extends Controller
         }
     }
     
-    public function editReservation($reservation, $field_price, $totalDiscount, $startTime, $endTime, $request, $minCost, $date)
+    public function editReservation($reservation, $field_price, $totalDiscount, $startTime, $endTime, $request, $minCost, $startDate, $endDate)
     {
         try
         {       
@@ -709,8 +752,8 @@ class ReservationController extends Controller
             $arrTime = explode(":", $time);
             $total_price = (($arrTime[0] * 60) + $arrTime[1]) * $minCost;
 
-            $mergeStart = new DateTime($date->format('Y-m-d') .' ' . $startTime->format('H:i:s'));
-            $mergeEnd = new DateTime($date->format('Y-m-d') .' ' . $endTime->format('H:i:s'));
+            $mergeStart = new DateTime($startDate->format('Y-m-d') .' ' . $startTime->format('H:i:s'));
+            $mergeEnd = new DateTime($endDate->format('Y-m-d') .' ' . $endTime->format('H:i:s'));
 
             $reservation->field_id = $request->input('hddResourceId');
             $reservation->start_time = $mergeStart;
