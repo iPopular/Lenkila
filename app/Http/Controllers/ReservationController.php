@@ -348,7 +348,7 @@ class ReservationController extends Controller
                 {
                     $startDate = $reserveStartDate;
                     $endDate = $reserveEndDate; 
-                    if(($reserveEndttime <= $fieldEndtime) && ($reserveEndDate <= $fieldEndDate))
+                    if($reserveEndttime <= $fieldEndtime)
                     {
                         $startTime = $reserveStarttime;
                         $endTime = $reserveEndttime;                                   
