@@ -22,9 +22,8 @@
                     });                    
                 </script>
             @endforeach
-
             <h2>รายการวันนี้ </h2>
-            <table id="table_reserve_today" class="table table-striped table-hover" data-page-length="5" cellspacing="0">
+            <table id="table_reserve_today" class="table table-hover" data-page-length="5" cellspacing="0">
                 <!--Table head-->
                 <thead>
                     <tr>
@@ -54,7 +53,7 @@
                             <input id="water_price-{{$event['id']}}" type="hidden" value="{{ $event['water_price'] }}">
                             <input id="supplement_price-{{$event['id']}}" type="hidden" value="{{ $event['supplement_price'] }}">
                             <input id="discount_price-{{$event['id']}}" type="hidden" value="{{ $event['discount_price'] }}">
-                            <td>
+                            <td  data-sort="{{$event['status']}}">
                                 @if($event['status'] == 1)
                                     <input type="checkbox" id="checkbox-{{$event['id']}}">
                                     <label for="checkbox-{{$event['id']}}"></label>
@@ -82,7 +81,7 @@
                             <td>
                                 {{ $event['field_price'] }}   
                             </td>
-                            <td>
+                            <td data-sort="{{$event['status']}}">
                             @if($event['status'] == 1)                                      
                                 <button form="form-{{$event['id']}}" id="btn-edit-paid-{{$event['id']}}" class="btn btn-xs btn-success waves-effect waves-light btn-table btn-edit-paid" type="button" data-toggle="modal" data-target="#modal-paid-reserve" >
                                     <i class="fa fa-money" aria-hidden="true"></i>

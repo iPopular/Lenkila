@@ -29,7 +29,7 @@
                 </div>
                 <!--Account table-->
                 <!--<div class="table-responsive" style="width:100%;">-->
-                    <table id="table_customer" class="table" data-page-length="5" cellspacing="0">
+                    <table id="table_customer" class="table table-hover" data-page-length="5" cellspacing="0">
                         <!--Table head-->
                         <thead>
                             <tr>
@@ -71,11 +71,13 @@
                                     <td>
                                         {{ $tmp->customer->mobile_number }}                                        
                                     </td>
-                                    <td>
                                     @if(array_key_exists($tmp->customer->id, $maxDay))
-                                        {{ $maxDay[$tmp->customer->id][0] }}
-                                    @endif
+                                    <td data-sort="{{ $maxDayNum[$tmp->customer->id][0]}}">                                    
+                                        {{ $maxDay[$tmp->customer->id][0]}}                                        
                                     </td>
+                                    @else
+                                        <td></td>
+                                    @endif
                                     <td>
                                     @if(array_key_exists($tmp->customer->id, $maxTime))
                                         {{ $maxTime[$tmp->customer->id][0] }}

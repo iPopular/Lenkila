@@ -27,7 +27,7 @@
                 
                 <!--Account table-->
                 <div class="table-responsive">
-                    <table class="table" data-page-length="5">
+                    <table class="table table-hover" data-page-length="5">
                         <!--Table head-->
                         <thead>
                             <tr>

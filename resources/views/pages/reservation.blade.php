@@ -14,13 +14,13 @@
 <script type="text/javascript" src="{{ URL::asset('js/bootstrap-colorselector.js') }}"></script>
 <script>
   $(document).ready(function() {
-    console.log({!!json_encode($date)!!});
     var userRole = {!!json_encode(Auth::user()->role_id)!!};
-    var left = '';
+    var left = '', lastdate;
+    console.log(lastdate);
     if (userRole == 3)
-      left = 'promptResource prev';
+      left = 'promptResource myprev';
     else
-      left = 'prev';
+      left = 'myprev';
 
     $('#calendar').fullCalendar({
       defaultView: 'agendaTwoDay',
@@ -40,7 +40,7 @@
       header: {
         left: left,
         center: 'title',
-        right: 'agendaDay, agendaTwoDay, next'
+        right: 'agendaDay, agendaTwoDay, mynext'
       },
       customButtons: {
         promptResource: {
@@ -49,7 +49,25 @@
             $('#modal-add-field').modal('show');
           }
         },
-      },      
+        mynext: {
+            text: 'Next',
+            click: function() {
+                $('#calendar').fullCalendar('incrementDate', moment.duration(1, 'day'));
+                lastdate = $('#calendar').fullCalendar('getDate');
+                console.log(lastdate.format());
+            },
+        },
+        myprev: {
+            text: 'Prev',
+            click: function() {
+                $('#calendar').fullCalendar('incrementDate', moment.duration(-1, 'day'));
+                lastdate = $('#calendar').fullCalendar('getDate');
+                console.log(lastdate.format());
+            }
+        },
+
+      }, 
+          
       //resourceLabelText: 'Rooms',
       resourceRender: function(resource, cellEls) {
         cellEls.on('click', function() {
@@ -139,7 +157,7 @@
     $(".fc-right > button, .fc-left > button").removeClass();
     $('.fc-right > button, .fc-left > button').addClass('btn btn-cyan waves-effect waves-light');    
 
-    $('.fc-right').prepend('<button id="hiddenField" class="datepicker btn btn-cyan waves-effect waves-light"><i class="fa fa-calendar prefix"></i></button>');
+    $('.fc-right').prepend('<button id="hiddenField" class="datepicker btn btn-cyan waves-effect waves-light"><i class="fa fa-calendar prefix"></i></button>');   
 
     $('#hiddenField').datepicker({
     todayHighlight: true,
@@ -149,7 +167,12 @@
     buttonText: "day",
     }).on('changeDate', function(e){
       $('#calendar').fullCalendar('gotoDate', new Date(e.format('mm/dd/yy')));
+      lastdate = $('#calendar').fullCalendar('getDate');
     });
+
+    
+    $('#calendar').fullCalendar('gotoDate', new Date(lastdate.format('mm/dd/yy')) );
+    
 
     function callEditModal(calEvent, start, end) {
       if(calEvent.color != '#c1c1c1')
@@ -196,6 +219,8 @@
     $('#datetimepicker3').datetimepicker({
       format: 'LT'
     });
+
+    
 
   });
 </script>

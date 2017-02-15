@@ -578,22 +578,33 @@ $('.btn-edit-paid').click(function (){
         field_price = 0, 
         water_price = 0, 
         supplement_price = 0,
-        discount_price = 0;
+        discount_price = 0,
+        check_flag = 0;
+    
     $('#table_reserve_today tr').filter(':has(:checkbox:checked)').each(function() {
-        // this = tr
-        
+    
         var tr = this.id;
         reserve_id = reserve_id + '-' + tr;
         field_price += parseInt($('#field_price-' + tr).val());
         water_price += parseInt($('#supplement_price-' + tr).val());
         supplement_price += parseInt($('#water_price-' + tr ).val());
         discount_price += parseInt($('#discount_price-' + tr ).val());
+        check_flag = 1;
 
     });
+    if(check_flag == 0) {
+        reserve_id = reserve_id + '-' + Id[3];
+        field_price += parseInt($('#field_price-' + Id[3]).val());
+        water_price += parseInt($('#supplement_price-' + Id[3]).val());
+        supplement_price += parseInt($('#water_price-' + Id[3]).val());
+        discount_price += parseInt($('#discount_price-' + Id[3]).val());     
+    }
+    
     $('#checkbox-' + Id[3]).trigger('click');
     $('#modal-paid-reserve #hddReserveId').val(reserve_id);
     $('#modal-paid-reserve #field_price').val(field_price);
-    $('#modal-paid-reserve #supplement_price').val(water_price);
+    $('#modal-paid-reserve #water_price').val(water_price);
+    $('#modal-paid-reserve #supplement_price').val(supplement_price);
     $('#modal-paid-reserve #discount_price').val(discount_price);
 
     sumPrice();

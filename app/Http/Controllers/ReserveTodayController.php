@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use auth;
 use Validator;
 use Session;
+use DateTime;
+use DateTimeZone;
 use App\Stadium as Stadium;
 use App\Reservation as Reservation;
 use Illuminate\Http\Request;
@@ -19,12 +21,25 @@ class ReserveTodayController extends Controller
 
         $events = array();
         $j = 0;
-
+        $THTTZ = new DateTimeZone('+0700');
+        $date = date('Y-m-d');
+        $time = date('H:i:s');
+        if($time < '23:59:59') 
+        {
+            $mergeStart = date('Y-m-d H:i:s', strtotime("$date $reservation->open_time"));
+            $mergeEnd = date('Y-m-d H:i:s', strtotime("$date $reservation->close_time" . "+1 days"));
+        }
+        else
+        {
+            $mergeStart = date('Y-m-d H:i:s', strtotime("$date $reservation->open_time" . "-1 days"));
+            $mergeEnd = date('Y-m-d H:i:s', strtotime("$date $reservation->close_time"));
+        }
+        
         foreach($reservation->field as $field)
         {
             foreach($field->reservation as $reserv)
             {
-                if($reserv->start_time >= date("Y-m-d 00:00:00") && $reserv->start_time <= date("Y-m-d 23:59:59"))
+                if($reserv->start_time >= $mergeStart && $reserv->start_time <= $mergeEnd)
                 {
                     $events[$j]['id'] = $reserv->id;
                     $events[$j]['field_price'] = $reserv->field_price;

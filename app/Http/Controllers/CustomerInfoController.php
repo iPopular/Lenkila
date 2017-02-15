@@ -43,6 +43,7 @@ class CustomerInfoController extends Controller
                 $events[$j]['end'] = date("H:i:s",strtotime($reserv['end_time']));//$reserv['end_time'];
                 $day = date('l', strtotime($reserv['start_time']));
                 $events[$j]['day'] = $day;
+                $events[$j]['dayNum'] = date('w', strtotime($reserv['start_time']));
                 $events[$j]['ref_code'] = $reserv['ref_code'];
                 $j++;
             }                       
@@ -60,6 +61,7 @@ class CustomerInfoController extends Controller
         $outDay = array();
         $outTime = array();
         $outDayCount = array();
+        $outDayNum = array();
         foreach ($arrays as $arr){
             foreach ($arr as $key => $value){
                 foreach ($value as $key2 => $value2){
@@ -70,6 +72,15 @@ class CustomerInfoController extends Controller
                             $outDay[$index]++;
                         } else {
                             $outDay[$index] = 1;
+                        }
+                    }
+                    if($key2 == 'dayNum')
+                    {
+                        $index = $value['id'] .'-' .$key2.'-'.$value2;
+                        if (array_key_exists($index, $outDayNum)){
+                            $outDayNum[$index]++;
+                        } else {
+                            $outDayNum[$index] = 1;
                         }
                     }
                     if($key2 == 'ref_code')
@@ -105,6 +116,19 @@ class CustomerInfoController extends Controller
             $maxs = array_keys($value, max($value));
             $maxDay[$key] = $maxs;
         }
+
+        $tmp4 = array();
+        foreach ($outDayNum as $key => $value) 
+        {
+            $key_str = explode("-", $key);           
+            $tmp4[$key_str[0]][$key_str[2]] = $value; 
+        }
+        $maxDayNum = array();
+        foreach($tmp4 as $key => $value)
+        {            
+            $maxs = array_keys($value, max($value));
+            $maxDayNum[$key] = $maxs;
+        }
         
         $tmp2 = array();
         foreach ($outTime as $key => $value) 
@@ -132,7 +156,7 @@ class CustomerInfoController extends Controller
             $countDay[$key] = array_sum($value);
         }
         
-        return view('pages.customer_info', compact('stadium', 'stadium_customer', 'maxTime', 'maxDay', 'countDay'));
+        return view('pages.customer_info', compact('stadium', 'stadium_customer', 'maxTime', 'maxDay', 'maxDayNum', 'countDay'));
      
     }
 
