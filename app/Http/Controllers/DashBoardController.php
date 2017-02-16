@@ -36,8 +36,8 @@ class DashBoardController extends Controller
         $rules = array(
             'field' => 'required|integer',
             'field_price' => 'required|integer',
-            'start_time' => 'required',
-            'end_time' => 'required',
+            'start_time' => 'required|date_format:H:i',
+            'end_time' => 'required|date_format:H:i',
             'start' => 'required|date_format:Y-m-d',
             'end' => 'required|date_format:Y-m-d',
         );
@@ -175,8 +175,8 @@ class DashBoardController extends Controller
             'promotion_name' => 'required',
             'discount' => 'required|integer',
             'discount_type' => 'required',
-            'start_time' => 'required',
-            'end_time' => 'required',
+            'start_time' => 'required|date_format:H:i',
+            'end_time' => 'required|date_format:H:i',
             'start' => 'required|date_format:Y-m-d',
             'end' => 'required|date_format:Y-m-d',
         );
