@@ -50,23 +50,22 @@
           }
         },
         mynext: {
-            text: 'Next',
+            icon: 'right-single-arrow',
             click: function() {
-                $('#calendar').fullCalendar('incrementDate', moment.duration(1, 'day'));
-                lastdate = $('#calendar').fullCalendar('getDate');
-                console.log(lastdate.format());
+                $('#calendar').fullCalendar('incrementDate', moment.duration(2, 'day'));
+                $('#calendar').fullCalendar('incrementDate', moment.duration(-1, 'day'));
+                setDateToCookie();
             },
         },
         myprev: {
-            text: 'Prev',
+            icon: 'left-single-arrow',
             click: function() {
                 $('#calendar').fullCalendar('incrementDate', moment.duration(-1, 'day'));
-                lastdate = $('#calendar').fullCalendar('getDate');
-                console.log(lastdate.format());
+                setDateToCookie();
             }
         },
 
-      }, 
+      },
           
       //resourceLabelText: 'Rooms',
       resourceRender: function(resource, cellEls) {
@@ -157,7 +156,7 @@
     $(".fc-right > button, .fc-left > button").removeClass();
     $('.fc-right > button, .fc-left > button').addClass('btn btn-cyan waves-effect waves-light');    
 
-    $('.fc-right').prepend('<button id="hiddenField" class="datepicker btn btn-cyan waves-effect waves-light"><i class="fa fa-calendar prefix"></i></button>');   
+    $('.fc-right').prepend('<button id="hiddenField" class="datepicker btn btn-cyan waves-effect waves-light"><i class="fa fa-calendar prefix"></i></button>');      
 
     $('#hiddenField').datepicker({
     todayHighlight: true,
@@ -167,11 +166,13 @@
     buttonText: "day",
     }).on('changeDate', function(e){
       $('#calendar').fullCalendar('gotoDate', new Date(e.format('mm/dd/yy')));
-      lastdate = $('#calendar').fullCalendar('getDate');
+      setDateToCookie();
     });
 
-    
-    $('#calendar').fullCalendar('gotoDate', new Date(lastdate.format('mm/dd/yy')) );
+    // on load of the page: switch to the currently selected tab
+    var curDate = getCookie('curDate');
+    $('#calendar').fullCalendar('gotoDate', new Date(curDate));
+    console.log(new Date(curDate));
     
 
     function callEditModal(calEvent, start, end) {
@@ -220,8 +221,29 @@
       format: 'LT'
     });
 
-    
+    function setDateToCookie() 
+    {
+      // store the currently selected tab in the hash value
+      var tglCurrent = $('#calendar').fullCalendar('getDate');
+      tglCurrent = moment(tglCurrent).format('MM/DD/YY');
+      setCookie("curDate", tglCurrent);
+      console.log(tglCurrent);
+    }
 
+    var today = new Date();
+    var expiry = new Date(today.getTime() * 24 * 3600 * 1000); // plus 24 hours
+
+    function setCookie(name, value)
+    {
+      document.cookie=name + "=" + escape(value) + "; path=/; expires=" + expiry.toGMTString();
+    }
+
+    function getCookie(name)
+    {
+      var re = new RegExp(name + "=([^;]+)");
+      var value = re.exec(document.cookie);
+      return (value != null) ? unescape(value[1]) : null;
+    }
   });
 </script>
 <main class="pt-6">
@@ -245,7 +267,7 @@
           <div id='calendar'></div>
         </div>
       </div>
-
+      
       <div tabindex="-1" class="modal fade" id="modal-add-reserve" role="dialog" aria-hidden="true" aria-labelledby="myModalLabel" style="display: none;">
         <div class="modal-dialog" role="document">
           <div class="modal-content">

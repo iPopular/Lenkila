@@ -5,8 +5,6 @@ namespace App\Http\Controllers;
 use auth;
 use Validator;
 use Session;
-use DateTime;
-use DateTimeZone;
 use App\Stadium as Stadium;
 use App\Reservation as Reservation;
 use Illuminate\Http\Request;
@@ -21,7 +19,6 @@ class ReserveTodayController extends Controller
 
         $events = array();
         $j = 0;
-        $THTTZ = new DateTimeZone('+0700');
         $date = date('Y-m-d');
         $time = date('H:i:s');
         if($time < '23:59:59') 

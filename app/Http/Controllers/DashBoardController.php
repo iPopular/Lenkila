@@ -142,6 +142,8 @@ class DashBoardController extends Controller
                 'staduim_name_edit' => 'max:50|unique:stadium,name,'.$stadium->id,
                 'address' => 'max:200',
                 'detail' => 'max:200',
+                'openTime' => 'required',
+                'closeTime' => 'required',
             );
 
             $validator = Validator::make($request->all(), $rules);
