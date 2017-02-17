@@ -165,13 +165,14 @@
     todayBtn: "linked",
     buttonText: "day",
     }).on('changeDate', function(e){
-      $('#calendar').fullCalendar('gotoDate', new Date(e.format('mm/dd/yy')));
+      $('#calendar').fullCalendar('gotoDate', new Date(e.format('mm/dd/yyyy')));
       setDateToCookie();
     });
 
     // on load of the page: switch to the currently selected tab
     var curDate = getCookie('curDate');
-    $('#calendar').fullCalendar('gotoDate', new Date(curDate));
+    if(curDate != null)
+      $('#calendar').fullCalendar('gotoDate', new Date(curDate));
     console.log(new Date(curDate));
     
 
@@ -225,7 +226,7 @@
     {
       // store the currently selected tab in the hash value
       var tglCurrent = $('#calendar').fullCalendar('getDate');
-      tglCurrent = moment(tglCurrent).format('MM/DD/YY');
+      tglCurrent = moment(tglCurrent).format('MM/DD/YYYY');
       setCookie("curDate", tglCurrent);
       console.log(tglCurrent);
     }
