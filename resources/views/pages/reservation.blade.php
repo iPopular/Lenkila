@@ -22,14 +22,26 @@
     else
       left = 'myprev';
 
+    var availHeight = window.screen.availHeight - 200; //144 = 9em
+    
+    //var availWidth = window.screen.availWidth;
+
     $('#calendar').fullCalendar({
-      defaultView: 'agendaTwoDay',
+      
+      resourceLabelText: 'สนาม',
+      defaultView: 'timelineTwoDays',
+      resourceAreaWidth: '10%',
       views: {
         agendaTwoDay: {
           type: 'agenda',
           duration: { days: 2 },
           buttonText: '2 day',
           groupByResource: true
+        },
+        timelineTwoDays: {
+              type: 'timelineWeek',
+              duration: { days: 2 },
+              buttonText: '2 day',
         }
       },
       editable: true,
@@ -40,7 +52,8 @@
       header: {
         left: left,
         center: 'title',
-        right: 'agendaDay, agendaTwoDay, mynext'
+        //right: 'agendaDay, agendaTwoDay, mynext'
+        right: 'timelineDay, timelineTwoDays, mynext'
       },
       customButtons: {
         promptResource: {
@@ -91,7 +104,7 @@
       timeFormat: 'HH:mm',
       slotDuration: "01:00:00",
       //snapMinutes: 60,
-      height: "auto",
+      height: availHeight,
       //selectOverlap: false,
       eventOverlap: true,
       nowIndicator: true,

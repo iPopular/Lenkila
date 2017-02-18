@@ -55,7 +55,7 @@ select {
 }
 
 /*Styles added to show Horizontal Scroll Bar*/
-.fc-view-container {
+/*.fc-view-container {
   width: auto;
 }
 
@@ -65,7 +65,7 @@ select {
 
 .fc-view-container .fc-view > table {
   width: 1600px;
-}
+}*/
 
 table.dataTable thead th.sorting:after {
     font-family: FontAwesome;
