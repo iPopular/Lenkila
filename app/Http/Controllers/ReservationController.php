@@ -39,9 +39,6 @@ class ReservationController extends Controller
         $dateTimeOpenTime = new DateTime($reservation->open_time);
         $dateTimeCloseTime = new DateTime($reservation->close_time);
 
-        //if($closeTime < $openTime)
-           // $closeTime+=24;
-
         $openTime = $openTime . ':00:00';
         $closeTime = $closeTime . ':00:00';
         foreach($reservation->field as $field)
