@@ -61,10 +61,38 @@ class ReservationController extends Controller
                 $events[$j]['color'] = '#c1c1c1';
                 $j++;
             }
-            else
-            {
+            else if($dateTimeCloseTime < $dateTimeOpenTime)
+            {                
                 $events[$j]['resourceId'] = $field['id'];                   
                 $events[$j]['start'] = $closeTime;
+                $events[$j]['end'] = $openTime;
+                $events[$j]['rendering'] = 'background';
+                $events[$j]['color'] = '#c1c1c1';
+                $events[$j]['title'] = 'Close';
+                $events[$j]['startEditable '] = false;
+                $events[$j]['editable'] = false;
+                $events[$j]['durationEditable '] = false;
+                $events[$j]['resourceEditable'] = false;
+                $events[$j]['overlap'] = false;
+                $j++;
+            }
+            else if($dateTimeCloseTime > $dateTimeOpenTime)
+            {                
+                $events[$j]['resourceId'] = $field['id'];                   
+                $events[$j]['start'] = $closeTime;
+                $events[$j]['end'] = '23:59:59';
+                $events[$j]['rendering'] = 'background';
+                $events[$j]['color'] = '#c1c1c1';
+                $events[$j]['title'] = 'Close';
+                $events[$j]['startEditable '] = false;
+                $events[$j]['editable'] = false;
+                $events[$j]['durationEditable '] = false;
+                $events[$j]['resourceEditable'] = false;
+                $events[$j]['overlap'] = false;
+                $j++;
+                
+                $events[$j]['resourceId'] = $field['id'];                   
+                $events[$j]['start'] = '00:00:00';
                 $events[$j]['end'] = $openTime;
                 $events[$j]['rendering'] = 'background';
                 $events[$j]['color'] = '#c1c1c1';
