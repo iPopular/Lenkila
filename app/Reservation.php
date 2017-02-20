@@ -18,14 +18,14 @@ class Reservation extends Model
         return $this->hasOne('App\Customer', 'id', 'customer_id');
     }
 
-    public static function checkOverlap($fieldId, $reserveStarttime, $reserveEndttime, $reservationId = 0)
+    public static function checkOverlap($fieldId, $reserveStarttime, $reserveEndtime, $reservationId = 0)
     {
       return static::leftJoin(
         'field',
         'reservation.field_id', '=', 'field.id'
       )->where('field_id', '=', $fieldId)
       ->where('reservation.id', '!=', $reservationId)
-      ->where('reservation.start_time', '<', $reserveEndttime)
+      ->where('reservation.start_time', '<', $reserveEndtime)
       ->where('reservation.end_time', '>', $reserveStarttime)
       ->select('reservation.id');
     }
