@@ -48,7 +48,15 @@ class DashBoardController extends Controller
         $startDate = new Datetime($request->input('start'));
         $endDate = new Datetime($request->input('end'));
         
+        $open = $this->checkOpenTime($startTime, $endTime);
         
+        if(!$open)
+        {
+            Session::flash('error_msg', 'ไม่สามารถเพิ่มข้อมูลราคาสนามได้ กรุณาสร้างข้อมูลในช่วงเวลาที่สนามเปิดให้บริการ');
+            return Redirect::to('/'. $stadium_name .'/dashboard#panel1_field_price')
+                ->withInput(Input::except('password'));
+        }
+
         $checkOverlap = Tmp_Field_Price::checkOverlap($request->input('field'), $startTime, $endTime, $startDate, $endDate )->get();
 
         if(count($checkOverlap) == 0)
@@ -103,6 +111,15 @@ class DashBoardController extends Controller
             $endTime = new Datetime($request->input('end_time'));
             $startDate = new Datetime($request->input('start'));
             $endDate = new Datetime($request->input('end'));
+
+            $open = $this->checkOpenTime($startTime, $endTime);
+        
+            if(!$open)
+            {
+                Session::flash('error_msg', 'ไม่สามารถแก้ไขข้อมูลราคาสนามได้ กรุณาสร้างข้อมูลในช่วงเวลาที่สนามเปิดให้บริการ');
+                return Redirect::to('/'. $stadium_name .'/dashboard#panel1_field_price')
+                    ->withInput(Input::except('password'));
+            }
 
             $checkOverlap = Tmp_Field_Price::checkOverlap($request->input('field'), $startTime, $endTime, $startDate, $endDate, $tmp_field_price->id )->get();
 
@@ -203,6 +220,23 @@ class DashBoardController extends Controller
         }
     }
 
+    function checkOpenTime($startTime, $endTime)
+    {
+        $stadium = Stadium::where('id', Auth::user()->stadium_id)->first();
+        $openTime = new Datetime($stadium->open_time);
+        $closeTime = new Datetime($stadium->close_time);
+
+        if($openTime > $closeTime)
+            $closeTime->modify('+1 day');
+        if($startTime > $endTime)
+            $endTime->modify('+1 day');
+
+        if(($openTime <= $startTime) && ($closeTime >= $endTime))
+            return true;
+        else
+            return false;
+    }
+
     public function addPromotion(Request $request, $stadium_name)
     {
         $rules = array(
@@ -218,7 +252,16 @@ class DashBoardController extends Controller
         $endTime = new Datetime($request->input('end_time'));
         $startDate = new Datetime($request->input('start'));
         $endDate = new Datetime($request->input('end'));
+
+        $open = $this->checkOpenTime($startTime, $endTime);
         
+        if(!$open)
+        {
+            Session::flash('error_msg', 'ไม่สามารถเพิ่มข้อมูลราคาโปรโมรชั่นได้ กรุณาสร้างข้อมูลในช่วงเวลาที่สนามเปิดให้บริการ');
+            return Redirect::to('/'. $stadium_name .'/dashboard#panel1_promotion')
+                ->withInput(Input::except('password'));
+        }
+
         $checkOverlap = Promotions::checkOverlap(Auth::user()->stadium_id, $startTime, $endTime, $startDate, $endDate )->get();
 
         if(count($checkOverlap) == 0)
@@ -278,7 +321,15 @@ class DashBoardController extends Controller
             $startDate = new Datetime($request->input('start'));
             $endDate = new Datetime($request->input('end'));
             
-            $checkOverlap = Promotions::checkOverlap(Auth::user()->stadium_id, $startTime, $endTime, $startDate, $endDate )->get();
+            $open = $this->checkOpenTime($startTime, $endTime);
+        
+            if(!$open)
+            {
+                Session::flash('error_msg', 'ไม่สามารถแก้ไขข้อมูลโปรโมรชั่นได้ กรุณาสร้างข้อมูลในช่วงเวลาที่สนามเปิดให้บริการ');
+                return Redirect::to('/'. $stadium_name .'/dashboard#panel1_promotion')
+                    ->withInput(Input::except('password'));
+            }
+            $checkOverlap = Promotions::checkOverlap(Auth::user()->stadium_id, $startTime, $endTime, $startDate, $endDate ,$promotion->id)->get();
 
             if(count($checkOverlap) == 0)
             {
@@ -315,7 +366,7 @@ class DashBoardController extends Controller
         }
         else
         {
-            Session::flash('error_msg', 'ไม่สามารถแก้ไขข้อมูลโปรโมรชั่นได้! ไม่พบข้อมูลราคานี้ในระบบ');
+            Session::flash('error_msg', 'ไม่สามารถแก้ไขข้อมูลโปรโมรชั่นได้ ไม่พบข้อมูลราคานี้ในระบบ');
             return Redirect::to('/'. $stadium_name .'/dashboard#panel1_promotion')
                 ->withErrors($validator)
                 ->withInput(Input::except('password')); 

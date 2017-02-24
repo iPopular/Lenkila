@@ -58,6 +58,7 @@ class ReservationController extends Controller
                 $events[$j]['end'] = '24:00:00';
                 $events[$j]['rendering'] = 'background';
                 $events[$j]['color'] = '#c1c1c1';
+                $events[$j]['overlap'] = false;
                 $j++;
             }
             else if($dateTimeCloseTime < $dateTimeOpenTime)
@@ -68,11 +69,6 @@ class ReservationController extends Controller
                 $events[$j]['end'] = $openTime;
                 $events[$j]['rendering'] = 'background';
                 $events[$j]['color'] = '#c1c1c1';
-                $events[$j]['title'] = 'Close';
-                $events[$j]['startEditable '] = false;
-                $events[$j]['editable'] = false;
-                $events[$j]['durationEditable '] = false;
-                $events[$j]['resourceEditable'] = false;
                 $events[$j]['overlap'] = false;
                 $j++;
             }
@@ -83,11 +79,6 @@ class ReservationController extends Controller
                 $events[$j]['end'] = '23:59:59';
                 $events[$j]['rendering'] = 'background';
                 $events[$j]['color'] = '#c1c1c1';
-                $events[$j]['title'] = 'Close';
-                $events[$j]['startEditable '] = false;
-                $events[$j]['editable'] = false;
-                $events[$j]['durationEditable '] = false;
-                $events[$j]['resourceEditable'] = false;
                 $events[$j]['overlap'] = false;
                 $j++;
                 
@@ -96,11 +87,6 @@ class ReservationController extends Controller
                 $events[$j]['end'] = $openTime;
                 $events[$j]['rendering'] = 'background';
                 $events[$j]['color'] = '#c1c1c1';
-                $events[$j]['title'] = 'Close';
-                $events[$j]['startEditable '] = false;
-                $events[$j]['editable'] = false;
-                $events[$j]['durationEditable '] = false;
-                $events[$j]['resourceEditable'] = false;
                 $events[$j]['overlap'] = false;
                 $j++;
             }
@@ -265,6 +251,23 @@ class ReservationController extends Controller
         }
     }
 
+    function checkOpenTime($startTime, $endTime)
+    {
+        $stadium = Stadium::where('id', Auth::user()->stadium_id)->first();
+        $openTime = new Datetime($stadium->open_time);
+        $closeTime = new Datetime($stadium->close_time);
+
+        if($openTime > $closeTime)
+            $closeTime->modify('+1 day');
+        if($startTime > $endTime)
+            $endTime->modify('+1 day');
+
+        if(($openTime <= $startTime) && ($closeTime >= $endTime))
+            return true;
+        else
+            return false;
+    }
+
     public function addReserve(Request $request, $stadium)
     {
         
@@ -302,6 +305,15 @@ class ReservationController extends Controller
             $reserveEndttime = new Datetime($request->input('endTime'));
             $reserveStartDate = new Datetime($request->input('hddStartDate'));
             $reserveEndDate = new Datetime($request->input('hddEndDate'));
+
+            $open = $this->checkOpenTime($reserveStarttime, $reserveEndttime);
+        
+            if(!$open)
+            {
+                Session::flash('error_msg', 'ไม่สามารถเพิ่มการจองได้ กรุณาจองในช่วงเวลาที่สนามเปิดให้บริการ');
+                return Redirect::to('/'. $stadium .'/reservation')
+                    ->withInput(Input::except('password'));
+            }
 
             $start1 = new DateTime($reserveStartDate->format('Y-m-d') .' ' .$reserveStarttime->format('H:i:s'));
             $end1 = new DateTime($reserveEndDate->format('Y-m-d') .' ' .$reserveEndttime->format('H:i:s'));
@@ -547,7 +559,7 @@ class ReservationController extends Controller
             }
             else
             {
-                Session::flash('error_msg', 'ไม่สามารถจองได้ มีการจองซ้ำ จอง '. $start1->format('Y-m-d H:i:s') . '-' . $end1->format('Y-m-d H:i:s') .':'.  $checkOverlap);
+                Session::flash('error_msg', 'ไม่สามารถจองได้ มีการจองซ้ำ');
                 return Redirect::to('/'. $stadium .'/reservation')
                     ->withInput(Input::except('password'));
             }
@@ -559,7 +571,7 @@ class ReservationController extends Controller
             }
             else
             {
-                Session::flash('error_msg', 'ไม่สามารถจองได้ ไม่พบช่วงเวลานี้ ในฐานข้อมูล' . $hicode);
+                Session::flash('error_msg', 'ไม่สามารถจองได้ ไม่พบช่วงเวลานี้ ในฐานข้อมูล');
                 return Redirect::to('/'. $stadium .'/reservation')
                     ->withInput(Input::except('password'));
             }
@@ -736,6 +748,15 @@ class ReservationController extends Controller
                 $reserveStartDate = new Datetime($request->input('hddStartDate'));
                 $reserveEndDate = new Datetime($request->input('hddEndDate'));
                 //$reservationDay = Reservation::where('start_time', $request->input('hddDate'))->get();
+
+                $open = $this->checkOpenTime($reserveStarttime, $reserveEndttime);
+        
+                if(!$open)
+                {
+                    Session::flash('error_msg', 'ไม่สามารถแก้ไขการจองได้ กรุณาจองในช่วงเวลาที่สนามเปิดให้บริการ');
+                    return Redirect::to('/'. $stadium .'/reservation')
+                        ->withInput(Input::except('password'));
+                }
 
                 $start1 = new DateTime($reserveStartDate->format('Y-m-d') .' ' .$reserveStarttime->format('H:i:s'));
                 $end1 = new DateTime($reserveEndDate->format('Y-m-d') .' ' .$reserveEndttime->format('H:i:s'));
@@ -957,7 +978,7 @@ class ReservationController extends Controller
                 }
                 else
                 {
-                    Session::flash('error_msg', 'ไม่สามารถแก้ไขการจองได้ มีการจองซ้ำ'. $checkOverlap);
+                    Session::flash('error_msg', 'ไม่สามารถแก้ไขการจองได้ มีการจองซ้ำ');
                     return Redirect::to('/'. $stadium .'/reservation')
                         ->withInput(Input::except('password'));
                 }
