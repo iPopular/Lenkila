@@ -231,7 +231,7 @@ class DashBoardController extends Controller
         if($startTime > $endTime)
             $endTime->modify('+1 day');
 
-        if(($openTime <= $startTime) && ($closeTime >= $endTime))
+        if(($openTime <= $startTime) && ($closeTime >= $endTime) || ($openTime == $closeTime))
             return true;
         else
             return false;
