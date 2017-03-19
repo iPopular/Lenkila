@@ -497,6 +497,63 @@ $('.btn-delete-customer').click(function (){
     $('#modal-delete-customer').modal('toggle');
 });
 
+$('.btn-copy-field_price').click(function(){
+    $('#modal-add-field_price #price_label').addClass('active');
+    // $('#modal-edit-field_price #field_label_edit').removeClass('active');
+    //$('#modal-add-field_price #hdd_field_price').val($('#modal-edit-field_price #hdd_field_price').val());
+    $('#modal-add-field_price #field_price').val($('#modal-edit-field_price #field_price_edit').val());
+    $('#modal-add-field_price #field').val($('#modal-edit-field_price #field_edit').val());
+    $('#modal-add-field_price #field').material_select();
+    $('#modal-add-field_price #start_time').val($('#modal-edit-field_price #start_time_edit').val());
+    $('#modal-add-field_price #end_time').val($('#modal-edit-field_price #end_time_edit').val());
+    // $('#modal-edit-field_price #start_date_edit').val($('#start_date-' + Id[3]).val());
+    // $('#modal-edit-field_price #end_date_edit').val($('#end_date-' + Id[3]).val());
+    if($('#modal-edit-field_price #day_0-edit').prop('checked'))
+        $('#modal-add-field_price #day_0').prop('checked', true);
+    else
+        $('#modal-add-field_price #day_0').prop('checked', false);
+
+    if($('#modal-edit-field_price #day_1-edit').prop('checked'))
+        $('#modal-add-field_price #day_1').prop('checked', true);
+    else
+        $('#modal-add-field_price #day_1').prop('checked', false);
+
+    if($('#modal-edit-field_price #day_2-edit').prop('checked'))
+        $('#modal-add-field_price #day_2').prop('checked', true);
+    else
+        $('#modal-add-field_price #day_2').prop('checked', false);
+
+    if($('#modal-edit-field_price #day_3-edit').prop('checked'))
+        $('#modal-add-field_price #day_3').prop('checked', true);
+    else
+        $('#modal-add-field_price #day_3').prop('checked', false);
+
+    if($('#modal-edit-field_price #day_4-edit').prop('checked'))
+        $('#modal-add-field_price #day_4').prop('checked', true);
+    else
+        $('#modal-add-field_price #day_4').prop('checked', false);
+    
+    if($('#modal-edit-field_price #day_5-edit').prop('checked'))
+        $('#modal-add-field_price #day_5').prop('checked', true);
+    else
+        $('#modal-add-field_price #day_5').prop('checked', false);
+
+    if($('#modal-edit-field_price #day_6-edit').prop('checked'))
+        $('#modal-add-field_price #day_6').prop('checked', true);
+    else
+        $('#modal-add-field_price #day_6').prop('checked', false);
+
+    if($('#modal-edit-field_price #holiday-edit').prop('checked'))
+        $('#modal-add-field_price #holiday').prop('checked', true);
+    else
+        $('#modal-add-field_price #holiday').prop('checked', false);
+
+    //$('#modal-add-field_price #field_price_edit').val($('#modal-edit-field_price #field_price_edit').val());
+    $('#modal-add-field_price #bgColor').val($('#modal-edit-field_price #bgColor_edit').val());
+    $('#modal-edit-field_price').modal('toggle');
+
+});
+
 $('.btn-edit-field_price').click(function (){
     var Id = this.id.split('-');
     // $('#modal-edit-field_price .edit label').addClass('active');

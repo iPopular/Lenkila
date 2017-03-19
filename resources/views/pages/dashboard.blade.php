@@ -369,7 +369,7 @@
                               <div class="md-form">
                                   <i class="fa fa-money prefix"></i>
                                   <input class="form-control" id="field_price" name="field_price" type="text" required>
-                                  <label for="field_price">ราคา</label>
+                                  <label id="price_label" for="field_price">ราคา</label>
                               </div>
                             </div>
                           </div>
@@ -569,7 +569,8 @@
                       <div class="modal-footer">
                           <div class="form-inline" style="color:red;">
                               <i class="fa fa-asterisk" aria-hidden="true"></i>  <p class="form-group  text-important">กรุณากรอกข้อมูลให้ครบถ้วน</p>
-                              <button class="btn btn-default waves-effect waves-light form-group" type="submit"><i class="fa fa-pencil" aria-hidden="true"></i> แก้ไข</button>
+                              <button class="btn btn-success waves-effect waves-light btn-copy-field_price" type="button" data-toggle="modal" data-target="#modal-add-field_price"><i class="fa fa-files-o" aria-hidden="true"></i> คัดลอก</button>
+                              <button class="btn btn-default waves-effect waves-light" type="submit"><i class="fa fa-pencil" aria-hidden="true"></i> แก้ไข</button>                              
                           </div>
                       </div>                            
                   </div>

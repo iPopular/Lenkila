@@ -132,9 +132,10 @@
       // eventConstraint: 'available_hours',
       select: function(start, end, jsEvent, view, resource, allDay) {
         if(resource.status == 1) {
-          // console.log(jsEvent);
+          console.log(jsEvent);
           if (jsEvent.target.classList.contains('fc-bgevent')) {
               alert('Click Background Event Area');
+              console.log(jsEvent);
           }
           endtime = moment(end).format('HH:mm');
           starttime = moment(start).format('HH:mm');

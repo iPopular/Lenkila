@@ -144,7 +144,7 @@ class ReservationController extends Controller
                     $events[$j]['rendering'] = 'background';
                     $events[$j]['color'] = '#c1c1c1';
                     $events[$j]['overlap'] = false;
-                    $events[$j]['selectable'] = false;
+                    $events[$j]['status'] = 0;
                     $events[$j]['ranges'] = array(array('start' => date('Y-m-d', strtotime($holiday->start_date . "-1 day")), 'end' => date('Y-m-d', strtotime($holiday->end_date . "+1 day"))));
                     $j++;
                 }
