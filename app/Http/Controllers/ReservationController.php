@@ -840,7 +840,18 @@ class ReservationController extends Controller
             
             if(count($reservation) > 0)
             {
-                $tmp_field_price = Tmp_Field_Price::where('field_id', $request->input('hddResourceId'))->orderBy('start_time', 'asc')->get();
+                $tmp_holiday = Holidays::where('stadium_id', Auth::user()->stadium_id)->where('avalible',1)->where('start_date', '<=', $request->input('hddEndDate'))->where('end_date', '>=', $request->input('hddStartDate'))->get();
+
+                $startDay = date('D', strtotime($request->input('hddStartDate')));
+                $endDay = date('D', strtotime($request->input('hddEndDate')));
+                
+                if(count($tmp_holiday) > 0)
+                    $tmp_field_price = Tmp_Field_Price::where('field_id', $request->input('hddResourceId'))->where('tmp_field_price.day', 'like', '%Holiday%')->orderBy('start_time', 'asc')->get();
+                elseif($startDay != $endDay)
+                    $tmp_field_price = Tmp_Field_Price::where('field_id', $request->input('hddResourceId'))->where('tmp_field_price.day', 'like', '%' . $startDay . '%')->orWhere('tmp_field_price.day', 'like', '%' . $endDay . '%')->orderBy('start_time', 'asc')->get();
+                else
+                    $tmp_field_price = Tmp_Field_Price::where('field_id', $request->input('hddResourceId'))->where('tmp_field_price.day', 'like', '%' . $startDay . '%')->orderBy('start_time', 'asc')->get();
+                //$tmp_field_price = Tmp_Field_Price::where('field_id', $request->input('hddResourceId'))->orderBy('start_time', 'asc')->get();
                 $reserveStarttime = new Datetime($request->input('startTime'));
                 $reserveEndtime = new Datetime($request->input('endTime'));
                 $reserveStartDate = new Datetime($request->input('hddStartDate'));
