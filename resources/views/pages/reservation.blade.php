@@ -17,7 +17,7 @@
     
     var userRole = {!!json_encode(Auth::user()->role_id)!!};
     var left = '', lastdate;
-    console.log(lastdate);
+    //console.log(lastdate);
     if (userRole == 3)
       left = 'promptResource myprev';
     else
@@ -101,7 +101,7 @@
               $('#modal-edit-field #edit_status').prop('checked', false);
             $('.reserve label').addClass('active');
             $('#modal-edit-field').modal('show');
-            console.log(resource);
+            //console.log(resource);
           }
         });
       },
@@ -125,8 +125,6 @@
       resources: {!!json_encode($resource)!!},
       events: function( start, end, timezone, callback ){
           var events = {!!json_encode($events)!!}; //getEvents(start,end);// {!!json_encode($events)!!}; //this should be a JSON request //   
-          // $('#calendar').fullCalendar('incrementDate', moment.duration(-1, 'day'));
-          // $('#calendar').fullCalendar('incrementDate', moment.duration(1, 'day'));       
           callback(events);
           
       },
@@ -135,9 +133,9 @@
       select: function(start, end, jsEvent, view, resource, allDay) {
         if(resource.status == 1) {
           // console.log(jsEvent);
-          // if (jsEvent.target.classList.contains('fc-bgevent')) {
-          //     alert('Click Background Event Area');
-          // }
+          if (jsEvent.target.classList.contains('fc-bgevent')) {
+              alert('Click Background Event Area');
+          }
           endtime = moment(end).format('HH:mm');
           starttime = moment(start).format('HH:mm');
           day = moment(start).format('dd ll');
@@ -182,7 +180,7 @@
         $('#reserve_tooltip').tooltip('toggle');
       },
       eventRender: function(event, element, view){
-          console.log(event.ranges);
+          //console.log(event.ranges);
           
           return (event.ranges.filter(function(range){
               return (event.start.isBefore(range.end) &&
@@ -191,31 +189,31 @@
       }
     });
 
-    var repeatingEvents = [{
-        title:"My repeating event",
-        id: 1,
-        resourceId:1,
-        start: '10:00', // a start time (10am in this example)
-        end: '14:00', // an end time (6pm in this example)
-        dow: [ 1,2,3,4,5 ], // Repeat monday and thursday
-        ranges: [{ //repeating events are only displayed if they are within one of the following ranges.
-            start: '2017-01-01',
-            end: '2017-12-05',
-        },{
-            start: '2017-12-05',
-            end: '2017-12-31',
-        }],
+    // var repeatingEvents = [{
+    //     title:"My repeating event",
+    //     id: 1,
+    //     resourceId:1,
+    //     start: '10:00', // a start time (10am in this example)
+    //     end: '14:00', // an end time (6pm in this example)
+    //     dow: [ 1,2,3,4,5 ], // Repeat monday and thursday
+    //     ranges: [{ //repeating events are only displayed if they are within one of the following ranges.
+    //         start: '2017-01-01',
+    //         end: '2017-12-05',
+    //     },{
+    //         start: '2017-12-05',
+    //         end: '2017-12-31',
+    //     }],
     
-    }];
+    // }];
 
-    console.log({!!json_encode($holidays2)!!});
+    
 
-    var repeatingEvents2 = {!!json_encode($events)!!};
+    // var repeatingEvents2 = {!!json_encode($events)!!};
     //emulate server
-    function getEvents( start, end ){
-        //return {!!json_encode($events)!!};
-        return repeatingEvents2;
-    }
+    // function getEvents( start, end ){
+    //     //return {!!json_encode($events)!!};
+    //     return repeatingEvents2;
+    // }
 
     // $('#calendar').fullCalendar( 'removeEvents', function(event) {
     //     if(event.start.toDateString()===new Date(2017, 12,5).toDateString())
@@ -246,7 +244,7 @@
     var curDate = getCookie('curDate');
     if(curDate != null)
       $('#calendar').fullCalendar('gotoDate', new Date(curDate));
-    console.log(curDate);
+    //console.log(curDate);
     setDateToCookie('today');
 
     
@@ -317,7 +315,7 @@
         //console.log(tglCurrent);
       }
       
-      console.log(date + ' = ' +tglCurrent);
+      //console.log(date + ' = ' +tglCurrent);
     }   
 
     function setCookie(name, value)
@@ -342,8 +340,8 @@
       setDateToCookie('today');
     });
 
-    var clientEvents = $('#calendar').fullCalendar('clientEvents');
-    console.log(clientEvents);
+    // var clientEvents = $('#calendar').fullCalendar('clientEvents');
+    // console.log(clientEvents);
   });
 </script>
 <main class="pt-6">

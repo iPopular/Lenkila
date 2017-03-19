@@ -351,7 +351,7 @@ function getLinechart(){
         },
         data: { _date: start },        
         success: function(info){
-            console.log(info[7]);
+            //console.log(info[7]);
             
             dataAmountDays = info[1];
             dataCntDays = info[2];

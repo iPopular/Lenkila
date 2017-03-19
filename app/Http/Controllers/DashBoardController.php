@@ -228,8 +228,6 @@ class DashBoardController extends Controller
                 }
             }
 
-            //$checkOverlap = Tmp_Field_Price::checkOverlap($request->input('field'), $startTime, $endTime, $tmp_day, $tmp_field_price->id )->get();
-
             if(count($checkOverlap) == 0)
             {
                 $validator = Validator::make($request->all(), $rules);
