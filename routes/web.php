@@ -129,6 +129,24 @@ Route::post('/{stadium}/delete-promotion', [
     'roles' => ['owner']
 ]);
 
+Route::post('/{stadium}/add-holiday', [
+    'middleware' => ['auth', 'roles', 'stadium'],
+    'uses' => 'DashBoardController@addHoliday',
+    'roles' => ['owner']
+]);
+
+Route::post('/{stadium}/edit-holiday', [
+    'middleware' => ['auth', 'roles', 'stadium'],
+    'uses' => 'DashBoardController@editHoliday',
+    'roles' => ['owner']
+]);
+
+Route::post('/{stadium}/delete-holiday', [
+    'middleware' => ['auth', 'roles', 'stadium'],
+    'uses' => 'DashBoardController@deleteHoliday',
+    'roles' => ['owner']
+]);
+
 Route::post('/{stadium}/edit-stadium', [
     'middleware' => ['auth', 'roles', 'stadium'],
     'uses' => 'DashBoardController@editStadium',
@@ -186,6 +204,12 @@ Route::post('/{stadium}/delete-reserve', [
 Route::post('/{stadium}/getCustomer', [
     'middleware' => ['auth', 'roles', 'stadium'],
     'uses' => 'ReservationController@getCustomer',
+    'roles' => ['owner', 'administrator', 'staff']
+]);
+
+Route::post('/{stadium}/getHoliday', [
+    'middleware' => ['auth', 'roles', 'stadium'],
+    'uses' => 'ReservationController@getHoliday',
     'roles' => ['owner', 'administrator', 'staff']
 ]);
 

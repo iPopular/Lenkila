@@ -499,16 +499,57 @@ $('.btn-delete-customer').click(function (){
 
 $('.btn-edit-field_price').click(function (){
     var Id = this.id.split('-');
-    $('#modal-edit-field_price .edit label').addClass('active');
-    $('#modal-edit-field_price #field_label_edit').removeClass('active');
+    // $('#modal-edit-field_price .edit label').addClass('active');
+    $('#modal-edit-field_price #price_label_edit').addClass('active');
+    // $('#modal-edit-field_price #field_label_edit').removeClass('active');
     $('#modal-edit-field_price #hdd_field_price').val(Id[3]);
     $('#modal-edit-field_price #field_price').val(Id[3]);
     $('#modal-edit-field_price #field_edit').val($('#field-' + Id[3]).val());
     $('#modal-edit-field_price #field_edit').material_select();
     $('#modal-edit-field_price #start_time_edit').val($('#start_time-' + Id[3]).val());
     $('#modal-edit-field_price #end_time_edit').val($('#end_time-' + Id[3]).val());
-    $('#modal-edit-field_price #start_date_edit').val($('#start_date-' + Id[3]).val());
-    $('#modal-edit-field_price #end_date_edit').val($('#end_date-' + Id[3]).val());
+    // $('#modal-edit-field_price #start_date_edit').val($('#start_date-' + Id[3]).val());
+    // $('#modal-edit-field_price #end_date_edit').val($('#end_date-' + Id[3]).val());
+    if($('#day-' + Id[3]).val().indexOf("Sun") >= 0)
+        $('#modal-edit-field_price #day_0-edit').prop('checked', true);
+    else
+        $('#modal-edit-field_price #day_0-edit').prop('checked', false);
+
+    if($('#day-' + Id[3]).val().indexOf("Mon") >= 0)
+        $('#modal-edit-field_price #day_1-edit').prop('checked', true);
+    else
+        $('#modal-edit-field_price #day_1-edit').prop('checked', false);
+
+    if($('#day-' + Id[3]).val().indexOf("Tue") >= 0)
+        $('#modal-edit-field_price #day_2-edit').prop('checked', true);
+    else
+        $('#modal-edit-field_price #day_2-edit').prop('checked', false);
+
+    if($('#day-' + Id[3]).val().indexOf("Wen") >= 0)
+        $('#modal-edit-field_price #day_3-edit').prop('checked', true);
+    else
+        $('#modal-edit-field_price #day_3-edit').prop('checked', false);
+
+    if($('#day-' + Id[3]).val().indexOf("Thu") >= 0)
+        $('#modal-edit-field_price #day_4-edit').prop('checked', true);
+    else
+        $('#modal-edit-field_price #day_4-edit').prop('checked', false);
+    
+    if($('#day-' + Id[3]).val().indexOf("Fri") >= 0)
+        $('#modal-edit-field_price #day_5-edit').prop('checked', true);
+    else
+        $('#modal-edit-field_price #day_5-edit').prop('checked', false);
+
+    if($('#day-' + Id[3]).val().indexOf("Sat") >= 0)
+        $('#modal-edit-field_price #day_6-edit').prop('checked', true);
+    else
+        $('#modal-edit-field_price #day_6-edit').prop('checked', false);
+
+    if($('#day-' + Id[3]).val().indexOf("Holiday") >= 0)
+        $('#modal-edit-field_price #holiday-edit').prop('checked', true);
+    else
+        $('#modal-edit-field_price #holiday-edit').prop('checked', false);
+
     $('#modal-edit-field_price #field_price_edit').val($('#price-' + Id[3]).val());
     $('#modal-edit-field_price #bgColor_edit').val($('#bgColor-' + Id[3]).val());
 });
@@ -546,6 +587,30 @@ $('.btn-delete-promotion').click(function (){
     $('#modal-delete-promotion').modal('toggle');
 });
 
+$('.btn-edit-holiday').click(function (){
+    var Id = this.id.split('-');
+    $('#modal-edit-holiday .edit label').addClass('active');    
+    $('#modal-edit-holiday #holiday_name-edit').val($('#holiday_name-' + Id[3]).val());
+    $('#modal-edit-holiday #hddholiday').val(Id[3]);
+    $('#modal-edit-holiday #start_time').val($('#holiday_start_time-' + Id[3]).val());
+    $('#modal-edit-holiday #end_time').val($('#holiday_end_time-' + Id[3]).val());   
+    $('#modal-edit-holiday #start_date').val($('#holiday_start_date-' + Id[3]).val());
+    $('#modal-edit-holiday #end_date').val($('#holiday_end_date-' + Id[3]).val());
+
+    if($('#holiday_avalible-' + Id[3]).val() == '1')
+        $('#modal-edit-holiday #holiday_avalible').prop('checked', true); // Checks it
+    else
+        $('#modal-edit-holiday #holiday_avalible').prop('checked', false); // Unchecks it
+        
+});
+
+$('.btn-delete-holiday').click(function (){
+    var Id = this.id.split('-');
+    $('#del-holiday').val(Id[2]);
+
+    $('#modal-delete-holiday').modal('toggle');
+});
+
 function checkCustomer() {
     var mobile_number = $("#mobile_number").val();
     $.ajax({
@@ -561,6 +626,32 @@ function checkCustomer() {
         data: { _mobile_number: mobile_number },        
         success: function(info) {
             $('#nickname').val(info);
+        },
+        error: function() {
+            console.log('error');
+        }
+    });
+
+}
+
+function checkHoliday(fullCalendarDate) {    
+    $.ajax({
+        url: 'getHoliday',
+        type: 'POST',
+        beforeSend: function (xhr) {
+            var token = $('meta[name="csrf_token"]').attr('content');
+
+            if (token) {
+                return xhr.setRequestHeader('X-CSRF-TOKEN', token);
+            }
+        },
+        data: { _fullCalendarDate: fullCalendarDate },        
+        success: function(info) {
+            $('#holiday_name').text(info); 
+            if(info != '')                     
+                $('.mb-1').css('display', 'block');
+            else
+                $('.mb-1').css('display', 'none');
         },
         error: function() {
             console.log('error');

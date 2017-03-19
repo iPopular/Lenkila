@@ -39,4 +39,9 @@ class Stadium extends Model
     {
         return $this->hasMany('App\Promotions','stadium_id');
     }
+
+    public function holidays()
+    {
+        return $this->hasMany('App\Holidays','stadium_id')->orderBy('start_date', 'ASC');
+    }
 }

@@ -14,6 +14,7 @@
 <script type="text/javascript" src="{{ URL::asset('js/bootstrap-colorselector.js') }}"></script>
 <script>
   $(document).ready(function() {
+    
     var userRole = {!!json_encode(Auth::user()->role_id)!!};
     var left = '', lastdate;
     console.log(lastdate);
@@ -65,16 +66,22 @@
         mynext: {
             icon: 'right-single-arrow',
             click: function() {
+                var fullCalendarDate;
                 $('#calendar').fullCalendar('incrementDate', moment.duration(2, 'day'));
                 $('#calendar').fullCalendar('incrementDate', moment.duration(-1, 'day'));
-                setDateToCookie();
+                fullCalendarDate = $('#calendar').fullCalendar('getDate');
+                fullCalendarDate = moment(fullCalendarDate).format('YYYY-MM-DD');
+                checkHoliday(fullCalendarDate);
             },
         },
         myprev: {
             icon: 'left-single-arrow',
             click: function() {
+                var fullCalendarDate;
                 $('#calendar').fullCalendar('incrementDate', moment.duration(-1, 'day'));
-                setDateToCookie();
+                fullCalendarDate = $('#calendar').fullCalendar('getDate');
+                fullCalendarDate = moment(fullCalendarDate).format('YYYY-MM-DD');
+                checkHoliday(fullCalendarDate);
             }
         },
 
@@ -116,11 +123,21 @@
       allDaySlot: false,
       schedulerLicenseKey: 'GPL-My-Project-Is-Open-Source',
       resources: {!!json_encode($resource)!!},
-      events: {!!json_encode($events)!!},
+      events: function( start, end, timezone, callback ){
+          var events = {!!json_encode($events)!!}; //getEvents(start,end);// {!!json_encode($events)!!}; //this should be a JSON request //   
+          // $('#calendar').fullCalendar('incrementDate', moment.duration(-1, 'day'));
+          // $('#calendar').fullCalendar('incrementDate', moment.duration(1, 'day'));       
+          callback(events);
+          
+      },
       // selectConstraint: 'available_hours',
       // eventConstraint: 'available_hours',
       select: function(start, end, jsEvent, view, resource, allDay) {
         if(resource.status == 1) {
+          // console.log(jsEvent);
+          // if (jsEvent.target.classList.contains('fc-bgevent')) {
+          //     alert('Click Background Event Area');
+          // }
           endtime = moment(end).format('HH:mm');
           starttime = moment(start).format('HH:mm');
           day = moment(start).format('dd ll');
@@ -163,8 +180,48 @@
       },
       eventMouseout: function(calEvent, jsEvent) {
         $('#reserve_tooltip').tooltip('toggle');
+      },
+      eventRender: function(event, element, view){
+          console.log(event.ranges);
+          
+          return (event.ranges.filter(function(range){
+              return (event.start.isBefore(range.end) &&
+                      event.end.isAfter(range.start));
+          }).length)>0;
       }
     });
+
+    var repeatingEvents = [{
+        title:"My repeating event",
+        id: 1,
+        resourceId:1,
+        start: '10:00', // a start time (10am in this example)
+        end: '14:00', // an end time (6pm in this example)
+        dow: [ 1,2,3,4,5 ], // Repeat monday and thursday
+        ranges: [{ //repeating events are only displayed if they are within one of the following ranges.
+            start: '2017-01-01',
+            end: '2017-12-05',
+        },{
+            start: '2017-12-05',
+            end: '2017-12-31',
+        }],
+    
+    }];
+
+    console.log({!!json_encode($holidays2)!!});
+
+    var repeatingEvents2 = {!!json_encode($events)!!};
+    //emulate server
+    function getEvents( start, end ){
+        //return {!!json_encode($events)!!};
+        return repeatingEvents2;
+    }
+
+    // $('#calendar').fullCalendar( 'removeEvents', function(event) {
+    //     if(event.start.toDateString()===new Date(2017, 12,5).toDateString())
+    //         return true;
+    // });
+    
 
     $(".fc-right > button, .fc-left > button").removeClass();
     $('.fc-right > button, .fc-left > button').addClass('btn btn-cyan waves-effect waves-light');    
@@ -178,15 +235,20 @@
     todayBtn: "linked",
     buttonText: "day",
     }).on('changeDate', function(e){
+      var fullCalendarDate;
       $('#calendar').fullCalendar('gotoDate', new Date(e.format('mm/dd/yyyy')));
-      setDateToCookie();
+      fullCalendarDate = $('#calendar').fullCalendar('getDate');
+      fullCalendarDate = moment(fullCalendarDate).format('YYYY-MM-DD');
+      checkHoliday(fullCalendarDate);    
     });
 
     // on load of the page: switch to the currently selected tab
     var curDate = getCookie('curDate');
     if(curDate != null)
       $('#calendar').fullCalendar('gotoDate', new Date(curDate));
-    console.log(new Date(curDate));
+    console.log(curDate);
+    setDateToCookie('today');
+
     
 
     function callEditModal(calEvent, start, end) {
@@ -235,20 +297,33 @@
       format: 'LT'
     });
 
-    function setDateToCookie() 
+    function setDateToCookie(date) 
     {
-      // store the currently selected tab in the hash value
-      var tglCurrent = $('#calendar').fullCalendar('getDate');
-      tglCurrent = moment(tglCurrent).format('MM/DD/YYYY');
-      setCookie("curDate", tglCurrent);
-      console.log(tglCurrent);
-    }
-
-    var today = new Date();
-    var expiry = new Date(today.getTime() * 24 * 3600 * 1000); // plus 24 hours
+      var tglCurrent;
+      if(date == 'Calendar')
+      {
+        // store the currently selected tab in the hash value
+        tglCurrent = $('#calendar').fullCalendar('getDate');
+        tglCurrent = moment(tglCurrent).format('MM/DD/YYYY');
+        setCookie("curDate", tglCurrent);
+        //console.log(tglCurrent);
+      }
+      else
+      {
+        // store the currently selected tab in the hash value
+        tglCurrent = new Date();
+        tglCurrent = moment(tglCurrent).format('MM/DD/YYYY');
+        setCookie("curDate", tglCurrent);
+        //console.log(tglCurrent);
+      }
+      
+      console.log(date + ' = ' +tglCurrent);
+    }   
 
     function setCookie(name, value)
     {
+      var today = new Date();
+      var expiry = new Date(today.getTime() * 3600 * 1000); // plus 1 hours
       document.cookie=name + "=" + escape(value) + "; path=/; expires=" + expiry.toGMTString();
     }
 
@@ -258,6 +333,17 @@
       var value = re.exec(document.cookie);
       return (value != null) ? unescape(value[1]) : null;
     }
+
+    $( ".setDateCalendar" ).click(function() {
+      setDateToCookie('Calendar');
+    });
+
+    $( ".setDateToday" ).click(function() {
+      setDateToCookie('today');
+    });
+
+    var clientEvents = $('#calendar').fullCalendar('clientEvents');
+    console.log(clientEvents);
   });
 </script>
 <main class="pt-6">
@@ -276,6 +362,11 @@
         });
       </script>
       @endif
+      <div class="card card-danger text-center z-depth-2 mb-1" style="display:none;">
+          <div class="card-block" style="padding:0.25rem;">
+              <p class="white-text mb-0">วันหยุด <a class="text-white"><strong id="holiday_name"></strong></a></p>
+          </div>
+      </div>
       <div class="row">
         <div class="col-md-12">
           <div id='calendar'></div>
@@ -363,8 +454,8 @@
 
               </div>
               <div class="modal-footer">
-                <button type="submit" class="btn btn-success"><i class="fa fa-check" aria-hidden="true"></i> บันทึก</button>
-                <button type="button" class="btn btn-warning" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> ยกเลิก</button>
+                <button type="submit" class="btn btn-success setDateCalendar"><i class="fa fa-check" aria-hidden="true"></i> บันทึก</button>
+                <button type="button" class="btn btn-warning setDateToday" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> ยกเลิก</button>
               </div>
             </form>
           </div>
@@ -456,9 +547,9 @@
             </div>
             <div class="modal-footer">              
               <button type="button" class="btn btn-info" data-toggle="modal" data-target="#modal-paid-reserve"><i class="fa fa-money" aria-hidden="true"></i> ชำระเงิน</button>
-              <button form="edit-reserve" type="submit" class="btn btn-success"><i class="fa fa-check" aria-hidden="true"></i> แก้ไข</button>
-              <button type="button" class="btn btn-warning" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> ยกเลิก</button>
-              <button form="delete-reserve" type="submit" class="btn btn-danger"><i class="fa fa-trash-o" aria-hidden="true"></i> ลบ</button>
+              <button form="edit-reserve" type="submit" class="btn btn-success setDateCalendar"><i class="fa fa-check" aria-hidden="true"></i> แก้ไข</button>
+              <button type="button" class="btn btn-warning" data-dismiss="modal setDateToday"><i class="fa fa-times" aria-hidden="true"></i> ยกเลิก</button>
+              <button form="delete-reserve" type="submit" class="btn btn-danger setDateCalendar"><i class="fa fa-trash-o" aria-hidden="true"></i> ลบ</button>
             </div>
           </div>
         </div>
@@ -505,7 +596,7 @@
               </form>
             </div>
             <div class="modal-footer">
-              <button form="paid-reserve" type="submit" class="btn btn-success"><i class="fa fa-check" aria-hidden="true"></i> บันทึก</button>
+              <button form="paid-reserve" type="submit" class="btn btn-success setDateCalendar"><i class="fa fa-check" aria-hidden="true"></i> บันทึก</button>
               <!--<button type="button" class="btn btn-warning" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> ยกเลิก</button>-->
             </div>
           </div>
@@ -610,7 +701,7 @@
         <div class="tooltip-inner">
           <p id="tooltip_label"></p>
         </div>
-      </div>
+      </div>      
   </div>
 
   </section>

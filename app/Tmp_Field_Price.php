@@ -13,7 +13,7 @@ class Tmp_Field_Price extends Model
         return $this->belongsTo('App\Field');
     }
 
-    public static function checkOverlap($fieldId, $starttime, $endtime, $startDate, $endDate, $fieldpriceId = 0)
+    public static function checkOverlap($fieldId, $starttime, $endtime, $day, $fieldpriceId = 0)
     {
       return static::leftJoin(
         'field',
@@ -22,8 +22,7 @@ class Tmp_Field_Price extends Model
       ->where('tmp_field_price.id', '!=', $fieldpriceId)
       ->where('tmp_field_price.start_time', '<', $endtime)
       ->where('tmp_field_price.end_time', '>', $starttime)
-      ->where('tmp_field_price.start_date', '<', $endDate)
-      ->where('tmp_field_price.end_date', '>', $startDate)
+      ->where('tmp_field_price.day', 'like', '%' . $day . '%')
       ->select('tmp_field_price.id');
     }
 }

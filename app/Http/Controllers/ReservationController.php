@@ -11,6 +11,7 @@ use App\Promotions as Promotions;
 use App\Tmp_Field_Price as Tmp_Field_Price;
 use App\Tmp_Customer_Stadium as Tmp_Customer_Stadium;
 use App\Stadium as Stadium;
+use App\Holidays as Holidays;
 use Validator;
 use Session;
 use DateTime;
@@ -20,6 +21,8 @@ use DateTimeZone;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Log;
+
 
 class ReservationController extends Controller
 {
@@ -32,7 +35,10 @@ class ReservationController extends Controller
         
         $reservation = Stadium::where('id', Auth::user()->stadium_id)->first();
         $events = array();
+        $holidays = array();
+        $holidays2 = array();
         $j = 0;
+        $k = 0;
 
         $openTime = intval(date('G', strtotime($reservation->open_time)));
         $closeTime = intval(date('G', strtotime($reservation->close_time)));
@@ -42,7 +48,30 @@ class ReservationController extends Controller
 
         $openTime = $openTime . ':00:00';
         $closeTime = $closeTime . ':00:00';
-        
+
+        foreach($reservation->holidays as $holiday)
+        {
+            if(new Datetime($holiday->start_time) >= new Datetime($holiday->end_time))   
+                array_push($holidays, array('id' => $holiday->id, 'start' => date('Y-m-d H:i:s', strtotime("$holiday->start_date $holiday->start_time")), 'end' => date('Y-m-d H:i:s', strtotime("$holiday->end_date $holiday->end_time"  . "+1 day"))));
+            else
+                array_push($holidays, array('id' => $holiday->id, 'start' => date('Y-m-d H:i:s', strtotime("$holiday->start_date $holiday->start_time")), 'end' => date('Y-m-d H:i:s', strtotime("$holiday->end_date $holiday->end_time"))));
+            
+        }
+        $holidays2[0]['start'] = date('Y-m-d', strtotime($holidays[count($holidays) - 1]['end'] . "-1 year"));
+        $holidays2[0]['end'] = date('Y-m-d', strtotime($holidays[0]['start']));
+        for($k = 1; $k <= count($holidays); $k++)
+        {
+
+            $holidays2[$k]['start'] = $holidays[$k - 1]['end'];
+            if($k < count($holidays))
+                $holidays2[$k]['end'] = $holidays[$k]['start'];
+            else
+                $holidays2[$k]['end'] = date('Y-m-d', strtotime($holidays[0]['start'] . "+1 year"));
+        } 
+
+        Log::info('holiday: '. json_encode($holidays));
+        Log::info('holiday2: '. json_encode($holidays2));
+
         foreach($reservation->field as $field)
         {
             
@@ -59,6 +88,7 @@ class ReservationController extends Controller
                 $events[$j]['rendering'] = 'background';
                 $events[$j]['color'] = '#c1c1c1';
                 $events[$j]['overlap'] = false;
+                $events[$j]['ranges'] = array(array('start' => '2010-01-01', 'end' => '9999-01-01'));
                 $j++;
             }
             else if($dateTimeCloseTime < $dateTimeOpenTime)
@@ -70,6 +100,7 @@ class ReservationController extends Controller
                 $events[$j]['rendering'] = 'background';
                 $events[$j]['color'] = '#c1c1c1';
                 $events[$j]['overlap'] = false;
+                $events[$j]['ranges'] = array(array('start' => '2010-01-01', 'end' => '9999-01-01'));
                 $j++;
             }
             else if($dateTimeCloseTime > $dateTimeOpenTime)
@@ -80,6 +111,7 @@ class ReservationController extends Controller
                 $events[$j]['rendering'] = 'background';
                 $events[$j]['color'] = '#c1c1c1';
                 $events[$j]['overlap'] = false;
+                $events[$j]['ranges'] = array(array('start' => '2010-01-01', 'end' => '9999-01-01'));
                 $j++;
                 
                 if(intval(date('G', strtotime($reservation->open_time))) > 0)
@@ -90,11 +122,34 @@ class ReservationController extends Controller
                     $events[$j]['rendering'] = 'background';
                     $events[$j]['color'] = '#c1c1c1';
                     $events[$j]['overlap'] = false;
+                    $events[$j]['ranges'] = array(array('start' => '2010-01-01', 'end' => '9999-01-01'));
                     $j++;
                 }
                 
             }
-            
+
+            foreach($reservation->holidays as $holiday)
+            {
+
+                if($holiday->avalible == '0')
+                {
+                    $holiday_start = date('Y-m-d H:i:s', strtotime("$holiday->start_date $holiday->start_time"));
+                    $holiday_end = date('Y-m-d H:i:s', strtotime("$holiday->end_date $holiday->end_time"));
+
+                    if(new Datetime($holiday->start_time) >= new Datetime($holiday->end_time))
+                        $holiday_end =  date('Y-m-d H:i:s', strtotime("$holiday->end_date $holiday->end_time" . "+1 day"));
+                    $events[$j]['resourceId'] = $field['id'];
+                    $events[$j]['start'] = $holiday_start;
+                    $events[$j]['end'] = $holiday_end;
+                    $events[$j]['rendering'] = 'background';
+                    $events[$j]['color'] = '#c1c1c1';
+                    $events[$j]['overlap'] = false;
+                    $events[$j]['selectable'] = false;
+                    $events[$j]['ranges'] = array(array('start' => date('Y-m-d', strtotime($holiday->start_date . "-1 day")), 'end' => date('Y-m-d', strtotime($holiday->end_date . "+1 day"))));
+                    $j++;
+                }
+
+            }                     
             
             $i++;
 
@@ -111,6 +166,7 @@ class ReservationController extends Controller
                 $events[$j]['title'] = $reserv['customer']['nickname'] . '_' . $reserv['customer']['mobile_number'];                
                 $events[$j]['color'] = $reserv['background_color'];
                 $events[$j]['description'] = $reserv['note'];
+                $events[$j]['ranges'] = array(array('start' =>  date('Y-m-d', strtotime($reserv['start_time'] . "-1 day")), 'end' => date('Y-m-d', strtotime($reserv['end_time'] . "+1 day"))));
                 if($reserv['status'] == '2')
                     $events[$j]['borderColor'] = '#54ff78';
                 else if($reserv['status'] == '1')
@@ -120,45 +176,136 @@ class ReservationController extends Controller
                 $j++;
             }
 
+            
+
             foreach($field->tmp_field_price as $field_price)
-            {                
-                $begin = new DateTime( $field_price->start_date );
-                $end = new DateTime( $field_price->end_date );
-                $end->modify('+1 day');
+            {
+                $dow = array();
 
-                $interval = DateInterval::createFromDateString('1 day');
-                $period = new DatePeriod($begin, $interval, $end);
-
-                foreach ( $period as $dt )
+                if(strpos($field_price->day,'Holiday') !== false)
                 {
-                    $date = $dt->format( "Y-m-d" );            
+                    foreach($reservation->holidays as $holiday)
+                    {
+
+                        if($holiday->avalible == '1')
+                        {             
+                            $holiday_start = date('Y-m-d H:i:s', strtotime("$holiday->start_date $holiday->start_time"));
+                            $holiday_end = date('Y-m-d H:i:s', strtotime("$holiday->end_date $holiday->end_time"));
+
+                            $start_time = $field_price['start_time'];
+                            $end_time = $field_price['end_time'];
+
+                            $dateTimeStarttime = date('Y-m-d H:i:s', strtotime("$holiday->start_date $start_time"));
+                            $dateTimeEndtime = date('Y-m-d H:i:s', strtotime("$holiday->start_date $end_time"));
+
+
+                            if($dateTimeStarttime > $dateTimeEndtime)
+                                $dateTimeEndtime = date('Y-m-d H:i:s', strtotime("$holiday->start_date $end_time" . "+1 day"));
+
+                            $events[$j]['start'] = $dateTimeStarttime;
+                            $events[$j]['end'] = $dateTimeEndtime;
+                            $events[$j]['resourceId'] = $field_price['field_id'];
+                            $events[$j]['title'] = $field_price['price']; 
+                            $events[$j]['rendering'] = 'background';
+                            $events[$j]['color'] = $field_price['set_color'];
+                            $events[$j]['ranges'] = array(array('start' => date('Y-m-d', strtotime($holiday->start_date . "-1 day")), 'end' => date('Y-m-d', strtotime($holiday->end_date . "+1 day"))));
+                            $j++;
+                        }                       
+                    }
+                }
+                else
+                {
+                    if(strpos($field_price->day,'Sun') !== false)                
+                        array_push($dow, 0);
+                    
+                    if(strpos($field_price->day,'Mon') !== false)
+                        array_push($dow, 1);
+                    
+                    if(strpos($field_price->day,'Tue') !== false)
+                        array_push($dow, 2);
+                    
+                    if(strpos($field_price->day,'Wen') !== false)
+                        array_push($dow, 3);
+                    
+                    if(strpos($field_price->day,'Thu') !== false)
+                        array_push($dow, 4);
+
+                    if(strpos($field_price->day,'Fri') !== false)
+                        array_push($dow, 5);
+
+                    if(strpos($field_price->day,'Sat') !== false)
+                        array_push($dow, 6);
+                    
                     $start_time = $field_price['start_time'];
                     $end_time = $field_price['end_time'];
-                    
+
                     $dateTimeStarttime = new DateTime($start_time);
                     $dateTimeEndtime = new DateTime($end_time);
-
-                    if ($dateTimeStarttime < $dateTimeOpenTime)                    
-                        $events[$j]['start'] = date('Y-m-d H:i:s', strtotime("$date $start_time" . "+1 days"));
+                    
+                    if($dateTimeEndtime < $dateTimeStarttime)
+                    {
+                        $events[$j]['start'] = $field_price['start_time'];
+                        $events[$j]['end'] = intval(date('G', strtotime($field_price['end_time']))) + 24 . ':00';
+                        
+                    }
                     else
-                        $events[$j]['start'] = date('Y-m-d H:i:s', strtotime("$date $start_time"));
-
-                    if (($dateTimeEndtime < $dateTimeOpenTime) || (($dateTimeStarttime == $dateTimeEndtime) && ($dateTimeOpenTime == $dateTimeCloseTime) || $dateTimeEndtime < $dateTimeStarttime ))                    
-                        $events[$j]['end'] = date('Y-m-d H:i:s', strtotime("$date $end_time" . "+1 days"));
-                    else
-                        $events[$j]['end'] = date('Y-m-d H:i:s', strtotime("$date $end_time"));
-
+                    {
+                        $events[$j]['start'] = $field_price['start_time'];
+                        $events[$j]['end'] = $field_price['end_time'];
+                        
+                    }
+                    $events[$j]['dow'] = $dow;
                     $events[$j]['resourceId'] = $field_price['field_id'];
                     $events[$j]['title'] = $field_price['price']; 
                     $events[$j]['rendering'] = 'background';
                     $events[$j]['color'] = $field_price['set_color'];
+                    $events[$j]['ranges'] = $holidays2;//array(array('start' => '2017-01-01', 'end' => '2017-12-05'), array('start' => '2017-12-05', 'end' => '2017-12-31'));
                     $j++;
-
+                   
                 }
+                
+                
+                
+                
+// ============================================================================================================================================
+                // $begin = new DateTime( $field_price->start_date );
+                // $end = new DateTime( $field_price->end_date );
+                // $end->modify('+1 day');
+
+                // $interval = DateInterval::createFromDateString('1 day');
+                // $period = new DatePeriod($begin, $interval, $end);
+
+                // foreach ( $period as $dt )
+                // {
+                //     $date = $dt->format( "Y-m-d" );            
+                //     $start_time = $field_price['start_time'];
+                //     $end_time = $field_price['end_time'];
+                    
+                //     $dateTimeStarttime = new DateTime($start_time);
+                //     $dateTimeEndtime = new DateTime($end_time);
+
+                //     if ($dateTimeStarttime < $dateTimeOpenTime)                    
+                //         $events[$j]['start'] = date('Y-m-d H:i:s', strtotime("$date $start_time" . "+1 days"));
+                //     else
+                //         $events[$j]['start'] = date('Y-m-d H:i:s', strtotime("$date $start_time"));
+
+                //     if (($dateTimeEndtime < $dateTimeOpenTime) || (($dateTimeStarttime == $dateTimeEndtime) && ($dateTimeOpenTime == $dateTimeCloseTime) || $dateTimeEndtime < $dateTimeStarttime ))                    
+                //         $events[$j]['end'] = date('Y-m-d H:i:s', strtotime("$date $end_time" . "+1 days"));
+                //     else
+                //         $events[$j]['end'] = date('Y-m-d H:i:s', strtotime("$date $end_time"));
+
+                //     $events[$j]['resourceId'] = $field_price['field_id'];
+                //     $events[$j]['title'] = $field_price['price']; 
+                //     $events[$j]['rendering'] = 'background';
+                //     $events[$j]['color'] = $field_price['set_color'];
+                //     $j++;
+
+                // }
+// ==================================================================================================================================================        
             }  
         }
 
-        return view('pages.reservation', compact('stadium', 'resource', 'reservation', 'events', 'openTime', 'closeTime'));
+        return view('pages.reservation', compact('stadium', 'resource', 'reservation', 'events', 'openTime', 'closeTime', 'holidays2'));
     }
 
     public function addField(Request $request, $stadium)
@@ -303,8 +450,21 @@ class ReservationController extends Controller
                 $customer->save();
                 $this->addTmpCustomerStadium($customer);                
             }
+            
+            $tmp_holiday = Holidays::where('stadium_id', Auth::user()->stadium_id)->where('avalible',1)->where('start_date', '<=', $request->input('hddEndDate'))->where('end_date', '>=', $request->input('hddStartDate'))->get();
 
-            $tmp_field_price = Tmp_Field_Price::where('field_id', $request->input('hddResourceId'))->where('start_date', '<', $request->input('hddEndDate'))->where('end_date', '>', $request->input('hddStartDate'))->orderBy('start_time', 'asc')->get();
+            $startDay = date('D', strtotime($request->input('hddStartDate')));
+            $endDay = date('D', strtotime($request->input('hddEndDate')));
+            
+            if(count($tmp_holiday) > 0)
+                $tmp_field_price = Tmp_Field_Price::where('field_id', $request->input('hddResourceId'))->where('tmp_field_price.day', 'like', '%Holiday%')->orderBy('start_time', 'asc')->get();
+            elseif($startDay != $endDay)
+                $tmp_field_price = Tmp_Field_Price::where('field_id', $request->input('hddResourceId'))->where('tmp_field_price.day', 'like', '%' . $startDay . '%')->orWhere('tmp_field_price.day', 'like', '%' . $endDay . '%')->orderBy('start_time', 'asc')->get();
+            else
+                $tmp_field_price = Tmp_Field_Price::where('field_id', $request->input('hddResourceId'))->where('tmp_field_price.day', 'like', '%' . $startDay . '%')->orderBy('start_time', 'asc')->get();
+            
+            //->where('start_date', '<', $request->input('hddEndDate'))->where('end_date', '>', $request->input('hddStartDate'))
+            Log::info('$tmp_field_price '. json_encode($tmp_field_price));
             $reserveStarttime = new Datetime($request->input('startTime'));
             $reserveEndtime = new Datetime($request->input('endTime'));
             $reserveStartDate = new Datetime($request->input('hddStartDate'));
@@ -367,8 +527,8 @@ class ReservationController extends Controller
                     {                   
                         if($done_flag == 0 && $over_flag == 0 && ($tmpStart1 >= $tmpStart2 && $tmpStart1 < $tmpEnd2))
                         {
-                            $startDate = $reserveStartDate;
-                            $endDate = $reserveEndDate; 
+                            // $startDate = $reserveStartDate;
+                            // $endDate = $reserveEndDate; 
                             if(($tmpEnd1 <= $tmpEnd2) && ($tmpStart1 < $tmpEnd1))
                             {
                                 $startTime = $tmpStart1;
@@ -383,14 +543,14 @@ class ReservationController extends Controller
                                 $over_flag = 1;
                             }
                             if($endTime > $startTime)
-                                $this->newReservation($customer, $field_price, $totalDiscount, $startTime, $endTime, $request, $minCost, $startDate, $endDate, $ref_code);
+                                $this->newReservation($customer, $field_price, $totalDiscount, $startTime, $endTime, $request, $minCost, $ref_code);
                             $reserved_flag = 1;                        
                             
                         }                
                         else if($done_flag == 0 && $over_flag == 1 && ($tmpStarttime >= $tmpStart2 && $tmpStarttime < $tmpEnd2))
                         {
-                            $startDate = $reserveStartDate;
-                            $endDate = $reserveEndDate; 
+                            // $startDate = $reserveStartDate;
+                            // $endDate = $reserveEndDate; 
                             
                             if(($tmpEnd1 <= $tmpEnd2) && ($tmpStarttime < $tmpEnd1))
                             {   
@@ -406,7 +566,7 @@ class ReservationController extends Controller
                                 $over_flag = 1;
                             }
                             if($endTime > $startTime)
-                                $this->newReservation($customer, $field_price, 0, $startTime, $endTime, $request, $minCost, $startDate, $endDate, $ref_code);
+                                $this->newReservation($customer, $field_price, 0, $startTime, $endTime, $request, $minCost, $ref_code);
                             $reserved_flag = 1;
                         }        
                     }
@@ -448,8 +608,8 @@ class ReservationController extends Controller
                                                 
                             if($done_flag == 0 && $over_flag == 0 && ($tmpStart1 >= $tmpStart3 && $tmpStart1 < $tmpEnd3))
                             {
-                                $startDate = $reserveStartDate;
-                                $endDate = $reserveEndDate; 
+                                // $startDate = $reserveStartDate;
+                                // $endDate = $reserveEndDate; 
                                 if(($tmpEnd1 <= $tmpEnd3) && ($tmpStart1 < $tmpEnd1))
                                 {
                                     $startTime = $tmpStart1;
@@ -464,14 +624,14 @@ class ReservationController extends Controller
                                     $over_flag = 1;
                                 }
                                 if($endTime > $startTime)
-                                    $this->newReservation($customer, $field_price, $totalDiscount, $startTime, $endTime, $request, $minCost, $startDate, $endDate, $ref_code);
+                                    $this->newReservation($customer, $field_price, $totalDiscount, $startTime, $endTime, $request, $minCost, $ref_code);
                                 $reserved_flag = 1;                        
                                 
                             }                
                             else if($done_flag == 0 && $over_flag == 1 && ($tmpStarttime >= $tmpStart3 && $tmpStarttime < $tmpEnd3))
                             {
-                                $startDate = new Datetime($tmpStarttime->format('Y-m-d'));
-                                $endDate = $reserveEndDate; 
+                                // $startDate = new Datetime($tmpStarttime->format('Y-m-d'));
+                                // $endDate = $reserveEndDate; 
                                 
                                 if(($tmpEnd1 <= $tmpEnd3) && ($tmpStarttime < $tmpEnd1))
                                 {   
@@ -487,7 +647,7 @@ class ReservationController extends Controller
                                     $over_flag = 1;
                                 }
                                 if($endTime > $startTime)
-                                    $this->newReservation($customer, $field_price, 0, $startTime, $endTime, $request, $minCost, $startDate, $endDate, $ref_code);
+                                    $this->newReservation($customer, $field_price, 0, $startTime, $endTime, $request, $minCost, $ref_code);
                                 $reserved_flag = 1;
                             }
                         } 
@@ -762,13 +922,13 @@ class ReservationController extends Controller
                                     $over_flag = 1;
                                 }
                                 if($endTime > $startTime)
-                                    $this->editReservation($reservation, $field_price, $totalDiscount, $startTime, $endTime, $request, $minCost, $startDate, $endDate);                        
+                                    $this->editReservation($reservation, $field_price, $totalDiscount, $startTime, $endTime, $request, $minCost);                        
                                 
                             }
                             else if($done_flag == 0 && $over_flag == 1 && ($tmpStarttime >= $tmpStart2 && $tmpStarttime < $tmpEnd2))
                             {
-                                $startDate = $reserveStartDate;
-                                $endDate = $reserveEndDate; 
+                                // $startDate = $reserveStartDate;
+                                // $endDate = $reserveEndDate; 
                                 
                                 if(($tmpEnd1 <= $tmpEnd2) && ($tmpStarttime < $tmpEnd1))
                                 {   
@@ -784,7 +944,7 @@ class ReservationController extends Controller
                                     $over_flag = 1;
                                 }
                                 if($endTime > $startTime)
-                                    $this->newReservation($customer, $field_price, 0, $startTime, $endTime, $request, $minCost, $startDate, $endDate, $ref_code);
+                                    $this->newReservation($customer, $field_price, 0, $startTime, $endTime, $request, $minCost, $ref_code);
                             }
                         } 
                     }
@@ -840,13 +1000,13 @@ class ReservationController extends Controller
                                         $over_flag = 1;
                                     }
                                     if($endTime > $startTime)
-                                        $this->editReservation($reservation, $field_price, $totalDiscount, $startTime, $endTime, $request, $minCost, $startDate, $endDate);                     
+                                        $this->editReservation($reservation, $field_price, $totalDiscount, $startTime, $endTime, $request, $minCost);                     
                                     
                                 }                
                                 else if($done_flag == 0 && $over_flag == 1 && ($tmpStarttime >= $tmpStart3 && $tmpStarttime < $tmpEnd3))
                                 {
-                                    $startDate = new Datetime($tmpStarttime->format('Y-m-d'));
-                                    $endDate = $reserveEndDate; 
+                                    // $startDate = new Datetime($tmpStarttime->format('Y-m-d'));
+                                    // $endDate = $reserveEndDate; 
                                     
                                     if(($tmpEnd1 <= $tmpEnd3) && ($tmpStarttime < $tmpEnd1))
                                     {   
@@ -862,7 +1022,7 @@ class ReservationController extends Controller
                                         $over_flag = 1;
                                     }
                                     if($endTime > $startTime)
-                                        $this->newReservation($customer, $field_price, 0, $startTime, $endTime, $request, $minCost, $startDate, $endDate, $ref_code);
+                                        $this->newReservation($customer, $field_price, 0, $startTime, $endTime, $request, $minCost, $ref_code);
                                 }
                             } 
                                             
@@ -950,12 +1110,12 @@ class ReservationController extends Controller
         }
     }
     
-    public function editReservation($reservation, $field_price, $totalDiscount, $startTime, $endTime, $request, $minCost, $startDate, $endDate)
+    public function editReservation($reservation, $field_price, $totalDiscount, $startTime, $endTime, $request, $minCost)
     {
         try
         {      
-            $mergeStart = new DateTime($startDate->format('Y-m-d') .' ' . $startTime->format('H:i:s'));
-            $mergeEnd = new DateTime($endDate->format('Y-m-d') .' ' . $endTime->format('H:i:s'));
+            $mergeStart = $startTime;//new DateTime($startDate->format('Y-m-d') .' ' . $startTime->format('H:i:s'));
+            $mergeEnd = $endTime;//new DateTime($endDate->format('Y-m-d') .' ' . $endTime->format('H:i:s'));
 
             $time = $mergeStart->diff($mergeEnd)->format('%H:%i:%s');
             $arrTime = explode(":", $time);
@@ -987,12 +1147,12 @@ class ReservationController extends Controller
         }
     }
 
-    function newReservation($customer, $field_price, $totalDiscount, $startTime, $endTime, $request, $minCost, $startDate, $endDate, $ref_code)
+    function newReservation($customer, $field_price, $totalDiscount, $startTime, $endTime, $request, $minCost, $ref_code)
     {
         try
         { 
-            $mergeStart = new DateTime($startDate->format('Y-m-d') .' ' . $startTime->format('H:i:s'));
-            $mergeEnd = new DateTime($endDate->format('Y-m-d') .' ' . $endTime->format('H:i:s'));
+            $mergeStart = $startTime;//new DateTime($startDate->format('Y-m-d') .' ' . $startTime->format('H:i:s'));
+            $mergeEnd = $endTime;//new DateTime($endDate->format('Y-m-d') .' ' . $endTime->format('H:i:s'));
 
             $time = $mergeStart->diff($mergeEnd)->format('%H:%i:%s');
             $arrTime = explode(":", $time);
@@ -1059,6 +1219,23 @@ class ReservationController extends Controller
         $result = '';
         if(count($customer) > 0)
             $result = $customer->nickname;
+
+        return $result;
+    }
+
+    public function getHoliday(Request $request)
+    {
+        $holidays = Holidays::where('stadium_id', Auth::user()->stadium_id)->where('start_date', '<=', $request->input('_fullCalendarDate'))->where('end_date', '>=', $request->input('_fullCalendarDate'))->first();        
+        $result = '';
+        if(count($holidays) > 0)
+        {
+            $result = $holidays->name;
+            if($holidays->avalible == 0)
+                $result .= ' ปิดบริการ';
+            else
+                $result .= ' เปิดบริการ';
+        }
+            
 
         return $result;
     }
