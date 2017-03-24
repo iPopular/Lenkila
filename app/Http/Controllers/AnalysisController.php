@@ -325,7 +325,7 @@ class AnalysisController extends Controller
         
         $begin = new Datetime($reservation->open_time);
         $end = new Datetime($reservation->close_time);
-        if($end < $begin)
+        if($end <= $begin)
             $end->modify('+1 day');
 
         $interval = DateInterval::createFromDateString('1 hour');
