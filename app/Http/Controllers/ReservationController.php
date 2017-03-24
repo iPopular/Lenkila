@@ -57,9 +57,14 @@ class ReservationController extends Controller
                 array_push($holidays, array('id' => $holiday->id, 'start' => date('Y-m-d H:i:s', strtotime("$holiday->start_date $holiday->start_time")), 'end' => date('Y-m-d H:i:s', strtotime("$holiday->end_date $holiday->end_time"))));
             
         }
-        $holidays2[0]['start'] = date('Y-m-d', strtotime($holidays[count($holidays) - 1]['end'] . "-1 year"));
-        $holidays2[0]['end'] = date('Y-m-d', strtotime($holidays[0]['start']));
-        for($k = 1; $k <= count($holidays); $k++)
+        if(count($holidays) > 1)
+            $holidays2[0]['start'] = date('Y-m-d', strtotime($holidays[count($holidays) - 1]['end'] . "-1 year"));
+        else if(count($holidays) == 1)
+            $holidays2[0]['start'] = date('Y-m-d', strtotime($holidays[0]['end'] . "-1 year"));
+
+        if(count($holidays) > 0)
+            $holidays2[0]['end'] = date('Y-m-d', strtotime($holidays[0]['start']));
+        for($k = 1; $k < count($holidays); $k++)
         {
 
             $holidays2[$k]['start'] = $holidays[$k - 1]['end'];
@@ -68,7 +73,7 @@ class ReservationController extends Controller
             else
                 $holidays2[$k]['end'] = date('Y-m-d', strtotime($holidays[0]['start'] . "+1 year"));
         } 
-
+        
         Log::info('holiday: '. json_encode($holidays));
         Log::info('holiday2: '. json_encode($holidays2));
 
@@ -259,7 +264,10 @@ class ReservationController extends Controller
                     $events[$j]['title'] = $field_price['price']; 
                     $events[$j]['rendering'] = 'background';
                     $events[$j]['color'] = $field_price['set_color'];
-                    $events[$j]['ranges'] = $holidays2;//array(array('start' => '2017-01-01', 'end' => '2017-12-05'), array('start' => '2017-12-05', 'end' => '2017-12-31'));
+                    if(count($holidays2) > 0)
+                        $events[$j]['ranges'] = $holidays2;//array(array('start' => '2017-01-01', 'end' => '2017-12-05'), array('start' => '2017-12-05', 'end' => '2017-12-31'));
+                    else
+                        $events[$j]['ranges'] = array(array('start' => '2010-01-01', 'end' => '9999-01-01'));
                     $j++;
                    
                 }
