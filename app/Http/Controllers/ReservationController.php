@@ -72,10 +72,16 @@ class ReservationController extends Controller
                 $holidays2[$k]['end'] = $holidays[$k]['start'];
             else
                 $holidays2[$k]['end'] = date('Y-m-d', strtotime($holidays[0]['start'] . "+1 year"));
+        }
+        $holidays3 = array();
+        for ($k=0; $k < count($holidays2); $k++) {
+            for ($l=-5; $l < 5; $l++) { 
+                array_push($holidays3, array('start' => date('Y-m-d', strtotime($holidays2[$k]['start'] . "+" .$l ."year")), 'end' => date('Y-m-d', strtotime($holidays2[$k]['end'] . "+" .$l ."year"))));
+            }            
         } 
         
         Log::info('holiday: '. json_encode($holidays));
-        Log::info('holiday2: '. json_encode($holidays2));
+        Log::info('holiday2: '. json_encode($holidays3));
 
         foreach($reservation->field as $field)
         {
@@ -264,8 +270,8 @@ class ReservationController extends Controller
                     $events[$j]['title'] = $field_price['price']; 
                     $events[$j]['rendering'] = 'background';
                     $events[$j]['color'] = $field_price['set_color'];
-                    if(count($holidays2) > 0)
-                        $events[$j]['ranges'] = $holidays2;//array(array('start' => '2017-01-01', 'end' => '2017-12-05'), array('start' => '2017-12-05', 'end' => '2017-12-31'));
+                    if(count($holidays3) > 0)
+                        $events[$j]['ranges'] = $holidays3;//array(array('start' => '2017-01-01', 'end' => '2017-12-05'), array('start' => '2017-12-05', 'end' => '2017-12-31'));
                     else
                         $events[$j]['ranges'] = array(array('start' => '2010-01-01', 'end' => '9999-01-01'));
                     $j++;
