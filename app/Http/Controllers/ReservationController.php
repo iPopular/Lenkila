@@ -80,8 +80,8 @@ class ReservationController extends Controller
             }            
         } 
         
-        Log::info('holiday: '. json_encode($holidays));
-        Log::info('holiday2: '. json_encode($holidays3));
+        // Log::info('holiday: '. json_encode($holidays));
+        // Log::info('holiday2: '. json_encode($holidays3));
 
         foreach($reservation->field as $field)
         {
@@ -175,7 +175,7 @@ class ReservationController extends Controller
                 $events[$j]['start'] = $reserv['start_time'];
                 $events[$j]['end'] = $reserv['end_time'];
                 $events[$j]['title'] = $reserv['customer']['nickname'] . '_' . $reserv['customer']['mobile_number'];                
-                $events[$j]['color'] = $reserv['background_color'];
+                $events[$j]['color'] = 'rgba(255, 255, 255, 0.15)';//$reserv['background_color'];
                 $events[$j]['description'] = $reserv['note'];
                 $events[$j]['ranges'] = array(array('start' =>  date('Y-m-d', strtotime($reserv['start_time'] . "-1 day")), 'end' => date('Y-m-d', strtotime($reserv['end_time'] . "+1 day"))));
                 if($reserv['status'] == '2')
@@ -478,7 +478,7 @@ class ReservationController extends Controller
                 $tmp_field_price = Tmp_Field_Price::where('field_id', $request->input('hddResourceId'))->where('tmp_field_price.day', 'like', '%' . $startDay . '%')->orderBy('start_time', 'asc')->get();
             
             //->where('start_date', '<', $request->input('hddEndDate'))->where('end_date', '>', $request->input('hddStartDate'))
-            Log::info('$tmp_field_price '. json_encode($tmp_field_price));
+            //Log::info('$tmp_field_price '. json_encode($tmp_field_price));
             $reserveStarttime = new Datetime($request->input('startTime'));
             $reserveEndtime = new Datetime($request->input('endTime'));
             $reserveStartDate = new Datetime($request->input('hddStartDate'));
@@ -505,14 +505,14 @@ class ReservationController extends Controller
                 $reserved_flag = 0;
                 $left_period_flag = 0;
                 $done_flag = 0;
-                $minutes_to_add = 1;            
+                $minutes_to_add = 1;
+                $totalPrice = 0;
+                $totalDiscount = 0;        
                 $ref_code = time();
                 
 
 
                 $stadium_data = Stadium::where('id', Auth::user()->stadium_id)->first();
-
-                $totalDiscount = $this->promotion($reserveStarttime, $reserveEndtime, $reserveStartDate, $reserveEndDate, $stadium_data);
 
                 
                 foreach($tmp_field_price as $field_price)
@@ -557,7 +557,12 @@ class ReservationController extends Controller
                                 $over_flag = 1;
                             }
                             if($endTime > $startTime)
-                                $this->newReservation($customer, $field_price, $totalDiscount, $startTime, $endTime, $request, $minCost, $ref_code);
+                            {
+                                $thisPrice = $this->calTotalPrice($startTime, $endTime, $minCost);
+                                $totalPrice += $thisPrice;    
+                                $totalDiscount += $this->promotion($startTime, $endTime, $reserveStartDate, $reserveEndDate, $stadium_data, $thisPrice);
+                            }
+                                                             
                             $reserved_flag = 1;                        
                             
                         }                
@@ -580,7 +585,11 @@ class ReservationController extends Controller
                                 $over_flag = 1;
                             }
                             if($endTime > $startTime)
-                                $this->newReservation($customer, $field_price, 0, $startTime, $endTime, $request, $minCost, $ref_code);
+                            {
+                                $thisPrice = $this->calTotalPrice($startTime, $endTime, $minCost);
+                                $totalPrice += $thisPrice;    
+                                $totalDiscount += $this->promotion($startTime, $endTime, $reserveStartDate, $reserveEndDate, $stadium_data, $thisPrice);
+                            }
                             $reserved_flag = 1;
                         }        
                     }
@@ -638,7 +647,11 @@ class ReservationController extends Controller
                                     $over_flag = 1;
                                 }
                                 if($endTime > $startTime)
-                                    $this->newReservation($customer, $field_price, $totalDiscount, $startTime, $endTime, $request, $minCost, $ref_code);
+                                {
+                                    $thisPrice = $this->calTotalPrice($startTime, $endTime, $minCost);
+                                    $totalPrice += $thisPrice;    
+                                    $totalDiscount += $this->promotion($startTime, $endTime, $reserveStartDate, $reserveEndDate, $stadium_data, $thisPrice);
+                                }  
                                 $reserved_flag = 1;                        
                                 
                             }                
@@ -661,13 +674,20 @@ class ReservationController extends Controller
                                     $over_flag = 1;
                                 }
                                 if($endTime > $startTime)
-                                    $this->newReservation($customer, $field_price, 0, $startTime, $endTime, $request, $minCost, $ref_code);
+                                {
+                                    $thisPrice = $this->calTotalPrice($startTime, $endTime, $minCost);
+                                    $totalPrice += $thisPrice;    
+                                    $totalDiscount += $this->promotion($startTime, $endTime, $reserveStartDate, $reserveEndDate, $stadium_data, $thisPrice);
+                                }  
                                 $reserved_flag = 1;
                             }
                         } 
                                         
                     }
                 }
+                
+                if($totalPrice > 0 && $reserved_flag == 1 && $done_flag == 1)
+                    $this->newReservation($customer, $totalDiscount, $start1, $end1, $request, $totalPrice, $ref_code);
             }
             else
             {
@@ -698,14 +718,99 @@ class ReservationController extends Controller
         }
     }
 
-    public function promotion($reserveStarttime, $reserveEndtime, $reserveStartDate, $reserveEndDate, $stadium_data)
+    public function promotion($reserveStarttime, $reserveEndtime, $reserveStartDate, $reserveEndDate, $stadium_data, $totalPrice)
     {
         $promotions = Promotions::where('stadium_id', Auth::user()->stadium_id)->get();
         $totalDiscount = 0;
         $over_flag_promo = 0;
+        $done_flag_promo = 0;
         $minutes_to_add = 1;
         $minDiscount = 0;
         $discountType = '';
+        // foreach($promotions as $promotion)
+        // {
+        //     $promo_startTime = new Datetime($promotion->start_time);
+        //     $promo_endTime = new Datetime($promotion->end_time);
+
+        //     $promo_startDate = new Datetime($promotion->start_date);
+        //     $promo_endDate = new Datetime($promotion->end_date);
+
+        //     $minDiscount = $promotion->discount/60;//$totalMinPromo
+            
+        //     if($promotion->discount_type == 'THB')            
+        //         $discountType = 'THB';            
+        //     else            
+        //         $discountType = 'percent';
+            
+
+        //     if($over_flag_promo == 0 && ($reserveStarttime >= $promo_startTime && $reserveStarttime < $promo_endTime) && ($reserveStartDate >= $promo_startDate && $reserveEndDate <= $promo_endDate))
+        //     {
+        //         if($reserveEndtime <= $promo_endTime)
+        //         {
+        //             $startTime = $reserveStarttime;
+        //             $endTime = $reserveEndtime;                                                 
+        //         }
+        //         else
+        //         {
+        //             $startTime = $reserveStarttime;                            
+        //             $endTime = $promo_endTime;
+        //             $tmpStarttime = $promo_endTime;
+        //             //$tmpStarttime->add(new DateInterval('PT' . $minutes_to_add . 'M'));                            
+        //             $over_flag_promo = 1;
+        //         }
+        //         $totalDiscount += $this->discounting($startTime, $endTime, $minDiscount, $totalPrice, $discountType);
+                
+        //     }
+        //     else if($over_flag_promo == 1 && ($tmpStarttime >= $promo_startTime && $tmpStarttime < $promo_endTime) && ($reserveStartDate >= $promo_startDate && $reserveEndDate <= $promo_endDate))
+        //     {
+        //         if($reserveEndtime <= $promo_endTime)
+        //         {
+        //             $startTime = $tmpStarttime;
+        //             $endTime = $reserveEndtime;
+        //         }
+        //         else
+        //         {
+        //             $startTime = $tmpStarttime;                            
+        //             $endTime = $promo_endTime;
+        //             $tmpStarttime = $promo_endTime;
+        //             //$tmpStarttime->add(new DateInterval('PT' . $minutes_to_add . 'M'));                            
+        //             $over_flag_promo = 1;
+        //         }
+        //         $totalDiscount += $this->discounting($startTime, $endTime, $minDiscount, $totalPrice, $discountType);
+        //     }
+        //     else if(($promo_endTime < new Datetime($stadium_data->open_time)) && ($reserveStartDate >= $promo_startDate && $reserveEndDate <= $promo_endDate) && 
+        //     (($reserveStarttime <= new Datetime("23:59") && $reserveStarttime >= new Datetime($stadium_data->open_time) && $promo_startTime <= new Datetime("23:59"))))
+        //     {
+        //         $mergeStart = new DateTime($reserveStartDate->format('Y-m-d') .' ' .$reserveStarttime->format('H:i:s'));
+        //         $mergeEnd = new DateTime($reserveEndDate->format('Y-m-d') .' ' .$reserveEndtime->format('H:i:s'));
+        //         if($mergeStart >= new DateTime($reserveStartDate->format('Y-m-d') .' ' .$promo_startTime->format('H:i:s')))
+        //         {   
+        //             if($mergeEnd <= new DateTime($reserveEndDate->format('Y-m-d') .' ' .$promo_endTime->format('H:i:s')))
+        //             {
+        //                 $startTime = $mergeStart;
+        //                 $endTime = $mergeEnd; 
+        //                 $totalDiscount += $this->discounting($startTime, $endTime, $minDiscount, $totalPrice, $discountType);
+        //             }
+        //         }    
+        //     }
+        //     else if(($promo_endTime < new Datetime($stadium_data->open_time)) && ($reserveStartDate >= $promo_startDate && $reserveEndDate <= $promo_endDate) && 
+        //     ($reserveStarttime >= new Datetime("00:00") && $reserveStarttime < new Datetime($stadium_data->open_time) && $promo_startTime <= new Datetime("23:59") && $reserveStarttime < new Datetime($stadium_data->open_time)))
+        //     {
+        //         $tmpFieldStartDate = $reserveStartDate;
+        //         $mergeStart = new DateTime($reserveStartDate->format('Y-m-d') .' ' .$reserveStarttime->format('H:i:s'));
+        //         $mergeEnd = new DateTime($reserveEndDate->format('Y-m-d') .' ' .$reserveEndtime->format('H:i:s'));
+
+        //         if($mergeStart<= new DateTime($reserveEndDate->format('Y-m-d') .' ' .$promo_endTime->format('H:i:s')))                    
+        //         {   
+        //             if($mergeEnd  >= new DateTime($tmpFieldStartDate->modify('-1 day')->format('Y-m-d') .' ' .$promo_startTime->format('H:i:s')))
+        //             {               
+        //                 $startTime = $mergeStart;
+        //                 $endTime = $mergeEnd; 
+        //                 $totalDiscount += $this->discounting($startTime, $endTime, $minDiscount, $totalPrice, $discountType);
+        //             }
+        //         }          
+        //     }
+        // }
         foreach($promotions as $promotion)
         {
             $promo_startTime = new Datetime($promotion->start_time);
@@ -713,109 +818,216 @@ class ReservationController extends Controller
 
             $promo_startDate = new Datetime($promotion->start_date);
             $promo_endDate = new Datetime($promotion->end_date);
-
-            $minDiscount = $promotion->discount/60;//$totalMinPromo
             
+            $tmpStart1 = new DateTime($reserveStartDate->format('Y-m-d') .' ' . $reserveStarttime->format('H:i:s'));
+            $tmpEnd1 = new DateTime($reserveEndDate->format('Y-m-d') .' ' . $reserveEndtime->format('H:i:s'));
+
+            $tmpStart2 = new DateTime($reserveStartDate->format('Y-m-d') . ' ' . $promo_startTime->format('H:i:s'));
+            if($promo_endTime > $promo_startTime)                        
+                $tmpEnd2 = new DateTime($reserveStartDate->format('Y-m-d') .' ' . $promo_endTime->format('H:i:s'));
+            else if($promo_endTime < $promo_startTime)
+                $tmpEnd2 = new DateTime($reserveStartDate->modify('+1 day')->format('Y-m-d') .' ' . $promo_endTime->format('H:i:s'));
+            else
+                $tmpEnd2 = new DateTime($reserveStartDate->modify('+2 day')->format('Y-m-d') .' ' . $promo_endTime->format('H:i:s'));
+
             if($promotion->discount_type == 'THB')            
                 $discountType = 'THB';            
             else            
                 $discountType = 'percent';
-            
-
-            if($over_flag_promo == 0 && ($reserveStarttime >= $promo_startTime && $reserveStarttime < $promo_endTime) && ($reserveStartDate >= $promo_startDate && $reserveEndDate <= $promo_endDate))
-            {
-                if($reserveEndtime <= $promo_endTime)
-                {
-                    $startTime = $reserveStarttime;
-                    $endTime = $reserveEndtime;                                                 
-                }
-                else
-                {
-                    $startTime = $reserveStarttime;                            
-                    $endTime = $promo_endTime;
-                    $tmpStarttime = $promo_endTime;
-                    //$tmpStarttime->add(new DateInterval('PT' . $minutes_to_add . 'M'));                            
-                    $over_flag_promo = 1;
-                }
-                if($discountType == 'THB')
-                    $totalDiscount += $this->discounting($startTime, $endTime, $minDiscount);
-                else
-                    $totalDiscount = $promotion->discount;
                 
-            }
-            else if($over_flag_promo == 1 && ($tmpStarttime >= $promo_startTime && $tmpStarttime < $promo_endTime) && ($reserveStartDate >= $promo_startDate && $reserveEndDate <= $promo_endDate))
-            {
-                if($reserveEndtime <= $promo_endTime)
+                        
+            $minDiscount = $promotion->discount/60;
+            if(($tmpStart1 <= $tmpEnd2) && ($tmpStart2 <= $tmpEnd1) && ($reserveStartDate >= $promo_startDate && $reserveEndDate <= $promo_endDate))
+            {  
+                Log::info('$tmpStart1: '. date_format($tmpStart1,'Y-m-d H:i:s' ) .'$tmpStart2: '. date_format($tmpStart2,'Y-m-d H:i:s' )  . '$tmpEnd2: ' . date_format($tmpEnd2,'Y-m-d H:i:s' ) );                 
+                if($done_flag_promo == 0 && $over_flag_promo == 0 && ($tmpStart1 >= $tmpStart2 && $tmpStart1 < $tmpEnd2))
                 {
-                    $startTime = $tmpStarttime;
-                    $endTime = $reserveEndtime;
-                }
-                else
-                {
-                    $startTime = $tmpStarttime;                            
-                    $endTime = $promo_endTime;
-                    $tmpStarttime = $promo_endTime;
-                    //$tmpStarttime->add(new DateInterval('PT' . $minutes_to_add . 'M'));                            
-                    $over_flag_promo = 1;
-                }
-                if($discountType == 'THB')
-                    $totalDiscount += $this->discounting($startTime, $endTime, $minDiscount);
-                else
-                    $totalDiscount = $promotion->discount;
-            }
-            else if(($promo_endTime < new Datetime($stadium_data->open_time)) && ($reserveStartDate >= $promo_startDate && $reserveEndDate <= $promo_endDate) && 
-            (($reserveStarttime <= new Datetime("23:59") && $reserveStarttime >= new Datetime($stadium_data->open_time) && $promo_startTime <= new Datetime("23:59"))))
-            {
-                $mergeStart = new DateTime($reserveStartDate->format('Y-m-d') .' ' .$reserveStarttime->format('H:i:s'));
-                $mergeEnd = new DateTime($reserveEndDate->format('Y-m-d') .' ' .$reserveEndtime->format('H:i:s'));
-                if($mergeStart >= new DateTime($reserveStartDate->format('Y-m-d') .' ' .$promo_startTime->format('H:i:s')))
-                {   
-                    if($mergeEnd <= new DateTime($reserveEndDate->format('Y-m-d') .' ' .$promo_endTime->format('H:i:s')))
+                      
+                    if(($tmpEnd1 <= $tmpEnd2) && ($tmpStart1 < $tmpEnd1))
                     {
-                        $startTime = $mergeStart;
-                        $endTime = $mergeEnd; 
-
-                        if($discountType == 'THB')
-                            $totalDiscount += $this->discounting($startTime, $endTime, $minDiscount);
-                        else
-                            $totalDiscount = $promotion->discount;
+                        $startTime = $tmpStart1;
+                        $endTime = $tmpEnd1;
+                        $done_flag_promo = 1;                           
                     }
-                }    
+                    else
+                    {
+                        $startTime = $tmpStart1;
+                        $endTime = $tmpEnd2;                        
+                        $tmpStarttime = $tmpEnd2;                   
+                        $over_flag_promo = 1;
+                    }
+                    Log::info('pass 2st if $startTime: ' . date_format($startTime,'Y-m-d H:i:s' )  . ', $endTime: '. date_format($endTime,'Y-m-d H:i:s' ) );
+                    if($endTime > $startTime)
+                        $totalDiscount += $this->discounting($startTime, $endTime, $minDiscount, $totalPrice, $discountType, $reserveStarttime, $reserveEndtime);                                
+                     
+                    
+                }                
+                else if($done_flag_promo == 0 && $over_flag_promo == 1 && ($tmpStarttime >= $tmpStart2 && $tmpStarttime < $tmpEnd2))
+                {
+                    Log::info('pass 3st if');  
+                    if(($tmpEnd1 <= $tmpEnd2) && ($tmpStarttime < $tmpEnd1))
+                    {   
+                        $startTime = $tmpStarttime;
+                        $endTime = $tmpEnd1;
+                        $done_flag_promo = 1;
+                    }
+                    else
+                    {
+                        $startTime = $tmpStarttime;
+                        $endTime = $tmpEnd2;                        
+                        $tmpStarttime = $tmpEnd2;                      
+                        $over_flag_promo = 1;
+                    }
+                    if($endTime > $startTime)
+                        $totalDiscount += $this->discounting($startTime, $endTime, $minDiscount, $totalPrice, $discountType, $reserveStarttime, $reserveEndtime);    
+                }
+                else if($done_flag_promo == 0 && $over_flag_promo == 0 && ($tmpStart1 < $tmpStart2 && $tmpEnd1 > $tmpStart2))
+                {
+                    if(($tmpEnd1 <= $tmpEnd2) && ($tmpStart1 < $tmpEnd1))
+                    {
+                        $startTime = $tmpStart2;
+                        $endTime = $tmpEnd1;
+                        $done_flag_promo = 1;                           
+                    }
+                    else
+                    {
+                        $startTime = $tmpStart2;
+                        $endTime = $tmpEnd2;                        
+                        $tmpStarttime = $tmpEnd2;                   
+                        $over_flag_promo = 1;
+                    }
+                    Log::info('pass 2st if $startTime: ' . date_format($startTime,'Y-m-d H:i:s' )  . ', $endTime: '. date_format($endTime,'Y-m-d H:i:s' ) );
+                    if($endTime > $startTime)
+                        $totalDiscount += $this->discounting($startTime, $endTime, $minDiscount, $totalPrice, $discountType, $reserveStarttime, $reserveEndtime); 
+                }       
             }
-            else if(($promo_endTime < new Datetime($stadium_data->open_time)) && ($reserveStartDate >= $promo_startDate && $reserveEndDate <= $promo_endDate) && 
-            ($reserveStarttime >= new Datetime("00:00") && $reserveStarttime < new Datetime($stadium_data->open_time) && $promo_startTime <= new Datetime("23:59") && $reserveStarttime < new Datetime($stadium_data->open_time)))
+            
+        }
+        //**==============================================================================================================================//
+        if($done_flag_promo != 1)
+        {
+            foreach($promotions as $promotion)
             {
-                $tmpFieldStartDate = $reserveStartDate;
-                $mergeStart = new DateTime($reserveStartDate->format('Y-m-d') .' ' .$reserveStarttime->format('H:i:s'));
-                $mergeEnd = new DateTime($reserveEndDate->format('Y-m-d') .' ' .$reserveEndtime->format('H:i:s'));
+                $promo_startTime = new Datetime($promotion->start_time);
+                $promo_endTime = new Datetime($promotion->end_time);
 
-                if($mergeStart<= new DateTime($reserveEndDate->format('Y-m-d') .' ' .$promo_endTime->format('H:i:s')))                    
-                {   
-                    if($mergeEnd  >= new DateTime($tmpFieldStartDate->modify('-1 day')->format('Y-m-d') .' ' .$promo_startTime->format('H:i:s')))
-                    {               
-                        $startTime = $mergeStart;
-                        $endTime = $mergeEnd; 
+                // if($left_period_flag == 0)
+                //     $reserveEndtime = new Datetime($request->input('endTime'));
+                // else
+                //     $reserveEndtime = $tmpEndtime;
+                
+                $tmpStart1 = new DateTime($reserveStartDate->format('Y-m-d') .' ' . $reserveStarttime->format('H:i:s'));
+                $tmpEnd1 = new DateTime($reserveEndDate->format('Y-m-d') .' ' . $reserveEndtime->format('H:i:s'));
 
-                        if($discountType == 'THB')
-                            $totalDiscount += $this->discounting($startTime, $endTime, $minDiscount);
+                $tmpStart3 = new DateTime($reserveEndDate->format('Y-m-d') . ' ' . $promo_startTime->format('H:i:s'));
+                if($promo_endTime > $promo_startTime)                        
+                    $tmpEnd3 = new DateTime($reserveEndDate->format('Y-m-d') .' ' . $promo_endTime->format('H:i:s'));
+                else if($promo_endTime < $promo_startTime)
+                    $tmpEnd3 = new DateTime($reserveEndDate->modify('+1 day')->format('Y-m-d') .' ' . $promo_endTime->format('H:i:s'));
+                else
+                    $tmpEnd3 = new DateTime($reserveEndDate->modify('+2 day')->format('Y-m-d') .' ' . $promo_endTime->format('H:i:s'));
+                    
+                if($promotion->discount_type == 'THB')            
+                    $discountType = 'THB';            
+                else            
+                    $discountType = 'percent';
+                             
+                $minDiscount = $promotion->discount/60;
+                if(($tmpStart1 <= $tmpEnd3) && ($tmpStart3 <= $tmpEnd1) && ($reserveStartDate >= $promo_startDate && $reserveEndDate <= $promo_endDate))
+                {                            
+                    Log::info('foreach2 $tmpStart1: '. date_format($tmpStart1,'Y-m-d H:i:s' ) .'$tmpStart2: '. date_format($tmpStart2,'Y-m-d H:i:s' )  . '$tmpEnd2: ' . date_format($tmpEnd2,'Y-m-d H:i:s' ) );                    
+                    if($done_flag_promo == 0 && $over_flag_promo == 0 && ($tmpStart1 >= $tmpStart3 && $tmpStart1 < $tmpEnd3))
+                    {
+                        // $startDate = $reserveStartDate;
+                        // $endDate = $reserveEndDate; 
+                        if(($tmpEnd1 <= $tmpEnd3) && ($tmpStart1 < $tmpEnd1))
+                        {
+                            $startTime = $tmpStart1;
+                            $endTime = $tmpEnd1;
+                            $done_flag_promo = 1;                           
+                        }
                         else
-                            $totalDiscount = $promotion->discount;
+                        {
+                            $startTime = $tmpStart1;
+                            $endTime = $tmpEnd3;                        
+                            $tmpStarttime = $tmpEnd3;                           
+                            $over_flag_promo = 1;
+                        }
+                        if($endTime > $startTime)
+                            $totalDiscount += $this->discounting($startTime, $endTime, $minDiscount, $totalPrice, $discountType, $reserveStarttime, $reserveEndtime);                         
+                        
+                    }                
+                    else if($done_flag_promo == 0 && $over_flag_promo == 1 && ($tmpStarttime >= $tmpStart3 && $tmpStarttime < $tmpEnd3))
+                    {
+                        // $startDate = new Datetime($tmpStarttime->format('Y-m-d'));
+                        // $endDate = $reserveEndDate; 
+                        
+                        if(($tmpEnd1 <= $tmpEnd3) && ($tmpStarttime < $tmpEnd1))
+                        {   
+                            $startTime = $tmpStarttime;
+                            $endTime = $tmpEnd1;
+                            $done_flag_promo = 1;
+                        }
+                        else
+                        {
+                            $startTime = $tmpStarttime;
+                            $endTime = $tmpEnd3;                        
+                            $tmpStarttime = $tmpEnd3;                         
+                            $over_flag_promo = 1;
+                        }
+                        if($endTime > $startTime)
+                            $totalDiscount += $this->discounting($startTime, $endTime, $minDiscount, $totalPrice, $discountType, $reserveStarttime, $reserveEndtime);   
 
                     }
-                }          
+                    else if($done_flag_promo == 0 && $over_flag_promo == 0 && ($tmpStart1 < $tmpStart3 && $tmpEnd1 > $tmpEnd3))
+                    {
+                        if(($tmpEnd1 <= $tmpEnd3) && ($tmpStart1 < $tmpEnd1))
+                        {
+                            $startTime = $tmpStart3;
+                            $endTime = $tmpEnd1;
+                            $done_flag_promo = 1;                           
+                        }
+                        else
+                        {
+                            $startTime = $tmpStart3;
+                            $endTime = $tmpEnd3;                        
+                            $tmpStarttime = $tmpEnd3;                   
+                            $over_flag_promo = 1;
+                        }
+                        Log::info('pass 2st if $startTime: ' . date_format($startTime,'Y-m-d H:i:s' )  . ', $endTime: '. date_format($endTime,'Y-m-d H:i:s' ) );
+                        if($endTime > $startTime)
+                            $totalDiscount += $this->discounting($startTime, $endTime, $minDiscount, $totalPrice, $discountType, $reserveStarttime, $reserveEndtime); 
+                    }
+                } 
+                                
             }
         }
+        //**==============================================================================================================================
 
-        return array($totalDiscount, $discountType);
+        return $totalDiscount;
     }
 
-    function discounting($startTime, $endTime, $minDiscount)
+    function discounting($startTime, $endTime, $minDiscount, $totalPrice, $discountType, $reserveStarttime, $reserveEndtime)
     {
         $totalDiscount = 0;
         $diffReserve = $startTime->diff($endTime)->format('%H:%i:%s');
         $arrTimeReserve = explode(":", $diffReserve);
-        $totalMinReserve = (($arrTimeReserve[0] * 60) + $arrTimeReserve[1]);
-        $totalDiscount += $totalMinReserve * $minDiscount;
+        $totalMinDiscount = (($arrTimeReserve[0] * 60) + $arrTimeReserve[1]);
+
+        // $tmpStart1 = new DateTime($reserveStartDate->format('Y-m-d') .' ' . $reserveStarttime->format('H:i:s'));
+        // $tmpEnd1 = new DateTime($reserveEndDate->format('Y-m-d') .' ' . $reserveEndtime->format('H:i:s'));
+        $diffTotalReserve = $reserveStarttime->diff($reserveEndtime)->format('%H:%i:%s');
+        $arrTimeTotalReserve = explode(":", $diffTotalReserve);
+        $totalMinReserve = (($arrTimeTotalReserve[0] * 60) + $arrTimeTotalReserve[1]);
+
+        $minCost = $totalPrice/$totalMinReserve;
+        $baseCostForDiscount = $minCost * $totalMinDiscount;
+        if($discountType == "THB")
+            $totalDiscount = $totalMinDiscount * $minDiscount;
+        else        
+            $totalDiscount = $baseCostForDiscount * (($totalMinDiscount * $minDiscount)/100);
+        Log::info('$reserveStarttime '. date_format($reserveStarttime,'Y-m-d H:i:s' ) . ', $reserveEndtime ' . date_format($reserveEndtime,'Y-m-d H:i:s' ) );
+        Log::info('$totalMinReserve '. $totalMinReserve . ', $totalDiscount ' . $totalDiscount . ', $baseCostForDiscount ' . $baseCostForDiscount);
 
         return $totalDiscount;
     }
@@ -892,10 +1104,10 @@ class ReservationController extends Controller
                     $done_flag = 0;
                     $minutes_to_add = 1;
                     $ref_code = $reservation->ref_code;
+                    $totalPrice = 0;
+                    $totalDiscount = 0;
 
-                    $stadium_data = Stadium::where('id', Auth::user()->stadium_id)->first();
-
-                    $totalDiscount = $this->promotion($reserveStarttime, $reserveEndtime, $reserveStartDate, $reserveEndDate, $stadium_data);
+                    $stadium_data = Stadium::where('id', Auth::user()->stadium_id)->first();                    
                     
                     foreach($tmp_field_price as $field_price)
                     {
@@ -947,7 +1159,11 @@ class ReservationController extends Controller
                                     $over_flag = 1;
                                 }
                                 if($endTime > $startTime)
-                                    $this->editReservation($reservation, $field_price, $totalDiscount, $startTime, $endTime, $request, $minCost);                        
+                                {
+                                    $thisPrice = $this->calTotalPrice($startTime, $endTime, $minCost);
+                                    $totalPrice += $thisPrice;    
+                                    $totalDiscount += $this->promotion($startTime, $endTime, $reserveStartDate, $reserveEndDate, $stadium_data, $thisPrice);
+                                }                                                         
                                 
                             }
                             else if($done_flag == 0 && $over_flag == 1 && ($tmpStarttime >= $tmpStart2 && $tmpStarttime < $tmpEnd2))
@@ -969,7 +1185,11 @@ class ReservationController extends Controller
                                     $over_flag = 1;
                                 }
                                 if($endTime > $startTime)
-                                    $this->newReservation($customer, $field_price, 0, $startTime, $endTime, $request, $minCost, $ref_code);
+                                {
+                                    $thisPrice = $this->calTotalPrice($startTime, $endTime, $minCost);
+                                    $totalPrice += $thisPrice;    
+                                    $totalDiscount += $this->promotion($startTime, $endTime, $reserveStartDate, $reserveEndDate, $stadium_data, $thisPrice);
+                                }  
                             }
                         } 
                     }
@@ -1025,7 +1245,11 @@ class ReservationController extends Controller
                                         $over_flag = 1;
                                     }
                                     if($endTime > $startTime)
-                                        $this->editReservation($reservation, $field_price, $totalDiscount, $startTime, $endTime, $request, $minCost);                     
+                                    {
+                                        $thisPrice = $this->calTotalPrice($startTime, $endTime, $minCost);
+                                        $totalPrice += $thisPrice;    
+                                        $totalDiscount += $this->promotion($startTime, $endTime, $reserveStartDate, $reserveEndDate, $stadium_data, $thisPrice);
+                                    }                      
                                     
                                 }                
                                 else if($done_flag == 0 && $over_flag == 1 && ($tmpStarttime >= $tmpStart3 && $tmpStarttime < $tmpEnd3))
@@ -1047,12 +1271,19 @@ class ReservationController extends Controller
                                         $over_flag = 1;
                                     }
                                     if($endTime > $startTime)
-                                        $this->newReservation($customer, $field_price, 0, $startTime, $endTime, $request, $minCost, $ref_code);
+                                    {
+                                        $thisPrice = $this->calTotalPrice($startTime, $endTime, $minCost);
+                                        $totalPrice += $thisPrice;    
+                                        $totalDiscount += $this->promotion($startTime, $endTime, $reserveStartDate, $reserveEndDate, $stadium_data, $thisPrice);
+                                    }  
                                 }
                             } 
                                             
                         }
                     }
+                    //$totalDiscount = $this->promotion($reserveStarttime, $reserveEndtime, $reserveStartDate, $reserveEndDate, $stadium_data, $totalPrice);
+                    if($totalPrice > 0 && $done_flag == 1)
+                        $this->editReservation($reservation, $totalDiscount, $start1, $end1, $request, $totalPrice); 
                 }
                 else
                 {
@@ -1135,31 +1366,24 @@ class ReservationController extends Controller
         }
     }
     
-    public function editReservation($reservation, $field_price, $totalDiscount, $startTime, $endTime, $request, $minCost)
+    public function editReservation($reservation, $totalDiscount, $startTime, $endTime, $request, $totalPrice)
     {
         try
         {      
-            $mergeStart = $startTime;//new DateTime($startDate->format('Y-m-d') .' ' . $startTime->format('H:i:s'));
-            $mergeEnd = $endTime;//new DateTime($endDate->format('Y-m-d') .' ' . $endTime->format('H:i:s'));
-
-            $time = $mergeStart->diff($mergeEnd)->format('%H:%i:%s');
-            $arrTime = explode(":", $time);
-            $total_price = (($arrTime[0] * 60) + $arrTime[1]) * $minCost;
-
             $reservation->field_id = $request->input('hddResourceId');
-            $reservation->start_time = $mergeStart;
-            $reservation->end_time = $mergeEnd;
-            $reservation->total_time = $time;
-            $reservation->field_price = $total_price;
-            if($totalDiscount[1] == 'THB')
-            {
-                $reservation->discount_price = $totalDiscount[0];
-            }
-            else
-            {
-                $reservation->discount_price = $total_price * ($totalDiscount[0]/100);
-            }
-            $reservation->background_color = $field_price->set_color;
+            $reservation->start_time = $startTime;
+            $reservation->end_time = $endTime;
+            $reservation->total_time = $startTime->diff($endTime)->format('%H:%i:%s');
+            $reservation->field_price = $totalPrice;
+            // if($totalDiscount[1] == 'THB')
+            // {
+                $reservation->discount_price = $totalDiscount;
+            // }
+            // else
+            // {
+            //     $reservation->discount_price = $totalPrice * ($totalDiscount[0]/100);
+            // }
+            //$reservation->background_color = $field_price->set_color;
             $reservation->note = $request->input('note');
             $reservation->updated_by = Auth::user()->id;
             $reservation->save();
@@ -1172,34 +1396,26 @@ class ReservationController extends Controller
         }
     }
 
-    function newReservation($customer, $field_price, $totalDiscount, $startTime, $endTime, $request, $minCost, $ref_code)
+    function newReservation($customer, $totalDiscount, $startTime, $endTime, $request, $totalPrice, $ref_code)
     {
         try
         { 
-            $mergeStart = $startTime;//new DateTime($startDate->format('Y-m-d') .' ' . $startTime->format('H:i:s'));
-            $mergeEnd = $endTime;//new DateTime($endDate->format('Y-m-d') .' ' . $endTime->format('H:i:s'));
-
-            $time = $mergeStart->diff($mergeEnd)->format('%H:%i:%s');
-            $arrTime = explode(":", $time);
-            $total_price = (($arrTime[0] * 60) + $arrTime[1]) * $minCost;
-
-
             $reservation = new Reservation();
             $reservation->field_id = $request->input('hddResourceId');
             $reservation->customer_id = $customer->id;
-            $reservation->start_time = $mergeStart;
-            $reservation->end_time = $mergeEnd;
-            $reservation->total_time = $time;
-            $reservation->field_price = $total_price;
-            if($totalDiscount[1] == 'THB')
-            {
-                $reservation->discount_price = $totalDiscount[0];
-            }
-            else
-            {
-                $reservation->discount_price = $total_price * ($totalDiscount[0]/100);
-            }
-            $reservation->background_color = $field_price->set_color;
+            $reservation->start_time = $startTime;
+            $reservation->end_time = $endTime;
+            $reservation->total_time = $startTime->diff($endTime)->format('%H:%i:%s');
+            $reservation->field_price = $totalPrice;
+            // if($totalDiscount[1] == 'THB')
+            // {
+                $reservation->discount_price = $totalDiscount;
+            // }
+            // else
+            // {
+            //     $reservation->discount_price = $totalPrice * ($totalDiscount[0]/100);
+            // }
+            //$reservation->background_color = $field_price->set_color;
             $reservation->ref_code = $ref_code;
             $reservation->note = $request->input('note');
             $reservation->created_by = Auth::user()->id;
@@ -1211,6 +1427,15 @@ class ReservationController extends Controller
             return Redirect::to('/'. $stadium .'/reservation')
                 ->withInput(Input::except('password'));
         }
+    }
+
+    public function calTotalPrice($startTime, $endTime, $minCost)
+    {
+        $time = $startTime->diff($endTime)->format('%H:%i:%s');
+        $arrTime = explode(":", $time);
+        $totalPrice = (($arrTime[0] * 60) + $arrTime[1]) * $minCost;
+
+        return $totalPrice;
     }
 
     function addTmpCustomerStadium($customer)
