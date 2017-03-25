@@ -21,7 +21,7 @@
                         toastr["error"]("{{ $error }}");
                     });
                 </script>
-            @endforeach
+            @endforeach            
             <h5>การจัดการบัญชีผู้ใช้ </h5>
             <br>          
                 
@@ -80,8 +80,8 @@
                                             <td>
                                                 <div class="div-row div-row-{{$user->id}}" style="display:block;">
                                                     {{ $user->role->name }}
-                                                </div>
-                                                <select form="form-{{$user->id}}"  id="role_id-{{$user->id}}" name="role_id" class="form-control select-border form-table input-row input-row-{{$user->id}}" autocomplete="off"  style="display:none;">
+                                                </div>                                                
+                                                <select form="form-{{$user->id}}"  id="role_id-{{$user->id}}" name="role_id" class="form-control select-border form-table input-row input-row-{{$user->id}}" autocomplete="off"  style="display:none; text-align-last:center;">
                                                     <option value="">กรุณาเลือกสิทธิ์</option>
                                                     @foreach($roles as $role)
                                                         <option value="{{ $role->id }}">{{ $role->name }}</option>
@@ -91,6 +91,15 @@
                                                     // $('#role_id-{{$user->id}}').val({{ $user->role_id }});
                                                     $("select#role_id-{{$user->id}} option[value='{{ $user->role_id }}']").attr("selected", "selected");
                                                 </script>
+                                                @if(Auth::user()->id == $user->id)
+                                                    <script>
+                                                        $('select#role_id-{{$user->id}}').prop('disabled', true);
+                                                    </script>
+                                                @else
+                                                    <script>
+                                                        $('select#role_id-{{$user->id}}').prop('disabled', false);
+                                                    </script>
+                                                @endif                                                
                                             </td>
                                             <td>
 

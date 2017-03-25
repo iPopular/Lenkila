@@ -341,6 +341,10 @@
       setDateToCookie('today');
     });
 
+    $('#modal-edit-reserve').on('hidden.bs.modal', function () {
+      window.location.reload();
+    });
+
     // var clientEvents = $('#calendar').fullCalendar('clientEvents');
     // console.log(clientEvents);
   });
@@ -547,7 +551,7 @@
             <div class="modal-footer">              
               <button type="button" class="btn btn-info" data-toggle="modal" data-target="#modal-paid-reserve"><i class="fa fa-money" aria-hidden="true"></i> ชำระเงิน</button>
               <button form="edit-reserve" type="submit" class="btn btn-success setDateCalendar"><i class="fa fa-check" aria-hidden="true"></i> แก้ไข</button>
-              <button type="button" class="btn btn-warning" data-dismiss="modal setDateToday"><i class="fa fa-times" aria-hidden="true"></i> ยกเลิก</button>
+              <button type="button" class="btn btn-warning setDateToday" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> ยกเลิก</button>
               <button form="delete-reserve" type="submit" class="btn btn-danger setDateCalendar"><i class="fa fa-trash-o" aria-hidden="true"></i> ลบ</button>
             </div>
           </div>
