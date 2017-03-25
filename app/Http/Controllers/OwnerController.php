@@ -54,10 +54,15 @@ class OwnerController extends Controller
         }
         else
         {
-            $name = explode(" ", Input::get('name'));
             $user = New Users();
-            $user->firstname	= $name[0];
-            $user->lastname   	= $name[1];
+            $name = explode(" ", Input::get('name'));         
+            if(count($name) > 1)
+            {
+                $user->firstname	= $name[0];
+                $user->lastname   	= $name[1];
+            }
+            else
+                $user->firstname    = Input::get('name');
             $user->username  	= Input::get('username');
             $user->password     = Hash::make(Input::get('password'));
             $user->email      	= Input::get('email');
