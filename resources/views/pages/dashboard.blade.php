@@ -868,14 +868,14 @@
                             <div class="col-md-6">
                               <div class="md-form">
                                 <i class="fa fa-clock-o prefix"></i>
-                                <input class="form-control" id="start_time" name="start_time" type="time" value="00:00" required>
+                                <input class="form-control" id="start_time" name="start_time" type="time" value="{{$stadium->open_time}}" required>
                                 <label class="active" for="start_time">เวลาเริ่ม</label>
                               </div>
                             </div>
                             <div class="col-md-6">
                               <div class="md-form">
                                 <i class="fa fa-times-circle-o prefix"></i>
-                                <input class="form-control" id="end_time" name="end_time" type="time" value="00:00" required>
+                                <input class="form-control" id="end_time" name="end_time" type="time" value="{{$stadium->close_time}}" required>
                                 <label class="active" for="end_time">เวลาสิ้นสุด</label>
                               </div>
                             </div>
