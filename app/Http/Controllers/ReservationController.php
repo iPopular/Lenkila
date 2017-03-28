@@ -225,7 +225,7 @@ class ReservationController extends Controller
                     }
                 }
                 else
-                {
+                //{
                     if(strpos($field_price->day,'Sun') !== false)                
                         array_push($dow, 0);
                     
@@ -276,7 +276,7 @@ class ReservationController extends Controller
                         $events[$j]['ranges'] = array(array('start' => '2010-01-01', 'end' => '9999-01-01'));
                     $j++;
                    
-                }
+                //}
                 
                 
                 
@@ -419,14 +419,27 @@ class ReservationController extends Controller
     function checkOpenTime($startTime, $endTime)
     {
         $stadium = Stadium::where('id', Auth::user()->stadium_id)->first();
-        $openTime = new Datetime($stadium->open_time);
-        $closeTime = new Datetime($stadium->close_time);
+        $openTime = new DateTime($stadium->open_time);
+        $closeTime = new DateTime($stadium->close_time);
 
         if($openTime > $closeTime)
             $closeTime->modify('+1 day');
-        if($startTime > $endTime)
-            $endTime->modify('+1 day');
+        // if($startTime > $endTime)        
+        //     $endTime->modify('+1 day');
+       
+            
+        $startTime = new DateTime($openTime->format('Y-m-d') .' ' .$startTime->format('H:i:s'));
+        $endTime = new DateTime($closeTime->format('Y-m-d') .' ' .$endTime->format('H:i:s'));
 
+        $diffTime = $startTime->diff($endTime)->format('%d:%H:%i');
+        $arrTime = explode(":", $diffTime);
+        $diffTimeInt = ($arrTime[0] * 24 * 60) +($arrTime[1] * 60) + $arrTime[2];
+        if($diffTimeInt > 1440)
+            $startTime->modify('+1 day');
+            
+        // Log::info($diffTimeInt. '');
+        // Log::info('$openTime: ' . date_format($openTime, 'Y-m-d H:i:s' ) .', $closeTime: '. date_format($closeTime, 'Y-m-d H:i:s' ) .', $startTime: '. date_format($startTime, 'Y-m-d H:i:s' ) .', $endTime: ' . date_format($endTime, 'Y-m-d H:i:s' ));
+        
         if(($openTime <= $startTime) && ($closeTime >= $endTime) || ($openTime == $closeTime))
             return true;
         else
