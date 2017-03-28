@@ -341,9 +341,9 @@
       setDateToCookie('today');
     });
 
-    // $('#modal-edit-reserve').on('hidden.bs.modal', function () {
-    //   window.location.reload();
-    // });
+    $('#modal-edit-reserve').on('hidden.bs.modal', function () {
+       window.location.reload();
+    });
 
     // var clientEvents = $('#calendar').fullCalendar('clientEvents');
     // console.log(clientEvents);
