@@ -1026,8 +1026,8 @@ class ReservationController extends Controller
             $totalDiscount = $totalMinDiscount * $minDiscount;
         else        
             $totalDiscount = $baseCostForDiscount * (($totalMinDiscount * $minDiscount)/100);
-        Log::info('$reserveStarttime '. date_format($reserveStarttime,'Y-m-d H:i:s' ) . ', $reserveEndtime ' . date_format($reserveEndtime,'Y-m-d H:i:s' ) );
-        Log::info('$totalMinReserve '. $totalMinReserve . ', $totalDiscount ' . $totalDiscount . ', $baseCostForDiscount ' . $baseCostForDiscount);
+        // Log::info('$reserveStarttime '. date_format($reserveStarttime,'Y-m-d H:i:s' ) . ', $reserveEndtime ' . date_format($reserveEndtime,'Y-m-d H:i:s' ) );
+        // Log::info('$totalMinReserve '. $totalMinReserve . ', $totalDiscount ' . $totalDiscount . ', $baseCostForDiscount ' . $baseCostForDiscount);
 
         return $totalDiscount;
     }

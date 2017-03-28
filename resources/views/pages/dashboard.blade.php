@@ -901,8 +901,8 @@
                           <div class="row">
                             <div class="col-md-12">
                                 <fieldset class="form-group">
-                                    <input type="checkbox" class="filled-in" id="avalible" name="avalible">
-                                    <label for="avalible">เปิดบริการ</label>
+                                    <input type="checkbox" class="filled-in" id="holiday_avalible" name="holiday_avalible">
+                                    <label for="holiday_avalible">เปิดบริการ</label>
                                 </fieldset>
                             </div>
                           </div>
@@ -984,8 +984,8 @@
                           <div class="row">
                             <div class="col-md-12">
                                 <fieldset class="form-group">
-                                    <input type="checkbox" class="filled-in" id="holiday_avalible" name="holiday_avalible">
-                                    <label for="holiday_avalible">เปิดบริการ</label>
+                                    <input type="checkbox" class="filled-in" id="holiday_avalible-edit" name="holiday_avalible-edit">
+                                    <label for="holiday_avalible-edit">เปิดบริการ</label>
                                 </fieldset>
                             </div>
                           </div>

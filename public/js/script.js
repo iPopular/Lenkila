@@ -655,9 +655,9 @@ $('.btn-edit-holiday').click(function (){
     $('#modal-edit-holiday #end_date').val($('#holiday_end_date-' + Id[3]).val());
 
     if($('#holiday_avalible-' + Id[3]).val() == '1')
-        $('#modal-edit-holiday #holiday_avalible').prop('checked', true); // Checks it
+        $('#modal-edit-holiday #holiday_avalible-edit').prop('checked', true); // Checks it
     else
-        $('#modal-edit-holiday #holiday_avalible').prop('checked', false); // Unchecks it
+        $('#modal-edit-holiday #holiday_avalible-edit').prop('checked', false); // Unchecks it
         
 });
 
