@@ -77,8 +77,8 @@ class DashBoardController extends Controller
         }
         if($request->input('day_3'))
         {
-            $tmp_day .= 'Wen ';
-            array_push($day, 'Wen');
+            $tmp_day .= 'Wed ';
+            array_push($day, 'Wed');
         }
         if($request->input('day_4'))
         {    
@@ -193,8 +193,8 @@ class DashBoardController extends Controller
             }
             if($request->input('day_3'))
             {
-                $tmp_day .= 'Wen ';
-                array_push($day, 'Wen');
+                $tmp_day .= 'Wed ';
+                array_push($day, 'Wed');
             }
             if($request->input('day_4'))
             {    
@@ -344,7 +344,7 @@ class DashBoardController extends Controller
         $diffTimeInt = ($arrTime[0] * 24 * 60) +($arrTime[1] * 60) + $arrTime[2];
         if($diffTimeInt > 1440)
             $startTime->modify('+1 day');
-            
+
         // Log::info($diffTimeInt. '');
         // Log::info('$openTime: ' . date_format($openTime, 'Y-m-d H:i:s' ) .', $closeTime: '. date_format($closeTime, 'Y-m-d H:i:s' ) .', $startTime: '. date_format($startTime, 'Y-m-d H:i:s' ) .', $endTime: ' . date_format($endTime, 'Y-m-d H:i:s' ));
         

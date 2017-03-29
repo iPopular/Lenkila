@@ -342,7 +342,8 @@
     });
 
     $('#modal-edit-reserve').on('hidden.bs.modal', function () {
-       window.location.reload();
+      //  window.location.reload();
+      $('#calendar').fullCalendar( 'refetchEvents' );
     });
 
     // var clientEvents = $('#calendar').fullCalendar('clientEvents');

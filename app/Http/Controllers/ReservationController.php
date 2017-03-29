@@ -235,7 +235,7 @@ class ReservationController extends Controller
                     if(strpos($field_price->day,'Tue') !== false)
                         array_push($dow, 2);
                     
-                    if(strpos($field_price->day,'Wen') !== false)
+                    if(strpos($field_price->day,'Wed') !== false)
                         array_push($dow, 3);
                     
                     if(strpos($field_price->day,'Thu') !== false)

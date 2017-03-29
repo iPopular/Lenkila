@@ -410,7 +410,7 @@
                                         </fieldset>
                                         <fieldset class="form-group">
                                             <input type="checkbox" class="filled-in" id="day_3" name="day_3">
-                                            <label for="day_3">Wen</label>
+                                            <label for="day_3">Wed</label>
                                         </fieldset>
                                         <fieldset class="form-group">
                                             <input type="checkbox" class="filled-in" id="day_4" name="day_4">
@@ -531,7 +531,7 @@
                                         </fieldset>
                                         <fieldset class="form-group">
                                             <input type="checkbox" class="filled-in" id="day_3-edit" name="day_3">
-                                            <label for="day_3-edit">Wen</label>
+                                            <label for="day_3-edit">Wed</label>
                                         </fieldset>
                                         <fieldset class="form-group">
                                             <input type="checkbox" class="filled-in" id="day_4-edit" name="day_4">

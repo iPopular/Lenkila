@@ -582,7 +582,7 @@ $('.btn-edit-field_price').click(function (){
     else
         $('#modal-edit-field_price #day_2-edit').prop('checked', false);
 
-    if($('#day-' + Id[3]).val().indexOf("Wen") >= 0)
+    if($('#day-' + Id[3]).val().indexOf("Wed") >= 0)
         $('#modal-edit-field_price #day_3-edit').prop('checked', true);
     else
         $('#modal-edit-field_price #day_3-edit').prop('checked', false);
