@@ -332,10 +332,7 @@ class DashBoardController extends Controller
 
         if($openTime > $closeTime)
             $closeTime->modify('+1 day');
-        // if($startTime > $endTime)        
-        //     $endTime->modify('+1 day');
-       
-            
+  
         $startTime = new DateTime($openTime->format('Y-m-d') .' ' .$startTime->format('H:i:s'));
         $endTime = new DateTime($closeTime->format('Y-m-d') .' ' .$endTime->format('H:i:s'));
 
@@ -344,14 +341,32 @@ class DashBoardController extends Controller
         $diffTimeInt = ($arrTime[0] * 24 * 60) +($arrTime[1] * 60) + $arrTime[2];
         if($diffTimeInt > 1440)
             $startTime->modify('+1 day');
-
+            
         // Log::info($diffTimeInt. '');
         // Log::info('$openTime: ' . date_format($openTime, 'Y-m-d H:i:s' ) .', $closeTime: '. date_format($closeTime, 'Y-m-d H:i:s' ) .', $startTime: '. date_format($startTime, 'Y-m-d H:i:s' ) .', $endTime: ' . date_format($endTime, 'Y-m-d H:i:s' ));
-        
+
+
+        $result = false;
         if(($openTime <= $startTime) && ($closeTime >= $endTime) || ($openTime == $closeTime))
-            return true;
+        {
+            $result = true;
+        }
         else
-            return false;
+        {
+            if($diffTimeInt > 1440)
+            {
+                $startTime->modify('-1 day');
+                $endTime->modify('-1 day');
+                if(($openTime <= $startTime) && ($closeTime >= $endTime) || ($openTime == $closeTime))
+                    $result = true;
+                else
+                    $result = false;
+            }
+            else
+                $result = false;
+            
+        }
+        return $result;
     }
 
     public function addPromotion(Request $request, $stadium_name)
