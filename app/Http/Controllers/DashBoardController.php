@@ -338,6 +338,36 @@ class DashBoardController extends Controller
         }
     }
 
+    function checkOverlapHoliday($startTime, $endTime, $holidayId = 0)
+    {
+        $holidays = Holidays::where('stadium_id', '=', Auth::user()->stadium_id)
+                                    ->where('id', '!=', $holidayId)->get();
+        $result = 0;                    
+        foreach ($holidays as $holiday) {
+
+            $start_Time = new Datetime($holiday->start_time);
+            $end_Time = new Datetime($holiday->end_time);
+            $startDate = new Datetime($holiday->start_date);
+            $endDate = new Datetime($holiday->end_date);
+
+            $start_time = new DateTime($startDate->format('Y-m-d')  .' ' .$start_Time->format('H:i:s'));
+            $end_time = new DateTime($endDate->format('Y-m-d')  .' ' .$end_Time->format('H:i:s'));
+
+            // Log::info('fieldId: ' . $fieldId .', fieldpriceId: ' . $fieldpriceId);
+            Log::info('$start_time: ' . date_format($start_time, 'Y-m-d H:i:s' ) .', $end_time: '. date_format($end_time, 'Y-m-d H:i:s' ) .', $startTime: '. date_format($startTime, 'Y-m-d H:i:s' ) .', $endTime: ' . date_format($endTime, 'Y-m-d H:i:s' ));
+            if($start_time > $end_time)
+                $end_time->modify('+1 day');
+            
+            if($startTime > $endTime)
+                $endTime->modify('+1 day');
+            Log::info('$start_time: ' . date_format($start_time, 'Y-m-d H:i:s' ) .', $end_time: '. date_format($end_time, 'Y-m-d H:i:s' ) .', $startTime: '. date_format($startTime, 'Y-m-d H:i:s' ) .', $endTime: ' . date_format($endTime, 'Y-m-d H:i:s' ));
+            if(($start_time < $endTime) && ($end_time > $startTime))
+                $result++;
+        }
+        return $result;        
+        
+    }
+
     function checkOverlapFieldPrice($fieldId, $startTime, $endTime, $day, $fieldpriceId = 0)
     {
         $fieldPrices = Tmp_Field_Price::where('field_id', '=', $fieldId)
@@ -414,8 +444,8 @@ class DashBoardController extends Controller
             'promotion_name' => 'required',
             'discount' => 'required|integer',
             'discount_type' => 'required',
-            'start_time' => 'required|date_format:H:i',
-            'end_time' => 'required|date_format:H:i',
+            'start_time' => 'required',
+            'end_time' => 'required',
             'start' => 'required|date_format:Y-m-d',
             'end' => 'required|date_format:Y-m-d',
         );
@@ -565,8 +595,8 @@ class DashBoardController extends Controller
     {
         $rules = array(
             'holiday_name' => 'required',
-            'start_time' => 'required|date_format:H:i',
-            'end_time' => 'required|date_format:H:i',
+            'start_time' => 'required',
+            'end_time' => 'required',
             'start' => 'required|date_format:Y-m-d',
             'end' => 'required|date_format:Y-m-d',
         );
@@ -586,17 +616,35 @@ class DashBoardController extends Controller
         }
         else
         {
-            $holidays = new Holidays();
-            $holidays->stadium_id = Auth::user()->stadium_id;
-            $holidays->name = $request->input('holiday_name');
-            $holidays->start_time = $request->input('start_time');
-            $holidays->end_time = $request->input('end_time');
-            $holidays->start_date = $request->input('start');
-            $holidays->end_date = $request->input('end');            
-            $holidays->avalible = $request->input('holiday_avalible') == 'on' ? 1 : 0;
-            $holidays->save();
-            Session::flash('success_msg', 'เพิ่มข้อมูลวันหยุดเรียบร้อยแล้ว!');
-            return Redirect::to('/'. $stadium_name .'/dashboard#panel1_holiday');
+            $startTime = new Datetime($request->input('start_time'));
+            $endTime = new Datetime($request->input('end_time'));
+            $startDate = new Datetime($request->input('start'));
+            $endDate = new Datetime($request->input('end'));
+            $start = new Datetime($startDate->format('Y-m-d') . ' ' . $startTime->format('H:i:s'));
+            $end = new Datetime($endDate->format('Y-m-d') . ' ' . $endTime->format('H:i:s'));
+
+            $checkOverlap = $this->checkOverlapHoliday($start, $end);
+
+            if($checkOverlap == 0)
+            {
+                $holidays = new Holidays();
+                $holidays->stadium_id = Auth::user()->stadium_id;
+                $holidays->name = $request->input('holiday_name');
+                $holidays->start_time = $request->input('start_time');
+                $holidays->end_time = $request->input('end_time');
+                $holidays->start_date = $request->input('start');
+                $holidays->end_date = $request->input('end');            
+                $holidays->avalible = $request->input('holiday_avalible') == 'on' ? 1 : 0;
+                $holidays->save();
+                Session::flash('success_msg', 'เพิ่มข้อมูลวันหยุดเรียบร้อยแล้ว!');
+                return Redirect::to('/'. $stadium_name .'/dashboard#panel1_holiday');
+            }
+            else
+            {
+                Session::flash('error_msg', 'ไม่สามารถเพิ่มข้อมูลวันหยุดได้ มีข้อมูลซ้ำ');
+                return Redirect::to('/'. $stadium_name .'/dashboard#panel1_holiday')
+                    ->withInput(Input::except('password'));
+            }
         }
 
     }
@@ -630,15 +678,32 @@ class DashBoardController extends Controller
             }
             else
             {
-                $holidays->name = $request->input('holiday_name');
-                $holidays->start_time = $request->input('start_time');
-                $holidays->end_time = $request->input('end_time');
-                $holidays->start_date = $request->input('start');
-                $holidays->end_date = $request->input('end');            
-                $holidays->avalible = $request->input('holiday_avalible') == 'on' ? 1 : 0;
-                $holidays->save();
-                Session::flash('success_msg', 'แก้ไขข้อมูลวันหยุดเรียบร้อยแล้ว!');
-                return Redirect::to('/'. $stadium_name .'/dashboard#panel1_holiday');
+                $startTime = new Datetime($request->input('start_time'));
+                $endTime = new Datetime($request->input('end_time'));
+                $startDate = new Datetime($request->input('start'));
+                $endDate = new Datetime($request->input('end'));
+                $start = new Datetime($startDate->format('Y-m-d') . ' ' . $startTime->format('H:i:s'));
+                $end = new Datetime($endDate->format('Y-m-d') . ' ' . $endTime->format('H:i:s'));
+                $checkOverlap = $this->checkOverlapHoliday($start, $end, $holidays->id);
+
+                if($checkOverlap == 0)
+                {
+                    $holidays->name = $request->input('holiday_name');
+                    $holidays->start_time = $request->input('start_time');
+                    $holidays->end_time = $request->input('end_time');
+                    $holidays->start_date = $request->input('start');
+                    $holidays->end_date = $request->input('end');            
+                    $holidays->avalible = $request->input('holiday_avalible') == 'on' ? 1 : 0;
+                    $holidays->save();
+                    Session::flash('success_msg', 'แก้ไขข้อมูลวันหยุดเรียบร้อยแล้ว!');
+                    return Redirect::to('/'. $stadium_name .'/dashboard#panel1_holiday');
+                }
+                else
+                {
+                    Session::flash('error_msg', 'ไม่สามารถแก้ไขข้อมูลวันหยุดได้ มีข้อมูลซ้ำ');
+                    return Redirect::to('/'. $stadium_name .'/dashboard#panel1_holiday')
+                        ->withInput(Input::except('password'));
+                }
             }
         }
         else
