@@ -101,19 +101,26 @@ class DashBoardController extends Controller
             array_push($day, 'Holiday');
         }
 
-        Log::info('$day '. json_encode($day)); 
+        if(count($day) <= 0)
+        {
+            Session::flash('error_msg', 'กรุณาระบุวันที่ต้องการ');
+            return Redirect::to('/'. $stadium_name .'/dashboard#panel1_field_price')
+                ->withInput(Input::except('password'));  
+        }
+
         foreach ($day as $d) {
-            $checkOverlap = Tmp_Field_Price::checkOverlap($request->input('field'), $startTime, $endTime, $d )->get();
-            if(count($checkOverlap) > 0)
+            //$checkOverlap = Tmp_Field_Price::checkOverlap($request->input('field'), $startTime, $endTime, $d )->get();
+            $checkOverlap = $this->checkOverlapFieldPrice($request->input('field'), $startTime, $endTime, $d );
+            if($checkOverlap > 0)
             {
-                Session::flash('error_msg', 'ไม่สามารถเพิ่มข้อมูลราคาสนามได้ มีข้อมูลซ้ำ'. $checkOverlap);
+                Session::flash('error_msg', 'ไม่สามารถเพิ่มข้อมูลราคาสนามได้ มีข้อมูลซ้ำ');
                 return Redirect::to('/'. $stadium_name .'/dashboard#panel1_field_price')
                     ->withInput(Input::except('password'));                
             }
         }
         
 
-        if(count($checkOverlap) == 0)
+        if($checkOverlap == 0)
         {       
 
             $validator = Validator::make($request->all(), $rules);
@@ -217,18 +224,25 @@ class DashBoardController extends Controller
                 array_push($day, 'Holiday');
             }
 
-            Log::info('$day '. json_encode($day)); 
+            if(count($day) <= 0)
+            {
+                Session::flash('error_msg', 'กรุณาระบุวันที่ต้องการ');
+                return Redirect::to('/'. $stadium_name .'/dashboard#panel1_field_price')
+                    ->withInput(Input::except('password'));  
+            }
+
             foreach ($day as $d) {
-                $checkOverlap = Tmp_Field_Price::checkOverlap($request->input('field'), $startTime, $endTime, $d, $tmp_field_price->id )->get();
-                if(count($checkOverlap) > 0)
+                // $checkOverlap = Tmp_Field_Price::checkOverlap($request->input('field'), $startTime, $endTime, $d, $tmp_field_price->id )->get();
+                $checkOverlap = $this->checkOverlapFieldPrice($request->input('field'), $startTime, $endTime, $d, $tmp_field_price->id );
+                if($checkOverlap > 0)
                 {
-                    Session::flash('error_msg', 'ไม่สามารถเพิ่มข้อมูลราคาสนามได้ มีข้อมูลซ้ำ'. $checkOverlap);
+                    Session::flash('error_msg', 'ไม่สามารถเพิ่มข้อมูลราคาสนามได้ มีข้อมูลซ้ำ');
                     return Redirect::to('/'. $stadium_name .'/dashboard#panel1_field_price')
                         ->withInput(Input::except('password'));                
                 }
             }
 
-            if(count($checkOverlap) == 0)
+            if($checkOverlap == 0)
             {
                 $validator = Validator::make($request->all(), $rules);
 
@@ -322,6 +336,31 @@ class DashBoardController extends Controller
                 return Redirect::to('/'. $stadium_name .'/dashboard#panel1_stadium');
             }            
         }
+    }
+
+    function checkOverlapFieldPrice($fieldId, $startTime, $endTime, $day, $fieldpriceId = 0)
+    {
+        $fieldPrices = Tmp_Field_Price::where('field_id', '=', $fieldId)
+                                    ->where('tmp_field_price.id', '!=', $fieldpriceId)      
+                                    ->where('tmp_field_price.day', 'like', '%' . $day . '%')->get();
+        $result = 0;                    
+        foreach ($fieldPrices as $fieldPrice) {
+            $start_time = new DateTime($fieldPrice->start_time);
+            $end_time = new DateTime($fieldPrice->end_time);
+
+            Log::info('fieldId: ' . $fieldId .', fieldpriceId: ' . $fieldpriceId);
+            Log::info('$start_time: ' . date_format($start_time, 'Y-m-d H:i:s' ) .', $end_time: '. date_format($end_time, 'Y-m-d H:i:s' ) .', $startTime: '. date_format($startTime, 'Y-m-d H:i:s' ) .', $endTime: ' . date_format($endTime, 'Y-m-d H:i:s' ));
+            if($start_time > $end_time)
+                $end_time->modify('+1 day');
+            
+            if($startTime > $endTime)
+                $endTime->modify('+1 day');
+            Log::info('$start_time: ' . date_format($start_time, 'Y-m-d H:i:s' ) .', $end_time: '. date_format($end_time, 'Y-m-d H:i:s' ) .', $startTime: '. date_format($startTime, 'Y-m-d H:i:s' ) .', $endTime: ' . date_format($endTime, 'Y-m-d H:i:s' ));
+            if(($start_time < $endTime) && ($end_time > $startTime))
+                $result++;
+        }
+        return $result;        
+        
     }
 
     function checkOpenTime($startTime, $endTime)

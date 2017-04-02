@@ -224,7 +224,7 @@ class ReservationController extends Controller
                         }                       
                     }
                 }
-                else
+                // else
                 //{
                     if(strpos($field_price->day,'Sun') !== false)                
                         array_push($dow, 0);
