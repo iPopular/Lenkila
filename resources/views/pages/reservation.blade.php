@@ -24,8 +24,7 @@
       left = 'myprev';
 
     var availHeight = window.screen.availHeight - 200; //144 = 9em
-    
-    //var availWidth = window.screen.availWidth;
+    var fullCalendarDate;
 
     $('#calendar').fullCalendar({
       
@@ -66,7 +65,7 @@
         mynext: {
             icon: 'right-single-arrow',
             click: function() {
-                var fullCalendarDate;
+                
                 $('#calendar').fullCalendar('incrementDate', moment.duration(2, 'day'));
                 $('#calendar').fullCalendar('incrementDate', moment.duration(-1, 'day'));
                 fullCalendarDate = $('#calendar').fullCalendar('getDate');
@@ -77,7 +76,7 @@
         myprev: {
             icon: 'left-single-arrow',
             click: function() {
-                var fullCalendarDate;
+                
                 $('#calendar').fullCalendar('incrementDate', moment.duration(-1, 'day'));
                 fullCalendarDate = $('#calendar').fullCalendar('getDate');
                 fullCalendarDate = moment(fullCalendarDate).format('YYYY-MM-DD');
@@ -117,8 +116,6 @@
       nowIndicator: true,
       minTime: 0,//{!!json_encode($openTime)!!}
       maxTime: '24:00',//{!!json_encode($closeTime)!!}
-
-
       //// uncomment this line to hide the all-day slot
       allDaySlot: false,
       schedulerLicenseKey: 'GPL-My-Project-Is-Open-Source',
@@ -131,12 +128,8 @@
       // selectConstraint: 'available_hours',
       // eventConstraint: 'available_hours',
       select: function(start, end, jsEvent, view, resource, allDay) {
-        if(resource.status == 1) {
-          console.log(jsEvent);
-          if (jsEvent.target.classList.contains('fc-bgevent')) {
-              alert('Click Background Event Area');
-              console.log(jsEvent);
-          }
+
+        if(resource.status == 1 && isValidEvent(start,end,resource.id) && !isValidCloseEvent(start,end,resource.id)) {
           endtime = moment(end).format('HH:mm');
           starttime = moment(start).format('HH:mm');
           day = moment(start).format('dd ll');
@@ -158,20 +151,31 @@
           $('#modal-add-reserve #endTime').val(endtime);
           $('.reserve label').addClass('active');
           $('#modal-add-reserve').modal('show');
-        }        
+        }
+        
+        $("#calendar").fullCalendar("unselect");     
 
       },
       selectOverlap: function(event) {
           return event.rendering === 'background';
       },
-      eventClick: function(calEvent, start, end) {
-        callEditModal(calEvent, start, end);
+      eventClick: function(event, delta, revertFunc, jsEvent, ui, view) {
+        if(!isValidEvent(event.start,event.end,event.resourceId) && !isValidCloseEvent(event.start,event.end,event.resourceId))
+          revertFunc();
+        else        
+          callEditModal(event, event.start, event.end)
       },
-      eventResize: function(calEvent, start, end) {
-        callEditModal(calEvent, start, end);
+      eventResize: function(event, delta, revertFunc, jsEvent, ui, view) {
+        if(!isValidEvent(event.start,event.end,event.resourceId) && !isValidCloseEvent(event.start,event.end,event.resourceId))
+          revertFunc();
+        else        
+          callEditModal(event, event.start, event.end)
       },
-      eventDrop: function(calEvent, start, end) {
-        callEditModal(calEvent, start, end);
+      eventDrop: function(event, delta, revertFunc, jsEvent, ui, view) {
+        if(!isValidEvent(event.start,event.end,event.resourceId) && !isValidCloseEvent(event.start,event.end,event.resourceId))
+          revertFunc();
+        else        
+          callEditModal(event, event.start, event.end);
       },
       eventMouseover: function(calEvent) {
         $('#reserve_tooltip #tooltip_label').text(calEvent.description);
@@ -180,47 +184,34 @@
       eventMouseout: function(calEvent, jsEvent) {
         $('#reserve_tooltip').tooltip('toggle');
       },
-      eventRender: function(event, element, view){
-          //console.log(event.ranges);
-          
+      eventRender: function(event, element, view){        
+          if(event.opacity == 1){
+            $(element).css("opacity", event.opacity);          
+            $(element).css("z-index", 9999);
+          }     
           return (event.ranges.filter(function(range){
               return (event.start.isBefore(range.end) &&
                       event.end.isAfter(range.start));
-          }).length)>0;
+          }).length)>0;               
       }
     });
 
-    // var repeatingEvents = [{
-    //     title:"My repeating event",
-    //     id: 1,
-    //     resourceId:1,
-    //     start: '10:00', // a start time (10am in this example)
-    //     end: '14:00', // an end time (6pm in this example)
-    //     dow: [ 1,2,3,4,5 ], // Repeat monday and thursday
-    //     ranges: [{ //repeating events are only displayed if they are within one of the following ranges.
-    //         start: '2017-01-01',
-    //         end: '2017-12-05',
-    //     },{
-    //         start: '2017-12-05',
-    //         end: '2017-12-31',
-    //     }],
-    
-    // }];
+    var isValidEvent = function(start,end,resource_id){
+        return $("#calendar").fullCalendar('clientEvents', function (event) {
+            return (event.rendering === "background" && event.resourceId == resource_id && event.avalible == '1' &&//Add more conditions here if you only want to check against certain events
+                    (start.isAfter(event.start) || start.isSame(event.start,'minute')) &&
+                    (end.isBefore(event.end) || end.isSame(event.end,'minute')));
+        }).length > 0;
+    }; 
 
-    
-
-    // var repeatingEvents2 = {!!json_encode($events)!!};
-    //emulate server
-    // function getEvents( start, end ){
-    //     //return {!!json_encode($events)!!};
-    //     return repeatingEvents2;
-    // }
-
-    // $('#calendar').fullCalendar( 'removeEvents', function(event) {
-    //     if(event.start.toDateString()===new Date(2017, 12,5).toDateString())
-    //         return true;
-    // });
-    
+    var isValidCloseEvent = function(start,end,resource_id){
+        return $("#calendar").fullCalendar('clientEvents', function (event) {
+            return (event.rendering === "background" && event.resourceId == resource_id && event.avalible == '0' &&//Add more conditions here if you only want to check against certain events
+                    (start.isAfter(event.start) || start.isSame(event.start,'minute')) &&
+                    (end.isBefore(event.end) || end.isSame(event.end,'minute')));
+        }).length > 0;
+    };
+   
 
     $(".fc-right > button, .fc-left > button").removeClass();
     $('.fc-right > button, .fc-left > button').addClass('btn btn-cyan waves-effect waves-light');    
@@ -247,12 +238,13 @@
       $('#calendar').fullCalendar('gotoDate', new Date(curDate));
     //console.log(curDate);
     setDateToCookie('today');
+    fullCalendarDate = moment(new Date(curDate)).format('YYYY-MM-DD');
+    checkHoliday(fullCalendarDate);
 
     
 
     function callEditModal(calEvent, start, end) {
-      if(calEvent.color != '#c1c1c1')
-      {      
+
         var resource = $('#calendar').fullCalendar('getResourceById', calEvent.resourceId);
         endtime = moment(calEvent.end).format('HH:mm');
         starttime = moment(calEvent.start).format('HH:mm');
@@ -287,7 +279,7 @@
         sumPrice();
         $('.reserve label').addClass('active');
         $('#modal-edit-reserve').modal('show');
-      }
+
     }
 
     $('#colorselector').colorselector();

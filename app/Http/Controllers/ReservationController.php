@@ -102,8 +102,10 @@ class ReservationController extends Controller
                 $events[$j]['start'] = '00:00:00';
                 $events[$j]['end'] = '24:00:00';
                 $events[$j]['rendering'] = 'background';
-                $events[$j]['color'] = '#c1c1c1';
+                $events[$j]['color'] = 'rgba(150, 150, 150, 1)';
+                $events[$j]['opacity'] = 1;
                 $events[$j]['overlap'] = false;
+                $events[$j]['avalible'] = '0';
                 $events[$j]['ranges'] = array(array('start' => '2010-01-01', 'end' => '9999-01-01'));
                 $j++;
             }
@@ -114,8 +116,10 @@ class ReservationController extends Controller
                 $events[$j]['start'] = $closeTime;
                 $events[$j]['end'] = $openTime;
                 $events[$j]['rendering'] = 'background';
-                $events[$j]['color'] = '#c1c1c1';
+                $events[$j]['color'] = 'rgba(150, 150, 150, 1)';
+                $events[$j]['opacity'] = 1;
                 $events[$j]['overlap'] = false;
+                $events[$j]['avalible'] = '0';
                 $events[$j]['ranges'] = array(array('start' => '2010-01-01', 'end' => '9999-01-01'));
                 $j++;
             }
@@ -125,8 +129,10 @@ class ReservationController extends Controller
                 $events[$j]['start'] = $closeTime;
                 $events[$j]['end'] = '23:59:59';
                 $events[$j]['rendering'] = 'background';
-                $events[$j]['color'] = '#c1c1c1';
+                $events[$j]['color'] = 'rgba(150, 150, 150, 1)';
+                $events[$j]['opacity'] = 1;
                 $events[$j]['overlap'] = false;
+                $events[$j]['avalible'] = '0';
                 $events[$j]['ranges'] = array(array('start' => '2010-01-01', 'end' => '9999-01-01'));
                 $j++;
                 
@@ -136,8 +142,10 @@ class ReservationController extends Controller
                     $events[$j]['start'] = '00:00:00';
                     $events[$j]['end'] = $openTime;
                     $events[$j]['rendering'] = 'background';
-                    $events[$j]['color'] = '#c1c1c1';
+                    $events[$j]['color'] = 'rgba(150, 150, 150, 1)';
+                    $events[$j]['opacity'] = 1;
                     $events[$j]['overlap'] = false;
+                    $events[$j]['avalible'] = '0';
                     $events[$j]['ranges'] = array(array('start' => '2010-01-01', 'end' => '9999-01-01'));
                     $j++;
                 }
@@ -158,9 +166,11 @@ class ReservationController extends Controller
                     $events[$j]['start'] = $holiday_start;
                     $events[$j]['end'] = $holiday_end;
                     $events[$j]['rendering'] = 'background';
-                    $events[$j]['color'] = '#c1c1c1';
+                    $events[$j]['color'] = 'rgba(150, 150, 150, 1)';
+                    $events[$j]['opacity'] = 1;
                     $events[$j]['overlap'] = false;
                     $events[$j]['status'] = 0;
+                    $events[$j]['avalible'] = '0';
                     $events[$j]['ranges'] = array(array('start' => date('Y-m-d', strtotime($holiday->start_date . "-1 day")), 'end' => date('Y-m-d', strtotime($holiday->end_date . "+1 day"))));
                     $j++;
                 }
@@ -182,6 +192,7 @@ class ReservationController extends Controller
                 $events[$j]['title'] = $reserv['customer']['nickname'] . '_' . $reserv['customer']['mobile_number'];                
                 $events[$j]['color'] = 'rgba(255, 255, 255, 0.15)';//$reserv['background_color'];
                 $events[$j]['description'] = $reserv['note'];
+                $events[$j]['avalible'] = '1';
                 $events[$j]['ranges'] = array(array('start' =>  date('Y-m-d', strtotime($reserv['start_time'] . "-1 day")), 'end' => date('Y-m-d', strtotime($reserv['end_time'] . "+1 day"))));
                 if($reserv['status'] == '2')
                     $events[$j]['borderColor'] = '#54ff78';
@@ -224,6 +235,7 @@ class ReservationController extends Controller
                             $events[$j]['title'] = $field_price['price']; 
                             $events[$j]['rendering'] = 'background';
                             $events[$j]['color'] = $field_price['set_color'];
+                            $events[$j]['avalible'] = '1';
                             $events[$j]['ranges'] = array(array('start' => date('Y-m-d', strtotime($holiday->start_date . "-1 day")), 'end' => date('Y-m-d', strtotime($holiday->end_date . "+1 day"))));
                             $j++;
                         }                       
@@ -275,6 +287,7 @@ class ReservationController extends Controller
                     $events[$j]['title'] = $field_price['price']; 
                     $events[$j]['rendering'] = 'background';
                     $events[$j]['color'] = $field_price['set_color'];
+                    $events[$j]['avalible'] = '1';
                     if(count($holidays3) > 0)
                         $events[$j]['ranges'] = $holidays3;//array(array('start' => '2017-01-01', 'end' => '2017-12-05'), array('start' => '2017-12-04', 'end' => '2017-12-31'));////
                     else

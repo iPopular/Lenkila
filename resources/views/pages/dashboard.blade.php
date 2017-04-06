@@ -111,9 +111,9 @@
                     <thead>
                         <tr>
                             <th>ชื่อสนาม  </th>
-                            <th>เวลาเริ่ม  </th>
-                            <th>เวลาสิ้นสุด  </th>
                             <th>วัน  </th>
+                            <th>เวลาเริ่ม  </th>
+                            <th>เวลาสิ้นสุด  </th>                            
                             <th>ราคา/ชม.  </th>
                             <th></th>
                         </tr>
@@ -139,14 +139,14 @@
                                         {{ $field->name }}                                        
                                     </td>
                                     <td>
+                                        {{ $field_price->day }}
+                                    </td>
+                                    <td>
                                         {{ $field_price->start_time }}                                        
                                     </td>
                                     <td>
                                         {{ $field_price->end_time }}
-                                    </td>
-                                    <td>
-                                        {{ $field_price->day }}
-                                    </td>
+                                    </td>                                    
                                     <td>
                                         {{ $field_price->price }}
                                     </td>
@@ -185,10 +185,10 @@
                     <thead>
                         <tr>
                             <th>ชื่อโปรโมชั่น  </th>
-                            <th>เวลาเริ่ม  </th>
-                            <th>เวลาสิ้นสุด  </th>
                             <th>วันที่เริ่ม  </th>
+                            <th>เวลาเริ่ม  </th>
                             <th>วันที่สิ้นสุด  </th>
+                            <th>เวลาสิ้นสุด  </th>
                             <th>ส่วนลด/ชม.  </th>
                             <!--<th>ล็อคช่วงเวลา  </th>-->
                             <th></th>
@@ -212,18 +212,18 @@
                                 <input id="pro-fixed_range-{{$promotion->id}}" type="hidden" value="{{ $promotion->fixed_range }}">                                                                
                                 <td>                                        
                                     {{ $promotion->name }}
+                                </td>
+                                <td>
+                                    {{ $promotion->start_date }}
                                 </td>                                    
                                 <td>
                                     {{ $promotion->start_time }}                                        
                                 </td>
                                 <td>
-                                    {{ $promotion->end_time }}
-                                </td>
-                                <td>
-                                    {{ $promotion->start_date }}
-                                </td>
-                                <td>
                                     {{ $promotion->end_date }}
+                                </td>
+                                <td>
+                                    {{ $promotion->end_time }}
                                 </td>
                                 <td>
                                     {{ $promotion->discount }} {{ $promotion->discount_type }}
@@ -269,10 +269,10 @@
                     <thead>
                         <tr>
                             <th>วัน  </th>
-                            <th>เวลาเริ่ม  </th>
-                            <th>เวลาสิ้นสุด  </th>
                             <th>วันที่เริ่ม  </th>
+                            <th>เวลาเริ่ม  </th>
                             <th>วันที่สิ้นสุด  </th>
+                            <th>เวลาสิ้นสุด  </th>
                             <th>เปิด/ปิดบริการ  </th>
                             <th></th>
                         </tr>
@@ -295,16 +295,16 @@
                                     {{ $holiday->name }}
                                 </td>
                                 <td>
-                                    {{ $holiday->start_time }}                                        
-                                </td>
-                                <td>
-                                    {{ $holiday->end_time }}
-                                </td>                                    
-                                <td>
                                     {{ $holiday->start_date }}
                                 </td>
                                 <td>
+                                    {{ $holiday->start_time }}                                        
+                                </td>
+                                <td>
                                     {{ $holiday->end_date }}
+                                </td>
+                                <td>
+                                    {{ $holiday->end_time }}
                                 </td>
                                 <td>
                                     @if($holiday->avalible == '1')
@@ -984,7 +984,7 @@
                           <div class="row">
                             <div class="col-md-12">
                                 <fieldset class="form-group">
-                                    <input type="checkbox" class="filled-in" id="holiday_avalible-edit" name="holiday_avalible-edit">
+                                    <input type="checkbox" class="filled-in" id="holiday_avalible-edit" name="holiday_avalible">
                                     <label for="holiday_avalible-edit">เปิดบริการ</label>
                                 </fieldset>
                             </div>
