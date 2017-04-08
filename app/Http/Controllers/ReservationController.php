@@ -51,7 +51,7 @@ class ReservationController extends Controller
 
         foreach($reservation->holidays as $holiday)
         {
-            if(new Datetime($holiday->start_time) >= new Datetime($holiday->end_time))   
+            if((new Datetime($holiday->start_time) >= new Datetime($holiday->end_time)) && ($holiday->start_date == $holiday->end_date))   
                 array_push($holidays, array('id' => $holiday->id, 'start' => date('Y-m-d H:i:s', strtotime("$holiday->start_date $holiday->start_time")), 'end' => date('Y-m-d H:i:s', strtotime("$holiday->end_date $holiday->end_time". "+1 day"))));// . "+1 day"
             else
                 array_push($holidays, array('id' => $holiday->id, 'start' => date('Y-m-d H:i:s', strtotime("$holiday->start_date $holiday->start_time")), 'end' => date('Y-m-d H:i:s', strtotime("$holiday->end_date $holiday->end_time"))));
@@ -160,7 +160,7 @@ class ReservationController extends Controller
                     $holiday_start = date('Y-m-d H:i:s', strtotime("$holiday->start_date $holiday->start_time"));
                     $holiday_end = date('Y-m-d H:i:s', strtotime("$holiday->end_date $holiday->end_time"));
 
-                    if(new Datetime($holiday->start_time) >= new Datetime($holiday->end_time))
+                    if((new Datetime($holiday->start_time) >= new Datetime($holiday->end_time)) && ($holiday->start_date == $holiday->end_date))
                         $holiday_end =  date('Y-m-d H:i:s', strtotime("$holiday->end_date $holiday->end_time" . "+1 day"));
                     $events[$j]['resourceId'] = $field['id'];
                     $events[$j]['start'] = $holiday_start;
@@ -171,7 +171,8 @@ class ReservationController extends Controller
                     $events[$j]['overlap'] = false;
                     $events[$j]['status'] = 0;
                     $events[$j]['avalible'] = '0';
-                    $events[$j]['ranges'] = array(array('start' => date('Y-m-d', strtotime($holiday->start_date . "-1 day")), 'end' => date('Y-m-d', strtotime($holiday->end_date . "+1 day"))));
+                    //$events[$j]['ranges'] = array(array('start' => date('Y-m-d H:i:s', strtotime($holiday->start_date . "-1 day")), 'end' => date('Y-m-d', strtotime($holiday->end_date . "+1 day"))));
+                    $events[$j]['ranges'] = array(array('start' => $holiday_start, 'end' => $holiday_end));
                     $j++;
                 }
 
@@ -219,25 +220,48 @@ class ReservationController extends Controller
                             $holiday_start = date('Y-m-d H:i:s', strtotime("$holiday->start_date $holiday->start_time"));
                             $holiday_end = date('Y-m-d H:i:s', strtotime("$holiday->end_date $holiday->end_time"));
 
-                            $start_time = $field_price['start_time'];
-                            $end_time = $field_price['end_time'];
+                            $begin = new Datetime($holiday_start);
+                            $end = new Datetime($holiday_end);
+                            Log::info('begin: ' . date_format($begin, 'Y-m-d H:i:s') .', end:' . date_format($end, 'Y-m-d H:i:s'));
+                            if($end <= $begin);
+                                $end->modify('+1 day');
+                            
+                            if((new Datetime($holiday->start_time) >= new Datetime($holiday->end_time)) && ($holiday->start_date == $holiday->end_date))
+                                $holiday_end =  date('Y-m-d H:i:s', strtotime("$holiday->end_date $holiday->end_time" . "+1 day"));
 
-                            $dateTimeStarttime = date('Y-m-d H:i:s', strtotime("$holiday->start_date $start_time"));
-                            $dateTimeEndtime = date('Y-m-d H:i:s', strtotime("$holiday->start_date $end_time"));
+                            $interval = DateInterval::createFromDateString('1 day');
+                            $period = new DatePeriod($begin, $interval, $end);
+                            $start_time = new Datetime($field_price['start_time']);
+                            $end_time = new Datetime($field_price['end_time']);
+                            $str_starttime = $field_price['start_time'];
+                            $str_endtime = $field_price['end_time'];
+                            
+                            foreach ( $period as $dt )
+                            {  
+                                $str_dt = date_format($dt, 'Y-m-d');
+                                // $holiday_start = date('Y-m-d H:i:s', strtotime("$holiday->start_date $holiday->start_time"));
+                                $dateTimeStarttime = date('Y-m-d H:i:s', strtotime("$str_dt $str_starttime"));//  date('Y-m-d H:i:s', strtotime("$holiday->start_date $start_time"));
+                                $dateTimeEndtime = date('Y-m-d H:i:s', strtotime("$str_dt $str_endtime"));//date('Y-m-d H:i:s', strtotime("$holiday->start_date $end_time"));
 
 
-                            if($dateTimeStarttime > $dateTimeEndtime)
-                                $dateTimeEndtime = date('Y-m-d H:i:s', strtotime("$holiday->start_date $end_time" . "+1 day"));
-
-                            $events[$j]['start'] = $dateTimeStarttime;
-                            $events[$j]['end'] = $dateTimeEndtime;
-                            $events[$j]['resourceId'] = $field_price['field_id'];
-                            $events[$j]['title'] = $field_price['price']; 
-                            $events[$j]['rendering'] = 'background';
-                            $events[$j]['color'] = $field_price['set_color'];
-                            $events[$j]['avalible'] = '1';
-                            $events[$j]['ranges'] = array(array('start' => date('Y-m-d', strtotime($holiday->start_date . "-1 day")), 'end' => date('Y-m-d', strtotime($holiday->end_date . "+1 day"))));
-                            $j++;
+                                if($dateTimeStarttime > $dateTimeEndtime)
+                                    $dateTimeEndtime = date('Y-m-d H:i:s', strtotime("$str_dt $str_endtime" . "+1 day"));
+                                
+                                //Log::info('dateTimeStarttime: ' . date_format($dateTimeStarttime, 'Y-m-d H:i:s') .', dateTimeEndtime:' . date_format($dateTimeEndtime, 'Y-m-d H:i:s'));
+                                $events[$j]['start'] = $dateTimeStarttime;
+                                $events[$j]['end'] = $dateTimeEndtime;
+                                $events[$j]['resourceId'] = $field_price['field_id'];
+                                $events[$j]['title'] = $field_price['price']; 
+                                $events[$j]['rendering'] = 'background';
+                                $events[$j]['color'] = $field_price['set_color'];
+                                $events[$j]['avalible'] = '1';
+                                $events[$j]['ranges'] = array(array('start' => $holiday_start, 'end' => $holiday_end));
+                                Log::info('holiday_start: ' . $holiday_start .', holiday_end:' . $holiday_end);
+                                //Log::info('period: '. json_encode($period));
+                                // $events[$j]['ranges'] = array(array('start' => date('Y-m-d', strtotime($holiday->start_date . "-1 day")), 'end' => date('Y-m-d', strtotime($holiday->end_date . "+1 day"))));
+                                // Log::info($events[$j]);
+                                $j++;
+                            }
                         }                       
                     }
                 }
