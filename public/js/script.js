@@ -327,12 +327,12 @@ function changeDiscountTypeIcon() {
         $('.discount_type > i').addClass('fa fa-percent prefix');
     }
     if($('#discount_type_edit').val() == 'THB') {
-        $('.discount_type > i').removeClass('fa fa-percent prefix');
-        $('.discount_type > i').addClass('fa fa-money prefix');
+        $('.discount_type_edit > i').removeClass('fa fa-percent prefix');
+        $('.discount_type_edit > i').addClass('fa fa-money prefix');
     }
     else {
-        $('.discount_type > i').removeClass('fa fa-money prefix');
-        $('.discount_type > i').addClass('fa fa-percent prefix');
+        $('.discount_type_edit > i').removeClass('fa fa-money prefix');
+        $('.discount_type_edit > i').addClass('fa fa-percent prefix');
     }
 }
 
@@ -630,6 +630,7 @@ $('.btn-edit-promotion').click(function (){
     $('#modal-edit-promotion #start_date_edit').val($('#pro-start_date-' + Id[3]).val());
     $('#modal-edit-promotion #end_date_edit').val($('#pro-end_date-' + Id[3]).val());
     $('#modal-edit-promotion #discount_edit').val($('#pro-discount-' + Id[3]).val());
+    changeDiscountTypeIcon();
     // if($('#pro-fixed_range-' + Id[3]).val() == '1')
     //     $('#modal-edit-promotion #fixed_range_edit').prop('checked', true); // Checks it
     // else

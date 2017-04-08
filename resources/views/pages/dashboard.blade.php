@@ -632,23 +632,7 @@
                                   <label for="promotion_name">ชื่อโปรโมชั่น</label>
                               </div>
                             </div>
-                          </div>
-                          <div class="row">
-                            <div class="col-md-6">
-                              <div class="md-form">
-                                <i class="fa fa-clock-o prefix"></i>
-                                <input class="form-control" id="start_time" name="start_time" type="time" value="00:00" required>
-                                <label class="active" for="start_time">เวลาเริ่ม</label>
-                              </div>
-                            </div>
-                            <div class="col-md-6">
-                              <div class="md-form">
-                                <i class="fa fa-times-circle-o prefix"></i>
-                                <input class="form-control" id="end_time" name="end_time" type="time" value="00:00" required>
-                                <label class="active" for="end_time">เวลาสิ้นสุด</label>
-                              </div>
-                            </div>
-                          </div>
+                          </div>                          
                           <div class="row">
                             <div class="input-daterange" id="field_price_datepicker">
                               <div class="col-md-6">
@@ -664,6 +648,22 @@
                                     <input class="form-control" id="end_date" name="end" type="text">
                                     <label for="end_date">วันที่สิ้นสุด</label>
                                 </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="row">
+                            <div class="col-md-6">
+                              <div class="md-form">
+                                <i class="fa fa-clock-o prefix"></i>
+                                <input class="form-control" id="start_time" name="start_time" type="time" value="00:00" required>
+                                <label class="active" for="start_time">เวลาเริ่ม</label>
+                              </div>
+                            </div>
+                            <div class="col-md-6">
+                              <div class="md-form">
+                                <i class="fa fa-times-circle-o prefix"></i>
+                                <input class="form-control" id="end_time" name="end_time" type="time" value="00:00" required>
+                                <label class="active" for="end_time">เวลาสิ้นสุด</label>
                               </div>
                             </div>
                           </div>
@@ -735,22 +735,6 @@
                             </div>
                           </div>
                           <div class="row">
-                            <div class="col-md-6">
-                              <div class="md-form">
-                                <i class="fa fa-clock-o prefix"></i>
-                                <input class="form-control" id="start_time_edit" name="start_time" type="time" required >
-                                <label class="active" for="start_time_edit">เวลาเริ่ม</label>
-                              </div>
-                            </div>
-                            <div class="col-md-6">
-                              <div class="md-form">
-                                <i class="fa fa-times-circle-o prefix"></i>
-                                <input class="form-control" id="end_time_edit" name="end_time" type="time" required>
-                                <label class="active" for="end_time_edit">เวลาสิ้นสุด</label>
-                              </div>
-                            </div>
-                          </div>
-                          <div class="row">
                             <div class="input-daterange" id="field_price_datepicker">
                               <div class="col-md-6">
                                 <div class="md-form">
@@ -768,6 +752,22 @@
                               </div>
                             </div>
                           </div>
+                          <div class="row">
+                            <div class="col-md-6">
+                              <div class="md-form">
+                                <i class="fa fa-clock-o prefix"></i>
+                                <input class="form-control" id="start_time_edit" name="start_time" type="time" required >
+                                <label class="active" for="start_time_edit">เวลาเริ่ม</label>
+                              </div>
+                            </div>
+                            <div class="col-md-6">
+                              <div class="md-form">
+                                <i class="fa fa-times-circle-o prefix"></i>
+                                <input class="form-control" id="end_time_edit" name="end_time" type="time" required>
+                                <label class="active" for="end_time_edit">เวลาสิ้นสุด</label>
+                              </div>
+                            </div>
+                          </div>                          
                           <br>
                           <div class="row">                            
                             <div class="col-md-6">
@@ -778,7 +778,7 @@
                               </div>
                             </div>
                             <div class="col-md-6">
-                              <div class="md-form discount_type">
+                              <div class="md-form discount_type_edit">
                                 <i class="fa fa-percent prefix"></i>
                                 <select id="discount_type_edit" name="discount_type" class="mdb-select colorful-select dropdown-ins" required>
                                     <option value="THB">บาท</option>
@@ -863,23 +863,7 @@
                                   <label for="holiday_name">วัน</label>
                               </div>
                             </div>
-                          </div>
-                          <div class="row">
-                            <div class="col-md-6">
-                              <div class="md-form">
-                                <i class="fa fa-clock-o prefix"></i>
-                                <input class="form-control" id="start_time" name="start_time" type="time" value="{{$stadium->open_time}}" required>
-                                <label class="active" for="start_time">เวลาเริ่ม</label>
-                              </div>
-                            </div>
-                            <div class="col-md-6">
-                              <div class="md-form">
-                                <i class="fa fa-times-circle-o prefix"></i>
-                                <input class="form-control" id="end_time" name="end_time" type="time" value="{{$stadium->close_time}}" required>
-                                <label class="active" for="end_time">เวลาสิ้นสุด</label>
-                              </div>
-                            </div>
-                          </div>
+                          </div>                          
                           <div class="row">
                             <div class="input-daterange" id="holiday_datepicker">
                               <div class="col-md-6">
@@ -895,6 +879,22 @@
                                     <input class="form-control" id="end_date" name="end" type="text">
                                     <label for="end_date">วันที่สิ้นสุด</label>
                                 </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="row">
+                            <div class="col-md-6">
+                              <div class="md-form">
+                                <i class="fa fa-clock-o prefix"></i>
+                                <input class="form-control" id="start_time" name="start_time" type="time" value="{{$stadium->open_time}}" required>
+                                <label class="active" for="start_time">เวลาเริ่ม</label>
+                              </div>
+                            </div>
+                            <div class="col-md-6">
+                              <div class="md-form">
+                                <i class="fa fa-times-circle-o prefix"></i>
+                                <input class="form-control" id="end_time" name="end_time" type="time" value="{{$stadium->close_time}}" required>
+                                <label class="active" for="end_time">เวลาสิ้นสุด</label>
                               </div>
                             </div>
                           </div>
@@ -948,22 +948,6 @@
                             </div>
                           </div>
                           <div class="row">
-                            <div class="col-md-6">
-                              <div class="md-form">
-                                <i class="fa fa-clock-o prefix"></i>
-                                <input class="form-control" id="start_time" name="start_time" type="time" value="00:00" required>
-                                <label class="active" for="start_time">เวลาเริ่ม</label>
-                              </div>
-                            </div>
-                            <div class="col-md-6">
-                              <div class="md-form">
-                                <i class="fa fa-times-circle-o prefix"></i>
-                                <input class="form-control" id="end_time" name="end_time" type="time" value="00:00" required>
-                                <label class="active" for="end_time">เวลาสิ้นสุด</label>
-                              </div>
-                            </div>
-                          </div>
-                          <div class="row">
                             <div class="input-daterange" id="holiday_datepicker">
                               <div class="col-md-6">
                                 <div class="md-form">
@@ -981,6 +965,22 @@
                               </div>
                             </div>
                           </div>
+                          <div class="row">
+                            <div class="col-md-6">
+                              <div class="md-form">
+                                <i class="fa fa-clock-o prefix"></i>
+                                <input class="form-control" id="start_time" name="start_time" type="time" value="00:00" required>
+                                <label class="active" for="start_time">เวลาเริ่ม</label>
+                              </div>
+                            </div>
+                            <div class="col-md-6">
+                              <div class="md-form">
+                                <i class="fa fa-times-circle-o prefix"></i>
+                                <input class="form-control" id="end_time" name="end_time" type="time" value="00:00" required>
+                                <label class="active" for="end_time">เวลาสิ้นสุด</label>
+                              </div>
+                            </div>
+                          </div>                          
                           <div class="row">
                             <div class="col-md-12">
                                 <fieldset class="form-group">
