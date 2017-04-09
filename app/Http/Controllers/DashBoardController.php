@@ -11,6 +11,7 @@ use App\Stadium as Stadium;
 use App\Tmp_Field_Price as Tmp_Field_Price;
 use App\Promotions as Promotions;
 use App\Holidays as Holidays;
+use App\Reservation as Reservation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Redirect;
@@ -490,6 +491,7 @@ class DashBoardController extends Controller
                 $promotion->discount_type = $request->input('discount_type');
                 $promotion->fixed_range = $request->input('fixed_range') == 'on' ? 1 : 0;
                 $promotion->save();
+                $this->editReserve();
                 Session::flash('success_msg', 'เพิ่มข้อมูลราคาโปรโมรชั่นเรียบร้อยแล้ว!');
                 return Redirect::to('/'. $stadium_name .'/dashboard#panel1_promotion');
             }
@@ -554,6 +556,7 @@ class DashBoardController extends Controller
                     $promotion->discount_type = $request->input('discount_type');
                     $promotion->fixed_range = $request->input('fixed_range') == 'on' ? 1 : 0;
                     $promotion->save();
+                    $this->editReserve();
                     Session::flash('success_msg', 'แก้ไขข้อมูลราคาโปรโมรชั่นเรียบร้อยแล้ว!');
                     return Redirect::to('/'. $stadium_name .'/dashboard#panel1_promotion');
                 }
@@ -580,6 +583,7 @@ class DashBoardController extends Controller
         if(count($promotion) > 0)
         {
             $promotion->delete();
+            $this->editReserve();
             Session::flash('success_msg', 'ลบข้อมูลโปรโมรชั่นเรียบร้อยแล้ว!');
                 return Redirect::to('/'. $stadium_name .'/dashboard#panel1_promotion');
         }
@@ -731,6 +735,270 @@ class DashBoardController extends Controller
             return Redirect::to('/'. $stadium_name .'/dashboard#panel1_holiday')
                 ->withInput(Input::except('password'));
         }
+    }
+
+    public function editReserve()
+    {
+        $reservations = Reservation::where('status','=', 1)->get();            
+        
+        foreach ($reservations as $reservation)
+        {
+            $reserveStartDate = date('Y-m-d', strtotime($reservation->start_time));
+            $reserveEndDate = date('Y-m-d', strtotime($reservation->end_time));
+            $reserveStarttime = date('H:i:s', strtotime($reservation->start_time));
+            $reserveEndtime = date('H:i:s', strtotime($reservation->end_time));
+
+            $totalDiscount = $this->promotion(new Datetime($reserveStarttime), new Datetime($reserveEndtime), new Datetime($reserveStartDate), new Datetime($reserveEndDate), $reservation->field_price);
+            if($totalDiscount >= 0)
+            {
+                $reservation->discount_price = $totalDiscount;
+                $reservation->save();
+            }
+            Log::info('$reservation:' . $reservation->id . ', $totalDiscount: '.$totalDiscount .', $reservation:' . $reservation->field_price);
+        }
+    }
+
+    public function promotion($reserveStarttime, $reserveEndtime, $reserveStartDate, $reserveEndDate, $totalPrice)
+    {
+        $promotions = Promotions::where('stadium_id', Auth::user()->stadium_id)->get();
+        $totalDiscount = 0;
+        $over_flag_promo = 0;
+        $done_flag_promo = 0;
+        $minutes_to_add = 1;
+        $discount = 0;
+        $discountType = '';
+        
+        foreach($promotions as $promotion)
+        {
+            $promo_startTime = new Datetime($promotion->start_time);
+            $promo_endTime = new Datetime($promotion->end_time);
+
+            $promo_startDate = new Datetime($promotion->start_date);
+            $promo_endDate = new Datetime($promotion->end_date);
+            $tmpStart1 = new DateTime($reserveStartDate->format('Y-m-d') .' ' . $reserveStarttime->format('H:i:s'));
+            $tmpEnd1 = new DateTime($reserveEndDate->format('Y-m-d') .' ' . $reserveEndtime->format('H:i:s'));
+
+            $tmpStart2 = new DateTime($reserveStartDate->format('Y-m-d') . ' ' . $promo_startTime->format('H:i:s'));
+            if($promo_endTime > $promo_startTime)                        
+                $tmpEnd2 = new DateTime($reserveStartDate->format('Y-m-d') .' ' . $promo_endTime->format('H:i:s'));
+            else if($promo_endTime < $promo_startTime)
+            {
+                $tmpEnd2 = new DateTime($reserveStartDate->format('Y-m-d') .' ' . $promo_endTime->format('H:i:s'));
+                $tmpEnd2->modify('+1 day');
+            }                
+            else
+            {
+                $tmpEnd2 = new DateTime($reserveStartDate->format('Y-m-d') .' ' . $promo_endTime->format('H:i:s'));
+                $tmpEnd2->modify('+2 day');
+            }
+                
+
+            if($promotion->discount_type == 'THB')            
+                $discountType = 'THB';            
+            else            
+                $discountType = 'percent';
+                     
+            $discount = $promotion->discount;
+            if(($tmpStart1 <= $tmpEnd2) && ($tmpStart2 <= $tmpEnd1) && ($reserveStartDate >= $promo_startDate && $reserveEndDate <= $promo_endDate))
+            {  
+                // Log::info('$tmpStart1: '. date_format($tmpStart1,'Y-m-d H:i:s' ) .'$tmpStart2: '. date_format($tmpStart2,'Y-m-d H:i:s' ) . '$tmpEnd1: ' . date_format($tmpEnd1,'Y-m-d H:i:s' )  . '$tmpEnd2: ' . date_format($tmpEnd2,'Y-m-d H:i:s' ) );                 
+                if($done_flag_promo == 0 && $over_flag_promo == 0 && ($tmpStart1 >= $tmpStart2 && $tmpStart1 < $tmpEnd2))
+                {
+                      
+                    if(($tmpEnd1 <= $tmpEnd2) && ($tmpStart1 < $tmpEnd1))
+                    {
+                        $startTime = $tmpStart1;
+                        $endTime = $tmpEnd1;
+                        $done_flag_promo = 1;                           
+                    }
+                    else
+                    {
+                        $startTime = $tmpStart1;
+                        $endTime = $tmpEnd2;                        
+                        $tmpStarttime = $tmpEnd2;                   
+                        $over_flag_promo = 1;
+                    }
+                    // Log::info('pass 2st if $startTime: ' . date_format($startTime,'Y-m-d H:i:s' )  . ', $endTime: '. date_format($endTime,'Y-m-d H:i:s' ) );
+                    if($endTime > $startTime)
+                        $totalDiscount += $this->discounting($startTime, $endTime, $discount, $totalPrice, $discountType, $reserveStarttime, $reserveEndtime);                                
+                     
+                    
+                }                
+                else if($done_flag_promo == 0 && $over_flag_promo == 1 && ($tmpStarttime >= $tmpStart2 && $tmpStarttime < $tmpEnd2))
+                {
+                    // Log::info('pass 3st if');  
+                    if(($tmpEnd1 <= $tmpEnd2) && ($tmpStarttime < $tmpEnd1))
+                    {   
+                        $startTime = $tmpStarttime;
+                        $endTime = $tmpEnd1;
+                        $done_flag_promo = 1;
+                    }
+                    else
+                    {
+                        $startTime = $tmpStarttime;
+                        $endTime = $tmpEnd2;                        
+                        $tmpStarttime = $tmpEnd2;                      
+                        $over_flag_promo = 1;
+                    }
+                    if($endTime > $startTime)
+                        $totalDiscount += $this->discounting($startTime, $endTime, $discount, $totalPrice, $discountType, $reserveStarttime, $reserveEndtime);    
+                }
+                else if($done_flag_promo == 0 && $over_flag_promo == 0 && ($tmpStart1 < $tmpStart2 && $tmpEnd1 > $tmpStart2))
+                {
+                    if(($tmpEnd1 <= $tmpEnd2) && ($tmpStart1 < $tmpEnd1))
+                    {
+                        $startTime = $tmpStart2;
+                        $endTime = $tmpEnd1;
+                        $done_flag_promo = 1;                           
+                    }
+                    else
+                    {
+                        $startTime = $tmpStart2;
+                        $endTime = $tmpEnd2;                        
+                        $tmpStarttime = $tmpEnd2;                   
+                        $over_flag_promo = 1;
+                    }
+                    // Log::info('pass 2st if $startTime: ' . date_format($startTime,'Y-m-d H:i:s' )  . ', $endTime: '. date_format($endTime,'Y-m-d H:i:s' ) );
+                    if($endTime > $startTime)
+                        $totalDiscount += $this->discounting($startTime, $endTime, $discount, $totalPrice, $discountType, $reserveStarttime, $reserveEndtime); 
+                }       
+            }
+            
+        }
+        //**==============================================================================================================================//
+        if($done_flag_promo != 1)
+        {
+            foreach($promotions as $promotion)
+            {
+                $promo_startTime = new Datetime($promotion->start_time);
+                $promo_endTime = new Datetime($promotion->end_time);
+
+                // if($left_period_flag == 0)
+                //     $reserveEndtime = new Datetime($request->input('endTime'));
+                // else
+                //     $reserveEndtime = $tmpEndtime;
+                
+                $tmpStart1 = new DateTime($reserveStartDate->format('Y-m-d') .' ' . $reserveStarttime->format('H:i:s'));
+                $tmpEnd1 = new DateTime($reserveEndDate->format('Y-m-d') .' ' . $reserveEndtime->format('H:i:s'));
+
+                $tmpStart3 = new DateTime($reserveEndDate->format('Y-m-d') . ' ' . $promo_startTime->format('H:i:s'));
+                if($promo_endTime > $promo_startTime)                        
+                    $tmpEnd3 = new DateTime($reserveEndDate->format('Y-m-d') .' ' . $promo_endTime->format('H:i:s'));
+                else if($promo_endTime < $promo_startTime)
+                {
+                    $tmpEnd3 = new DateTime($reserveEndDate->format('Y-m-d') .' ' . $promo_endTime->format('H:i:s'));
+                    $tmpEnd3->modify('+1 day');
+                }                    
+                else
+                {
+                    $tmpEnd3 = new DateTime($reserveEndDate->format('Y-m-d') .' ' . $promo_endTime->format('H:i:s'));
+                    $tmpEnd3->modify('+2 day');
+                }
+                    
+                    
+                if($promotion->discount_type == 'THB')            
+                    $discountType = 'THB';            
+                else            
+                    $discountType = 'percent';
+                             
+                $discount = $promotion->discount;
+                if(($tmpStart1 <= $tmpEnd3) && ($tmpStart3 <= $tmpEnd1) && ($reserveStartDate >= $promo_startDate && $reserveEndDate <= $promo_endDate))
+                {                            
+                    //Log::info('foreach2 $tmpStart1: '. date_format($tmpStart1,'Y-m-d H:i:s' ) .'$tmpStart2: '. date_format($tmpStart2,'Y-m-d H:i:s' )  . '$tmpEnd2: ' . date_format($tmpEnd2,'Y-m-d H:i:s' ) );                    
+                    if($done_flag_promo == 0 && $over_flag_promo == 0 && ($tmpStart1 >= $tmpStart3 && $tmpStart1 < $tmpEnd3))
+                    {
+                        // $startDate = $reserveStartDate;
+                        // $endDate = $reserveEndDate; 
+                        if(($tmpEnd1 <= $tmpEnd3) && ($tmpStart1 < $tmpEnd1))
+                        {
+                            $startTime = $tmpStart1;
+                            $endTime = $tmpEnd1;
+                            $done_flag_promo = 1;                           
+                        }
+                        else
+                        {
+                            $startTime = $tmpStart1;
+                            $endTime = $tmpEnd3;                        
+                            $tmpStarttime = $tmpEnd3;                           
+                            $over_flag_promo = 1;
+                        }
+                        if($endTime > $startTime)
+                            $totalDiscount += $this->discounting($startTime, $endTime, $discount, $totalPrice, $discountType, $reserveStarttime, $reserveEndtime);                         
+                        
+                    }                
+                    else if($done_flag_promo == 0 && $over_flag_promo == 1 && ($tmpStarttime >= $tmpStart3 && $tmpStarttime < $tmpEnd3))
+                    {
+                        // $startDate = new Datetime($tmpStarttime->format('Y-m-d'));
+                        // $endDate = $reserveEndDate; 
+                        
+                        if(($tmpEnd1 <= $tmpEnd3) && ($tmpStarttime < $tmpEnd1))
+                        {   
+                            $startTime = $tmpStarttime;
+                            $endTime = $tmpEnd1;
+                            $done_flag_promo = 1;
+                        }
+                        else
+                        {
+                            $startTime = $tmpStarttime;
+                            $endTime = $tmpEnd3;                        
+                            $tmpStarttime = $tmpEnd3;                         
+                            $over_flag_promo = 1;
+                        }
+                        if($endTime > $startTime)
+                            $totalDiscount += $this->discounting($startTime, $endTime, $discount, $totalPrice, $discountType, $reserveStarttime, $reserveEndtime);   
+
+                    }
+                    else if($done_flag_promo == 0 && $over_flag_promo == 0 && ($tmpStart1 < $tmpStart3 && $tmpEnd1 > $tmpEnd3))
+                    {
+                        if(($tmpEnd1 <= $tmpEnd3) && ($tmpStart1 < $tmpEnd1))
+                        {
+                            $startTime = $tmpStart3;
+                            $endTime = $tmpEnd1;
+                            $done_flag_promo = 1;                           
+                        }
+                        else
+                        {
+                            $startTime = $tmpStart3;
+                            $endTime = $tmpEnd3;                        
+                            $tmpStarttime = $tmpEnd3;                   
+                            $over_flag_promo = 1;
+                        }
+                        //Log::info('pass 2st if $startTime: ' . date_format($startTime,'Y-m-d H:i:s' )  . ', $endTime: '. date_format($endTime,'Y-m-d H:i:s' ) );
+                        if($endTime > $startTime)
+                            $totalDiscount += $this->discounting($startTime, $endTime, $discount, $totalPrice, $discountType, $reserveStarttime, $reserveEndtime); 
+                    }
+                } 
+                                
+            }
+        }
+        //**==============================================================================================================================
+
+        return $totalDiscount;
+    }
+
+    function discounting($startTime, $endTime, $discount, $totalPrice, $discountType, $reserveStarttime, $reserveEndtime)
+    {
+        $totalDiscount = 0;
+        $diffReserve = $startTime->diff($endTime)->format('%H:%i:%s');
+        $arrTimeReserve = explode(":", $diffReserve);
+        $totalMinDiscount = (($arrTimeReserve[0] * 60) + $arrTimeReserve[1]);
+
+        // $tmpStart1 = new DateTime($reserveStartDate->format('Y-m-d') .' ' . $reserveStarttime->format('H:i:s'));
+        // $tmpEnd1 = new DateTime($reserveEndDate->format('Y-m-d') .' ' . $reserveEndtime->format('H:i:s'));
+        $diffTotalReserve = $reserveStarttime->diff($reserveEndtime)->format('%H:%i:%s');
+        $arrTimeTotalReserve = explode(":", $diffTotalReserve);
+        $totalMinReserve = (($arrTimeTotalReserve[0] * 60) + $arrTimeTotalReserve[1]);
+
+        $minCost = $totalPrice/$totalMinReserve;
+        $baseCostForDiscount = $minCost * $totalMinDiscount;
+        if($discountType == "THB")
+            $totalDiscount = $totalMinDiscount * ($discount/60);
+        else        
+            $totalDiscount = ($baseCostForDiscount * ($discount/100));
+        // Log::info('$reserveStarttime '. date_format($reserveStarttime,'Y-m-d H:i:s' ) . ', $reserveEndtime ' . date_format($reserveEndtime,'Y-m-d H:i:s' ) );
+        // Log::info('$totalMinReserve '. $totalMinReserve . ', $totalDiscount ' . $totalDiscount . ', $baseCostForDiscount ' . $baseCostForDiscount);
+
+        return $totalDiscount;
     }
 
 }

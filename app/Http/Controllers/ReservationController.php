@@ -599,12 +599,18 @@ class ReservationController extends Controller
                     if($fieldEndtime > $fieldStarttime)                        
                         $tmpEnd2 = new DateTime($reserveStartDate->format('Y-m-d') .' ' . $fieldEndtime->format('H:i:s'));
                     else if($fieldEndtime < $fieldStarttime)
-                        $tmpEnd2 = new DateTime($reserveStartDate->modify('+1 day')->format('Y-m-d') .' ' . $fieldEndtime->format('H:i:s'));
+                    {
+                        $tmpEnd2 = new DateTime($reserveStartDate->format('Y-m-d') .' ' . $fieldEndtime->format('H:i:s'));
+                        $tmpEnd2->modify('+1 day');
+                    }                        
                     else
-                        $tmpEnd2 = new DateTime($reserveStartDate->modify('+2 day')->format('Y-m-d') .' ' . $fieldEndtime->format('H:i:s'));
+                    {
+                        $tmpEnd2 = new DateTime($reserveStartDate->format('Y-m-d') .' ' . $fieldEndtime->format('H:i:s'));
+                        $tmpEnd2->modify('+2 day');
+                    }                       
                         
-                    $reserveStartDate = new Datetime($request->input('hddStartDate'));
-                    $reserveEndDate = new Datetime($request->input('hddEndDate'));
+                    // $reserveStartDate = new Datetime($request->input('hddStartDate'));
+                    // $reserveEndDate = new Datetime($request->input('hddEndDate'));
                                         
                     $minCost = ($field_price->price)/60;
                     if(($tmpStart1 <= $tmpEnd2) && ($tmpStart2 <= $tmpEnd1))
@@ -687,12 +693,18 @@ class ReservationController extends Controller
                         if($fieldEndtime > $fieldStarttime)                        
                             $tmpEnd3 = new DateTime($reserveEndDate->format('Y-m-d') .' ' . $fieldEndtime->format('H:i:s'));
                         else if($fieldEndtime < $fieldStarttime)
-                            $tmpEnd3 = new DateTime($reserveEndDate->modify('+1 day')->format('Y-m-d') .' ' . $fieldEndtime->format('H:i:s'));
+                        {
+                            $tmpEnd3 = new DateTime($reserveEndDate->format('Y-m-d') .' ' . $fieldEndtime->format('H:i:s'));
+                            $tmpEnd3->modify('+1 day');
+                        }                            
                         else
-                            $tmpEnd3 = new DateTime($reserveEndDate->modify('+2 day')->format('Y-m-d') .' ' . $fieldEndtime->format('H:i:s'));
+                        {
+                            $tmpEnd3 = new DateTime($reserveEndDate->format('Y-m-d') .' ' . $fieldEndtime->format('H:i:s'));
+                            $tmpEnd3->modify('+2 day');
+                        }                            
                             
-                        $reserveStartDate = new Datetime($request->input('hddStartDate'));
-                        $reserveEndDate = new Datetime($request->input('hddEndDate'));
+                        // $reserveStartDate = new Datetime($request->input('hddStartDate'));
+                        // $reserveEndDate = new Datetime($request->input('hddEndDate'));
 
                                             
                         $minCost = ($field_price->price)/60;
@@ -896,9 +908,15 @@ class ReservationController extends Controller
             if($promo_endTime > $promo_startTime)                        
                 $tmpEnd2 = new DateTime($reserveStartDate->format('Y-m-d') .' ' . $promo_endTime->format('H:i:s'));
             else if($promo_endTime < $promo_startTime)
-                $tmpEnd2 = new DateTime($reserveStartDate->modify('+1 day')->format('Y-m-d') .' ' . $promo_endTime->format('H:i:s'));
+            {
+                $tmpEnd2 = new DateTime($reserveStartDate->format('Y-m-d') .' ' . $promo_endTime->format('H:i:s'));
+                $tmpEnd2->modify('+1 day');
+            }                
             else
-                $tmpEnd2 = new DateTime($reserveStartDate->modify('+2 day')->format('Y-m-d') .' ' . $promo_endTime->format('H:i:s'));
+            {
+                $tmpEnd2 = new DateTime($reserveStartDate->format('Y-m-d') .' ' . $promo_endTime->format('H:i:s'));
+                $tmpEnd2->modify('+2 day');
+            }
 
             if($promotion->discount_type == 'THB')            
                 $discountType = 'THB';            
@@ -993,9 +1011,15 @@ class ReservationController extends Controller
                 if($promo_endTime > $promo_startTime)                        
                     $tmpEnd3 = new DateTime($reserveEndDate->format('Y-m-d') .' ' . $promo_endTime->format('H:i:s'));
                 else if($promo_endTime < $promo_startTime)
-                    $tmpEnd3 = new DateTime($reserveEndDate->modify('+1 day')->format('Y-m-d') .' ' . $promo_endTime->format('H:i:s'));
+                {
+                    $tmpEnd3 = new DateTime($reserveEndDate->format('Y-m-d') .' ' . $promo_endTime->format('H:i:s'));
+                    $tmpEnd3->modify('+1 day');
+                }                    
                 else
-                    $tmpEnd3 = new DateTime($reserveEndDate->modify('+2 day')->format('Y-m-d') .' ' . $promo_endTime->format('H:i:s'));
+                {
+                    $tmpEnd3 = new DateTime($reserveEndDate->format('Y-m-d') .' ' . $promo_endTime->format('H:i:s'));
+                    $tmpEnd3->modify('+2 day');
+                }
                     
                 if($promotion->discount_type == 'THB')            
                     $discountType = 'THB';            
@@ -1201,12 +1225,19 @@ class ReservationController extends Controller
                         if($fieldEndtime > $fieldStarttime)                        
                             $tmpEnd2 = new DateTime($reserveStartDate->format('Y-m-d') .' ' . $fieldEndtime->format('H:i:s'));
                         else if($fieldEndtime < $fieldStarttime)
-                            $tmpEnd2 = new DateTime($reserveStartDate->modify('+1 day')->format('Y-m-d') .' ' . $fieldEndtime->format('H:i:s'));
+                        {
+                            $tmpEnd2 = new DateTime($reserveStartDate->format('Y-m-d') .' ' . $fieldEndtime->format('H:i:s'));
+                            $tmpEnd2->modify('+1 day');
+                        }                            
                         else
-                            $tmpEnd2 = new DateTime($reserveStartDate->modify('+2 day')->format('Y-m-d') .' ' . $fieldEndtime->format('H:i:s'));
+                        {
+                            $tmpEnd2 = new DateTime($reserveStartDate->format('Y-m-d') .' ' . $fieldEndtime->format('H:i:s'));
+                            $tmpEnd2->modify('+2 day');
+                        }
+                            
 
-                        $reserveStartDate = new Datetime($request->input('hddStartDate'));
-                        $reserveEndDate = new Datetime($request->input('hddEndDate'));
+                        // $reserveStartDate = new Datetime($request->input('hddStartDate'));
+                        // $reserveEndDate = new Datetime($request->input('hddEndDate'));
 
                         $minCost = ($field_price->price)/60;
                         if(($tmpStart1 <= $tmpEnd2) && ($tmpStart2 <= $tmpEnd1))
@@ -1285,12 +1316,19 @@ class ReservationController extends Controller
                             if($fieldEndtime > $fieldStarttime)                        
                                 $tmpEnd3 = new DateTime($reserveEndDate->format('Y-m-d') .' ' . $fieldEndtime->format('H:i:s'));
                             else if($fieldEndtime < $fieldStarttime)
-                                $tmpEnd3 = new DateTime($reserveEndDate->modify('+1 day')->format('Y-m-d') .' ' . $fieldEndtime->format('H:i:s'));
+                            {
+                                $tmpEnd3 = new DateTime($reserveEndDate->format('Y-m-d') .' ' . $fieldEndtime->format('H:i:s'));
+                                $tmpEnd3->modify('+1 day');
+                            }                                
                             else
-                                $tmpEnd3 = new DateTime($reserveEndDate->modify('+2 day')->format('Y-m-d') .' ' . $fieldEndtime->format('H:i:s'));
+                            {
+                                $tmpEnd3 = new DateTime($reserveEndDate->format('Y-m-d') .' ' . $fieldEndtime->format('H:i:s'));
+                                $tmpEnd3->modify('+2 day');
+                            }
                                 
-                            $reserveStartDate = new Datetime($request->input('hddStartDate'));
-                            $reserveEndDate = new Datetime($request->input('hddEndDate'));
+                                
+                            // $reserveStartDate = new Datetime($request->input('hddStartDate'));
+                            // $reserveEndDate = new Datetime($request->input('hddEndDate'));
 
                                                 
                             $minCost = ($field_price->price)/60;
