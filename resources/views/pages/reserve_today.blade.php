@@ -135,7 +135,7 @@
                                 </div>
                                 <div class="col-md-6 md-form">
                                     <i class="fa fa-scissors prefix"></i>
-                                    <input class="form-control" id="discount_price" name="discount_price" type="text">
+                                    <input class="form-control" id="discount_price" name="discount_price" type="text" onkeyup="sumPrice();">
                                     <label for="discount_price">ส่วนลด</label>
                                 </div>
                             </div>

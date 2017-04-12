@@ -143,6 +143,7 @@ class DashBoardController extends Controller
                 $tmp_field_price->day  = $tmp_day;
                 $tmp_field_price->set_color = $request->input('bgColor');
                 $tmp_field_price->save();
+                $this->editReserveAfterPriceChange();
                 Session::flash('success_msg', 'เพิ่มข้อมูลราคาสนามเรียบร้อยแล้ว!');
                 return Redirect::to('/'. $stadium_name .'/dashboard#panel1_field_price');
             }
@@ -263,6 +264,7 @@ class DashBoardController extends Controller
                     $tmp_field_price->day  = $tmp_day;
                     $tmp_field_price->set_color = $request->input('bgColor');
                     $tmp_field_price->save();
+                    $this->editReserveAfterPriceChange();
                     Session::flash('success_msg', 'แก้ไขข้อมูลราคาสนามเรียบร้อยแล้ว!');
                     return Redirect::to('/'. $stadium_name .'/dashboard#panel1_field_price');
                 }
@@ -291,6 +293,7 @@ class DashBoardController extends Controller
         if(count($tmp_field_price) > 0)
         {
             $tmp_field_price->delete();
+            $this->editReserveAfterPriceChange();
             Session::flash('success_msg', 'ลบข้อมูลราคาเรียบร้อยแล้ว!');
                 return Redirect::to('/'. $stadium_name .'/dashboard#panel1_field_price');
         }
@@ -999,6 +1002,254 @@ class DashBoardController extends Controller
         // Log::info('$totalMinReserve '. $totalMinReserve . ', $totalDiscount ' . $totalDiscount . ', $baseCostForDiscount ' . $baseCostForDiscount);
 
         return $totalDiscount;
+    }
+
+    public function editReserveAfterPriceChange()
+    {
+
+        $reservations = Reservation::where('status','=', 1)->get();            
+        
+        foreach ($reservations as $reservation)
+        {
+            $tmpReserveStartDate = date('Y-m-d', strtotime($reservation->start_time));
+            $tmpReserveEndDate = date('Y-m-d', strtotime($reservation->end_time));
+            $tmpReserveStarttime = date('H:i:s', strtotime($reservation->start_time));
+            $tmpReserveEndtime = date('H:i:s', strtotime($reservation->end_time));
+            
+            $tmp_holiday = Holidays::where('stadium_id', Auth::user()->stadium_id)->where('avalible',1)->where('start_date', '<=', $tmpReserveEndDate)->where('end_date', '>=', $tmpReserveStartDate)->get();
+
+            $startDay = date('D', strtotime($reservation->start_time));
+            $endDay = date('D', strtotime($reservation->end_time));
+            
+            if(count($tmp_holiday) > 0)
+                $tmp_field_price = Tmp_Field_Price::where('field_id', $reservation->field_id)->where('tmp_field_price.day', 'like', '%Holiday%')->orderBy('start_time', 'asc')->get();
+            elseif($startDay != $endDay)
+                $tmp_field_price = Tmp_Field_Price::where('field_id', $reservation->field_id)->where('tmp_field_price.day', 'like', '%' . $startDay . '%')->orWhere('tmp_field_price.day', 'like', '%' . $endDay . '%')->orderBy('start_time', 'asc')->get();
+            else
+                $tmp_field_price = Tmp_Field_Price::where('field_id', $reservation->field_id)->where('tmp_field_price.day', 'like', '%' . $startDay . '%')->orderBy('start_time', 'asc')->get();
+            //$tmp_field_price = Tmp_Field_Price::where('field_id', $request->input('hddResourceId'))->orderBy('start_time', 'asc')->get();
+            
+            //$reservationDay = Reservation::where('start_time', $request->input('hddDate'))->get();
+
+            // $open = $this->checkOpenTime($reserveStarttime, $reserveEndtime);
+    
+            // if(!$open)
+            // {
+            //     Session::flash('error_msg', 'ไม่สามารถแก้ไขการจองได้ กรุณาจองในช่วงเวลาที่สนามเปิดให้บริการ');
+            //     return Redirect::to('/'. $stadium .'/reservation')
+            //         ->withInput(Input::except('password'));
+            // }
+
+            // $start1 = new DateTime($reserveStartDate->format('Y-m-d') .' ' .$reserveStarttime->format('H:i:s'));
+            // $end1 = new DateTime($reserveEndDate->format('Y-m-d') .' ' .$reserveEndtime->format('H:i:s'));
+            // $checkOverlap = Reservation::checkOverlap($request->input('hddResourceId'), $start1, $end1, $reservation->id)->get();
+
+                            
+            $over_flag = 0;
+            $left_period_flag = 0;
+            $done_flag = 0;
+            $ref_code = $reservation->ref_code;
+            $totalPrice = 0;
+            $totalDiscount = 0;
+
+            $stadium_data = Stadium::where('id', Auth::user()->stadium_id)->first();                    
+            
+            foreach($tmp_field_price as $field_price)
+            {
+                $fieldStarttime = new Datetime($field_price->start_time);
+                $fieldEndtime = new Datetime($field_price->end_time);
+
+                $fieldStartDate = new Datetime($field_price->start_date);
+                $fieldEndDate = new Datetime($field_price->end_date);
+
+                $reserveStarttime = new Datetime($tmpReserveStarttime);
+                if($left_period_flag == 0)
+                    $reserveEndtime = new Datetime($tmpReserveEndtime);
+                else
+                    $reserveEndtime = $tmpEndtime;
+                $reserveStartDate = new Datetime($tmpReserveStartDate);
+                $reserveEndDate = new Datetime($tmpReserveEndDate);
+                $tmpStart1 = new DateTime($reserveStartDate->format('Y-m-d') .' ' .$reserveStarttime->format('H:i:s'));
+                $tmpEnd1 = new DateTime($reserveEndDate->format('Y-m-d') .' ' .$reserveEndtime->format('H:i:s'));
+                
+                $tmpStart2 = new DateTime($reserveStartDate->format('Y-m-d') . ' ' . $fieldStarttime->format('H:i:s'));
+                if($fieldEndtime > $fieldStarttime)                        
+                    $tmpEnd2 = new DateTime($reserveStartDate->format('Y-m-d') .' ' . $fieldEndtime->format('H:i:s'));
+                else if($fieldEndtime < $fieldStarttime)
+                {
+                    $tmpEnd2 = new DateTime($reserveStartDate->format('Y-m-d') .' ' . $fieldEndtime->format('H:i:s'));
+                    $tmpEnd2->modify('+1 day');
+                }                            
+                else
+                {
+                    $tmpEnd2 = new DateTime($reserveStartDate->format('Y-m-d') .' ' . $fieldEndtime->format('H:i:s'));
+                    $tmpEnd2->modify('+2 day');
+                }
+                    
+
+                $minCost = ($field_price->price)/60;
+                if(($tmpStart1 <= $tmpEnd2) && ($tmpStart2 <= $tmpEnd1))
+                {
+                    if($done_flag == 0 && $over_flag == 0 && ($tmpStart1 >= $tmpStart2 && $tmpStart1 < $tmpEnd2))
+                    {
+                        $startDate = $reserveStartDate;
+                        $endDate = $reserveEndDate; 
+                        if(($tmpEnd1 <= $tmpEnd2) && ($tmpStart1 < $tmpEnd1))
+                        {
+                            $startTime = $tmpStart1;
+                            $endTime = $tmpEnd1;
+                            $done_flag = 1;                           
+                        }
+                        else
+                        {
+                            $startTime = $tmpStart1;
+                            $endTime = $tmpEnd2;                        
+                            $tmpStarttime = $tmpEnd2;                   
+                            $over_flag = 1;
+                        }
+                        if($endTime > $startTime)
+                        {
+                            $thisPrice = $this->calTotalPrice($startTime, $endTime, $minCost);
+                            $totalPrice += $thisPrice;    
+                            // $totalDiscount += $this->promotion($startTime, $endTime, $reserveStartDate, $reserveEndDate, $stadium_data, $thisPrice);
+                        }                                                         
+                        
+                    }
+                    else if($done_flag == 0 && $over_flag == 1 && ($tmpStarttime >= $tmpStart2 && $tmpStarttime < $tmpEnd2))
+                    {
+                        
+                        if(($tmpEnd1 <= $tmpEnd2) && ($tmpStarttime < $tmpEnd1))
+                        {   
+                            $startTime = $tmpStarttime;
+                            $endTime = $tmpEnd1;
+                            $done_flag = 1;
+                        }
+                        else
+                        {
+                            $startTime = $tmpStarttime;
+                            $endTime = $tmpEnd2;                        
+                            $tmpStarttime = $tmpEnd2;                      
+                            $over_flag = 1;
+                        }
+                        if($endTime > $startTime)
+                        {
+                            $thisPrice = $this->calTotalPrice($startTime, $endTime, $minCost);
+                            $totalPrice += $thisPrice;    
+                            // $totalDiscount += $this->promotion($startTime, $endTime, $reserveStartDate, $reserveEndDate, $stadium_data, $thisPrice);
+                        }  
+                    }
+                } 
+            }
+
+            if($done_flag != 1)
+            {
+                foreach($tmp_field_price as $field_price)
+                {
+                    $fieldStarttime = new Datetime($field_price->start_time); 
+                    $fieldEndtime = new Datetime($field_price->end_time);
+
+                    if($left_period_flag == 0)
+                        $reserveEndtime = new Datetime($tmpReserveEndtime);
+                    else
+                        $reserveEndtime = $tmpEndtime;
+                    
+                    $reserveStartDate = new Datetime($tmpReserveStartDate);
+                    $reserveEndDate = new Datetime($tmpReserveEndDate);
+                    $tmpStart1 = new DateTime($reserveStartDate->format('Y-m-d') .' ' . $reserveStarttime->format('H:i:s'));
+                    $tmpEnd1 = new DateTime($reserveEndDate->format('Y-m-d') .' ' . $reserveEndtime->format('H:i:s'));
+
+                    $tmpStart3 = new DateTime($reserveEndDate->format('Y-m-d') . ' ' . $fieldStarttime->format('H:i:s'));
+                    if($fieldEndtime > $fieldStarttime)                        
+                        $tmpEnd3 = new DateTime($reserveEndDate->format('Y-m-d') .' ' . $fieldEndtime->format('H:i:s'));
+                    else if($fieldEndtime < $fieldStarttime)
+                    {
+                        $tmpEnd3 = new DateTime($reserveEndDate->format('Y-m-d') .' ' . $fieldEndtime->format('H:i:s'));
+                        $tmpEnd3->modify('+1 day');
+                    }                                
+                    else
+                    {
+                        $tmpEnd3 = new DateTime($reserveEndDate->format('Y-m-d') .' ' . $fieldEndtime->format('H:i:s'));
+                        $tmpEnd3->modify('+2 day');
+                    }
+                        
+                    $minCost = ($field_price->price)/60;
+                    if(($tmpStart1 <= $tmpEnd3) && ($tmpStart3 <= $tmpEnd1))
+                    {                            
+                                            
+                        if($done_flag == 0 && $over_flag == 0 && ($tmpStart1 >= $tmpStart3 && $tmpStart1 < $tmpEnd3))
+                        {
+                            $startDate = $reserveStartDate;
+                            $endDate = $reserveEndDate; 
+                            if(($tmpEnd1 <= $tmpEnd3) && ($tmpStart1 < $tmpEnd1))
+                            {
+                                $startTime = $tmpStart1;
+                                $endTime = $tmpEnd1;
+                                $done_flag = 1;                           
+                            }
+                            else
+                            {
+                                $startTime = $tmpStart1;
+                                $endTime = $tmpEnd3;                        
+                                $tmpStarttime = $tmpEnd3;                           
+                                $over_flag = 1;
+                            }
+                            if($endTime > $startTime)
+                            {
+                                $thisPrice = $this->calTotalPrice($startTime, $endTime, $minCost);
+                                $totalPrice += $thisPrice;    
+                                // $totalDiscount += $this->promotion($startTime, $endTime, $reserveStartDate, $reserveEndDate, $stadium_data, $thisPrice);
+                            }                      
+                            
+                        }                
+                        else if($done_flag == 0 && $over_flag == 1 && ($tmpStarttime >= $tmpStart3 && $tmpStarttime < $tmpEnd3))
+                        {
+                
+                            if(($tmpEnd1 <= $tmpEnd3) && ($tmpStarttime < $tmpEnd1))
+                            {   
+                                $startTime = $tmpStarttime;
+                                $endTime = $tmpEnd1;
+                                $done_flag = 1;
+                            }
+                            else
+                            {
+                                $startTime = $tmpStarttime;
+                                $endTime = $tmpEnd3;                        
+                                $tmpStarttime = $tmpEnd3;                         
+                                $over_flag = 1;
+                            }
+                            if($endTime > $startTime)
+                            {
+                                $thisPrice = $this->calTotalPrice($startTime, $endTime, $minCost);
+                                $totalPrice += $thisPrice;    
+                                // $totalDiscount += $this->promotion($startTime, $endTime, $reserveStartDate, $reserveEndDate, $stadium_data, $thisPrice);
+                            }  
+                        }
+                    } 
+                                    
+                }
+            }
+            
+            // if($totalPrice > 0 && $done_flag == 1)
+            //     $this->editReservation($reservation, $totalDiscount, $start1, $end1, $request, $totalPrice);
+            Log::info('$reservation:' . $reservation->id . ', $totalPrice: '.$totalPrice .', $old_totalPrice:' . $reservation->field_price); 
+            if($totalPrice >= 0)
+            {
+                $reservation->field_price = $totalPrice;
+                $reservation->save();
+            }
+            
+        }
+        
+        
+    }
+
+    public function calTotalPrice($startTime, $endTime, $minCost)
+    {
+        $time = $startTime->diff($endTime)->format('%H:%i:%s');
+        $arrTime = explode(":", $time);
+        $totalPrice = (($arrTime[0] * 60) + $arrTime[1]) * $minCost;
+
+        return $totalPrice;
     }
 
 }

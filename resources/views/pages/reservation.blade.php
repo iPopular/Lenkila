@@ -129,7 +129,7 @@
       // eventConstraint: 'available_hours',
       select: function(start, end, jsEvent, view, resource, allDay) {
 
-        if(resource.status == 1 && isValidEvent(start,end,resource.id) && !isValidCloseEvent(start,end,resource.id)) {
+        if(resource.status == 1 && !isValidCloseEvent(start,end,resource.id)) {
           endtime = moment(end).format('HH:mm');
           starttime = moment(start).format('HH:mm');
           day = moment(start).format('dd ll');
@@ -160,19 +160,19 @@
           return event.rendering === 'background';
       },
       eventClick: function(event, delta, revertFunc, jsEvent, ui, view) {
-        if(!isValidEvent(event.start,event.end,event.resourceId) && !isValidCloseEvent(event.start,event.end,event.resourceId))
+        if(!isValidCloseEvent(event.start,event.end,event.resourceId))
           revertFunc();
         else        
           callEditModal(event, event.start, event.end);
       },
       eventResize: function(event, delta, revertFunc, jsEvent, ui, view) {
-        if(!isValidEvent(event.start,event.end,event.resourceId) && !isValidCloseEvent(event.start,event.end,event.resourceId))
+        if(!isValidCloseEvent(event.start,event.end,event.resourceId))
           revertFunc();
         else        
           callEditModal(event, event.start, event.end);
       },
       eventDrop: function(event, delta, revertFunc, jsEvent, ui, view) {
-        if(!isValidEvent(event.start,event.end,event.resourceId) && !isValidCloseEvent(event.start,event.end,event.resourceId))
+        if(!isValidCloseEvent(event.start,event.end,event.resourceId))
           revertFunc();
         else        
           callEditModal(event, event.start, event.end);
@@ -210,7 +210,7 @@
                     (start.isAfter(event.start) || start.isSame(event.start,'minute')) &&
                     (end.isBefore(event.end) || end.isSame(event.end,'minute')));
         }).length > 0;
-    };
+    };    
    
 
     $(".fc-right > button, .fc-left > button").removeClass();
@@ -234,9 +234,23 @@
 
     // on load of the page: switch to the currently selected tab
     var curDate = getCookie('curDate');
-    if(curDate != null)
+    var tmpCurDate = moment(new Date(curDate)).format('YYYY-MM-DD');
+    var tmpTodayPlus = moment(new Date()).add(1, 'day').format('YYYY-MM-DD');
+    
+    if(curDate != null && (tmpCurDate > tmpTodayPlus) || (tmpCurDate < tmpTodayPlus))
+    {
       $('#calendar').fullCalendar('gotoDate', new Date(curDate));
-    //console.log(curDate);
+      // console.log('tmpCurDate: ' + tmpCurDate + '> tmpTodayPlus: '+ tmpTodayPlus);
+    }
+    else if(tmpCurDate == tmpTodayPlus)
+    {
+      // $('#calendar').fullCalendar('gotoDate', new Date(curDate));
+      $('#calendar').fullCalendar('incrementDate', moment.duration(2, 'day'));
+      $('#calendar').fullCalendar('incrementDate', moment.duration(-1, 'day'));
+      // console.log('tmpCurDate: ' + tmpCurDate + '== tmpTodayPlus: '+ tmpTodayPlus);
+    }
+      
+    // console.log(curDate);
     setDateToCookie('today');
     fullCalendarDate = moment(new Date(curDate)).format('YYYY-MM-DD');
     checkHoliday(fullCalendarDate);
@@ -297,7 +311,7 @@
         tglCurrent = $('#calendar').fullCalendar('getDate');
         tglCurrent = moment(tglCurrent).format('MM/DD/YYYY');
         setCookie("curDate", tglCurrent);
-        //console.log(tglCurrent);
+        // alert('calendar ' +tglCurrent);
       }
       else
       {
@@ -305,7 +319,7 @@
         tglCurrent = new Date();
         tglCurrent = moment(tglCurrent).format('MM/DD/YYYY');
         setCookie("curDate", tglCurrent);
-        //console.log(tglCurrent);
+        // alert('today ' + tglCurrent);
       }
       
       //console.log(date + ' = ' +tglCurrent);
