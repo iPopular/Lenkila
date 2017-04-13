@@ -160,19 +160,19 @@
           return event.rendering === 'background';
       },
       eventClick: function(event, delta, revertFunc, jsEvent, ui, view) {
-        if(!isValidCloseEvent(event.start,event.end,event.resourceId))
+        if(isValidCloseEvent(event.start,event.end,event.resourceId))
           revertFunc();
         else        
           callEditModal(event, event.start, event.end);
       },
       eventResize: function(event, delta, revertFunc, jsEvent, ui, view) {
-        if(!isValidCloseEvent(event.start,event.end,event.resourceId))
+        if(isValidCloseEvent(event.start,event.end,event.resourceId))
           revertFunc();
         else        
           callEditModal(event, event.start, event.end);
       },
       eventDrop: function(event, delta, revertFunc, jsEvent, ui, view) {
-        if(!isValidCloseEvent(event.start,event.end,event.resourceId))
+        if(isValidCloseEvent(event.start,event.end,event.resourceId))
           revertFunc();
         else        
           callEditModal(event, event.start, event.end);
